@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://bcb1eiqogjka4"]
+
+[ext_resource type="Texture2D" uid="uid://dsb32edbam5kw" path="res://assets/images/Menu/pak1.png" id="1_lqlcp"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_11kl6"]
+atlas = ExtResource("1_lqlcp")
+region = Rect2(800, 648, 48, 56)
+
+[node name="GlobalButtons" type="CanvasLayer" unique_id=1881163336]
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1250584485]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -56.0
+offset_bottom = 64.0
+grow_horizontal = 0
+
+[node name="Button" type="Button" parent="HBoxContainer" unique_id=1200951191]
+layout_mode = 2
+icon = SubResource("AtlasTexture_11kl6")
+flat = true

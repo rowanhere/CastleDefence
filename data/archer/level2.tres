@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://b3joc8q8wwqqa"]
+
+[ext_resource type="Script" uid="uid://jcojfonhgt1j" path="res://scripts/resources/upgrade_data.gd" id="1_tdjv0"]
+[ext_resource type="Texture2D" uid="uid://bi4vjsquuwbha" path="res://assets/images/towerPlaceHolder/towers/ArcherTower/Level2.png" id="2_tdjv0"]
+[ext_resource type="Texture2D" uid="uid://c3u5ndlmjykhe" path="res://assets/images/towerPlaceHolder/towers/ArcherTower/towerTop2.png" id="3_muhke"]
+
+[resource]
+script = ExtResource("1_tdjv0")
+upgradeCost = 700
+damage = 15.0
+attackSpeed = 2.0
+tower_range = 300.0
+towerImage = ExtResource("2_tdjv0")
+level = 2
+isTowerTop = true
+towerTop = ExtResource("3_muhke")
+metadata/_custom_type_script = "uid://jcojfonhgt1j"

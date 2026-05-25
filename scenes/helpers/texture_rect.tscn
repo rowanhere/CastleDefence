@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://buj8lourm5nnr"]
+
+[ext_resource type="Texture2D" uid="uid://dh50aqbaws1gj" path="res://assets/images/Menu/SpeechBubbleRectangle.png" id="1_qx1f0"]
+
+[node name="TextureRect" type="TextureRect" unique_id=1263854715]
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("1_qx1f0")
+
+[node name="Label" type="Label" parent="." unique_id=24945173]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 15.0

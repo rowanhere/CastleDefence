@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://dacappjnmq2vd"]
+
+[ext_resource type="FontFile" uid="uid://c26krysvv4u6l" path="res://assets/fonts/WinkySans-Italic-VariableFont_wght.ttf" id="1_wdbos"]
+[ext_resource type="Texture2D" uid="uid://b33blutewwpoq" path="res://assets/images/towerPlaceHolder/Sword1_2.png" id="2_vqhtx"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_vqhtx"]
+load_path = "res://.godot/imported/normal_window.png-e92ccb8896fa7392fd92953673621bfd.ctex"
+
+[node name="TowerDialouge" type="Control" unique_id=1480458088]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1574195340]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -156.0
+offset_top = -89.0
+offset_right = 87.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("CompressedTexture2D_vqhtx")
+expand_mode = 1
+
+[node name="TowerType" type="Label" parent="TextureRect" unique_id=967252232]
+layout_mode = 1
+offset_left = 10.0
+offset_top = 4.0
+offset_right = 108.0
+offset_bottom = 27.0
+theme_override_fonts/font = ExtResource("1_wdbos")
+theme_override_font_sizes/font_size = 17
+text = "Archer tower:"
+
+[node name="TowerDesc" type="Label" parent="TextureRect" unique_id=54740730]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+offset_top = 25.0
+offset_right = -6.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 0.6431373, 1)
+theme_override_constants/line_spacing = -5
+theme_override_fonts/font = ExtResource("1_wdbos")
+theme_override_font_sizes/font_size = 12
+text = "Fast attack speed, low damage. Good for early waves"
+autowrap_mode = 1
+
+[node name="TextureRect" type="TextureRect" parent="TextureRect" unique_id=527602353]
+layout_mode = 0
+offset_left = 76.0
+offset_top = 52.0
+offset_right = 108.0
+offset_bottom = 81.0
+texture = ExtResource("2_vqhtx")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="TextureRect/TextureRect" unique_id=659161292]
+layout_mode = 0
+offset_left = 28.0
+offset_top = 2.0
+offset_right = 55.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 0.17000002, 0.17000002, 1)
+theme_override_fonts/font = ExtResource("1_wdbos")
+text = "(10)"

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://dygsqud8ksdh7"]
+
+[ext_resource type="Script" uid="uid://jcojfonhgt1j" path="res://scripts/resources/upgrade_data.gd" id="1_pu8vf"]
+[ext_resource type="Texture2D" uid="uid://bfd6p81po1mir" path="res://assets/images/towerPlaceHolder/towers/MagicTower/level2.png" id="2_pu8vf"]
+
+[resource]
+script = ExtResource("1_pu8vf")
+upgradeCost = 900
+damage = 40.0
+tower_range = 350.0
+towerImage = ExtResource("2_pu8vf")
+level = 2
+metadata/_custom_type_script = "uid://jcojfonhgt1j"

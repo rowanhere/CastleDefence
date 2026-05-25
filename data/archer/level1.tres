@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://bmkthfbbxh5km"]
+
+[ext_resource type="Script" uid="uid://jcojfonhgt1j" path="res://scripts/resources/upgrade_data.gd" id="1_i0qi6"]
+[ext_resource type="Texture2D" uid="uid://cjryulwvcsvxm" path="res://assets/images/towerPlaceHolder/towers/ArcherTower/towerTop1.png" id="2_wurmx"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_upk41"]
+load_path = "res://.godot/imported/Level1.png-b016f6fc67321afef3ac26c9f486a894.ctex"
+
+[resource]
+script = ExtResource("1_i0qi6")
+tower_range = 300.0
+towerImage = SubResource("CompressedTexture2D_upk41")
+isTowerTop = true
+towerTop = ExtResource("2_wurmx")
+metadata/_custom_type_script = "uid://jcojfonhgt1j"

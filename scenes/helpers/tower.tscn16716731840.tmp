@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://xxpbaw3c2yaj"]
+
+[ext_resource type="Texture2D" uid="uid://by1t5cqm03i74" path="res://assets/images/towerPlaceHolder/towers/ArcherTower/Level1.png" id="1_6q6b4"]
+[ext_resource type="Script" uid="uid://dujwkisfnh41y" path="res://scripts/tower.gd" id="1_kij78"]
+[ext_resource type="Script" uid="uid://j0uru4vynyxa" path="res://scenes/helpers/range_circle.gd" id="3_1ajmo"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_kij78"]
+radius = 250.0
+
+[node name="Tower" type="Node2D" unique_id=1408521318]
+script = ExtResource("1_kij78")
+
+[node name="TowerImage" type="Sprite2D" parent="." unique_id=731846542]
+texture = ExtResource("1_6q6b4")
+
+[node name="towerArea" type="Area2D" parent="TowerImage" unique_id=1951609280]
+
+[node name="towerCollision" type="CollisionShape2D" parent="TowerImage/towerArea" unique_id=2137550408]
+modulate = Color(0.39607844, 0.007843138, 0.09411765, 0.3137255)
+shape = SubResource("CircleShape2D_kij78")
+debug_color = Color(0, 0.6, 0.7019608, 0.41960785)
+
+[node name="Range circle" type="Node2D" parent="TowerImage/towerArea" unique_id=2024682491]
+visible = false
+script = ExtResource("3_1ajmo")
+
+[connection signal="input_event" from="TowerImage/towerArea" to="." method="_on_tower_area_input_event"]

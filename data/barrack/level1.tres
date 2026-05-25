@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://dhj1ve87nd3yj"]
+
+[ext_resource type="Script" uid="uid://jcojfonhgt1j" path="res://scripts/resources/upgrade_data.gd" id="1_m5aov"]
+[ext_resource type="Texture2D" uid="uid://bx2vsk7cfeomv" path="res://assets/images/towerPlaceHolder/towers/BarrackTower/level1.png" id="2_tj6ap"]
+
+[resource]
+script = ExtResource("1_m5aov")
+damage = 15.0
+tower_range = 300.0
+towerImage = ExtResource("2_tj6ap")
+metadata/_custom_type_script = "uid://jcojfonhgt1j"

@@ -1,0 +1,104 @@
+[gd_scene format=3 uid="uid://dk21fwsh6ui7k"]
+
+[ext_resource type="Texture2D" uid="uid://clnksvo1uubnd" path="res://assets/images/Menu/Level.jpg" id="1_2q6dc"]
+[ext_resource type="Script" uid="uid://bisb1mtgamgk3" path="res://scripts/level.gd" id="1_w8frs"]
+[ext_resource type="Texture2D" uid="uid://dsb32edbam5kw" path="res://assets/images/Menu/pak1.png" id="2_w7c3h"]
+[ext_resource type="PackedScene" uid="uid://dv1b58cxs8a4v" path="res://scenes/helpers/music_btn.tscn" id="4_mx8sn"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w7c3h"]
+atlas = ExtResource("2_w7c3h")
+region = Rect2(944, 336, 64, 72)
+
+[node name="Level" type="Control" unique_id=136685980]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_w8frs")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=652717964]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -2.0
+offset_top = 1.0
+offset_right = 318.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("1_2q6dc")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="BackButton" type="Button" parent="." unique_id=1138345918]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -28.0
+offset_right = 27.0
+grow_vertical = 0
+icon = SubResource("AtlasTexture_w7c3h")
+flat = true
+expand_icon = true
+
+[node name="LevelGroup" type="Control" parent="." unique_id=562674999]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_top = 3.0
+offset_right = 1.0
+offset_bottom = 3.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="levelLoad" type="ProgressBar" parent="." unique_id=679774705]
+clip_contents = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -19.0
+offset_right = 100.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 15
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1198356216]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5019608)
+
+[node name="MusicButton" parent="." unique_id=1243087452 instance=ExtResource("4_mx8sn")]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 1
+anchor_left = 1.0
+anchor_bottom = 0.0
+offset_left = -20.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 1
+
+[connection signal="pressed" from="BackButton" to="." method="_on_back_button_pressed"]

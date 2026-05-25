@@ -1,0 +1,160 @@
+[gd_scene format=3 uid="uid://bwuk4nmi4tblq"]
+
+[ext_resource type="Texture2D" uid="uid://3lhdqkqoopvx" path="res://assets/images/Menu/Background.jpg" id="1_l6cm7"]
+[ext_resource type="Script" uid="uid://bbpig1dpn2jqh" path="res://scripts/main_menu.gd" id="1_wu84c"]
+[ext_resource type="Texture2D" uid="uid://dgsr0kguer1ml" path="res://assets/images/Menu/logo.png" id="2_ekxnf"]
+[ext_resource type="Texture2D" uid="uid://dsb32edbam5kw" path="res://assets/images/Menu/pak1.png" id="3_bqqt6"]
+[ext_resource type="PackedScene" uid="uid://dv1b58cxs8a4v" path="res://scenes/helpers/music_btn.tscn" id="6_rtw2f"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wu84c"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wu84c"]
+atlas = ExtResource("3_bqqt6")
+region = Rect2(856, 0, 160, 168)
+
+[sub_resource type="Animation" id="Animation_bqqt6"]
+length = 0.53333336
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(118, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("../PlayButton:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(131, 120)]
+}
+
+[sub_resource type="Animation" id="Animation_wu84c"]
+resource_name = "logoAnimation"
+length = 0.53333336
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(118, -78), Vector2(118, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("../PlayButton:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.53333336),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(131, 178), Vector2(131, 120)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_8ln24"]
+_data = {
+&"RESET": SubResource("Animation_bqqt6"),
+&"logoAnimation": SubResource("Animation_wu84c")
+}
+
+[node name="Main_menu" type="Control" unique_id=1558935447]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_wu84c")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1471989533]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_l6cm7")
+expand_mode = 2
+
+[node name="LogoContainer" type="Control" parent="." unique_id=368066348]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -42.0
+offset_right = 42.0
+offset_bottom = 72.0
+grow_horizontal = 2
+
+[node name="TextureRect" type="TextureRect" parent="LogoContainer" unique_id=1680949795]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -63.5
+offset_top = -34.5
+offset_right = 63.5
+offset_bottom = 50.5
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_ekxnf")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="PlayButton" type="Button" parent="." unique_id=1756220579]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -29.0
+offset_top = -60.0
+offset_right = 29.0
+offset_bottom = 3.0517578e-05
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/hover = SubResource("StyleBoxFlat_wu84c")
+icon = SubResource("AtlasTexture_wu84c")
+flat = true
+expand_icon = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=724954708]
+root_node = NodePath("../LogoContainer")
+libraries/ = SubResource("AnimationLibrary_8ln24")
+autoplay = &"logoAnimation"
+
+[node name="MusicButton" parent="." unique_id=1243087452 instance=ExtResource("6_rtw2f")]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_bottom = 0.0
+offset_left = -20.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 1
+
+[connection signal="mouse_entered" from="PlayButton" to="PlayButton" method="_on_mouse_entered"]
+[connection signal="pressed" from="PlayButton" to="." method="_on_play_button_pressed"]

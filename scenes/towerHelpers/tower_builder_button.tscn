@@ -1,0 +1,71 @@
+[gd_scene format=3 uid="uid://bj42846dj5gic"]
+
+[ext_resource type="Texture2D" uid="uid://bg5dft5wl2v0n" path="res://assets/images/towerPlaceHolder/holder.png" id="1_rpul2"]
+[ext_resource type="Script" uid="uid://c0pl1bk7sy1tx" path="res://scripts/tower_builder_button.gd" id="2_6hubb"]
+[ext_resource type="Texture2D" uid="uid://pycoo2teg68n" path="res://assets/images/towerPlaceHolder/1.png" id="3_4sbbt"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6hubb"]
+atlas = ExtResource("1_rpul2")
+region = Rect2(20, 32, 553, 517)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4sbbt"]
+atlas = ExtResource("3_4sbbt")
+
+[node name="towerButton" type="Control" unique_id=1105763877]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_6hubb")
+
+[node name="TowerBtnRing" type="TextureRect" parent="." unique_id=1766430984]
+layout_mode = 0
+offset_right = 162.0
+offset_bottom = 129.0
+texture = SubResource("AtlasTexture_6hubb")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CostAndTypeButton" type="TextureButton" parent="TowerBtnRing" unique_id=184181968]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -36.0
+offset_bottom = 42.0
+grow_horizontal = 0
+texture_normal = SubResource("AtlasTexture_4sbbt")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="coin" type="Label" parent="TowerBtnRing/CostAndTypeButton" unique_id=1017059841]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/outline_size = 3
+theme_override_constants/shadow_outline_size = 1
+theme_override_font_sizes/font_size = 9
+text = "100"
+horizontal_alignment = 1
+vertical_alignment = 2
+autowrap_trim_flags = 128
+
+[node name="purchaseTypeImg" type="TextureRect" parent="TowerBtnRing/CostAndTypeButton" unique_id=332577349]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_top = -5.0
+offset_right = 3.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5

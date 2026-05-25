@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://dcqujjrg5pu8i"]
+
+[ext_resource type="Script" uid="uid://5ycj3y403wb5" path="res://scripts/level_1_path.gd" id="1_j1ir5"]
+
+[sub_resource type="Curve2D" id="Curve2D_ewlje"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 137, 887, 0, 0, 0, 0, 183, 796, 0, 0, 0, 0, 264, 749, 0, 0, 0, 0, 348, 719, 0, 0, 0, 0, 415, 671, 0, 0, 0, 0, 454, 616, 0, 0, 0, 0, 470, 530, 0, 0, 0, 0, 477, 436, 0, 0, 0, 0, 504, 350, 0, 0, 0, 0, 540, 292, 0, 0, 0, 0, 619, 247, 0, 0, 0, 0, 712, 218, 0, 0, 0, 0, 809, 223, 0, 0, 0, 0, 905, 223, 0, 0, 0, 0, 1008, 223, 0, 0, 0, 0, 1122, 230, 0, 0, 0, 0, 1200, 273, 0, 0, 0, 0, 1255, 348, 0, 0, 0, 0, 1269, 446, 0, 0, 0, 0, 1278, 518, 0, 0, 0, 0, 1291, 609, 0, 0, 0, 0, 1322, 674)
+}
+point_count = 22
+
+[node name="level1path" type="Path2D" unique_id=1408373372]
+curve = SubResource("Curve2D_ewlje")
+script = ExtResource("1_j1ir5")
+
+[node name="Timer" type="Timer" parent="." unique_id=1455844079]
+wait_time = 0.5

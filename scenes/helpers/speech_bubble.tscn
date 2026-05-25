@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://cui0jeknjcesq"]
+
+[ext_resource type="Texture2D" uid="uid://dh50aqbaws1gj" path="res://assets/images/Menu/SpeechBubbleRectangle.png" id="1_mu8g6"]
+
+[node name="Button" type="Button" unique_id=1512319740]
+offset_right = 45.0
+offset_bottom = 20.0
+icon = ExtResource("1_mu8g6")
+flat = true
+expand_icon = true

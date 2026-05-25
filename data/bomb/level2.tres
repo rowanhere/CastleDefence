@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://klglpboc54kk"]
+
+[ext_resource type="Script" uid="uid://jcojfonhgt1j" path="res://scripts/resources/upgrade_data.gd" id="1_45c3o"]
+[ext_resource type="Texture2D" uid="uid://tl24o3441w4y" path="res://assets/images/towerPlaceHolder/towers/BombTower/level2.png" id="2_45c3o"]
+
+[resource]
+script = ExtResource("1_45c3o")
+upgradeCost = 1000
+damage = 50.0
+tower_range = 350.0
+towerImage = ExtResource("2_45c3o")
+level = 2
+metadata/_custom_type_script = "uid://jcojfonhgt1j"

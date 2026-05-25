@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://c1dhlvo4s5bo6"]
+
+[ext_resource type="Texture2D" uid="uid://dsb32edbam5kw" path="res://assets/images/Menu/pak1.png" id="2_hrusj"]
+[ext_resource type="Script" uid="uid://bb2nd8nc2mku" path="res://scripts/level_button.gd" id="2_o8246"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ppgk2"]
+atlas = ExtResource("2_hrusj")
+region = Rect2(850, 168, 95, 136)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mx8sn"]
+atlas = ExtResource("2_hrusj")
+region = Rect2(850, 304, 94, 136)
+filter_clip = true
+
+[node name="Button" type="TextureButton" unique_id=1954869878]
+offset_right = 12.0
+offset_bottom = 17.0
+texture_normal = SubResource("AtlasTexture_ppgk2")
+texture_disabled = SubResource("AtlasTexture_mx8sn")
+ignore_texture_size = true
+stretch_mode = 4
+script = ExtResource("2_o8246")
+
+[node name="Label" type="Label" parent="." unique_id=665749570]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -3.5
+offset_top = -5.0
+offset_right = 3.5
+offset_bottom = 5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 4
+horizontal_alignment = 1
+vertical_alignment = 1

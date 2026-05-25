@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="TowerData" format=3 uid="uid://bbeq1tpe6ghvg"]
+
+[ext_resource type="Script" uid="uid://b455k2b8q12i1" path="res://scripts/resources/tower_data.gd" id="1_i26mt"]
+[ext_resource type="Script" uid="uid://jcojfonhgt1j" path="res://scripts/resources/upgrade_data.gd" id="2_o8v0b"]
+[ext_resource type="Resource" uid="uid://dhj1ve87nd3yj" path="res://data/barrack/level1.tres" id="3_pbrxj"]
+[ext_resource type="Resource" uid="uid://opxp012iapj8" path="res://data/barrack/level2.tres" id="4_gq08f"]
+
+[resource]
+script = ExtResource("1_i26mt")
+name = "barrack"
+upgrades = Array[ExtResource("2_o8v0b")]([ExtResource("3_pbrxj"), ExtResource("4_gq08f")])
+metadata/_custom_type_script = "uid://b455k2b8q12i1"
