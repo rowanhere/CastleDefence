@@ -3,7 +3,6 @@
 [ext_resource type="Texture2D" uid="uid://clnksvo1uubnd" path="res://assets/images/Menu/Level.jpg" id="1_2q6dc"]
 [ext_resource type="Script" uid="uid://bisb1mtgamgk3" path="res://scripts/level.gd" id="1_w8frs"]
 [ext_resource type="Texture2D" uid="uid://dsb32edbam5kw" path="res://assets/images/Menu/pak1.png" id="2_w7c3h"]
-[ext_resource type="PackedScene" uid="uid://dv1b58cxs8a4v" path="res://scenes/helpers/music_btn.tscn" id="4_mx8sn"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_w7c3h"]
 atlas = ExtResource("2_w7c3h")
@@ -88,17 +87,5 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.5019608)
-
-[node name="MusicButton" parent="." unique_id=1243087452 instance=ExtResource("4_mx8sn")]
-custom_minimum_size = Vector2(20, 20)
-layout_mode = 1
-anchor_left = 1.0
-anchor_bottom = 0.0
-offset_left = -20.0
-offset_top = 3.0
-offset_right = -3.0
-offset_bottom = 20.0
-grow_horizontal = 0
-grow_vertical = 1
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_button_pressed"]

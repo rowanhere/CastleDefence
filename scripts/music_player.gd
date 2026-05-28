@@ -1,32 +1,68 @@
 extends Node
 
 @onready var bg_music: AudioStreamPlayer = $bgMusic
+
 var last_music: AudioStreamOggVorbis
-# Called when the node enters the scene tree for the first time.
+var music_enabled: bool = true
+var is_transitioning: bool = false  # ← spam lock
+
+# ─── Play / Stop ───────────────────────────────────────────
+
 func play_music():
-	
-	if not bg_music.playing:
+	if not bg_music.playing and music_enabled:
 		bg_music.play()
 
 func stop_music():
 	bg_music.stop()
 
-	
+func enable_music():
+	music_enabled = true
+	if last_music:
+		last_music.loop = true
+		bg_music.stream = last_music
+		bg_music.play()
+		fade_volume(bg_music, -40, 0, 1.0)
 
-func change_music(audio:AudioStreamOggVorbis) ->void:
-	if last_music != audio:
-		await fade_volume(bg_music,0,-40,1.0)
-		if audio:
-			audio.loop = true 
-			bg_music.stream = audio
-			bg_music.play()
-			fade_volume(bg_music,-40,0,1.0)
-	 
-	last_music = audio
+func disable_music():
+	music_enabled = false
+	await fade_volume(bg_music, 0, -40, 1.0)
+	bg_music.stop()
 
-func fade_volume(player, from_db, to_db, duration):
+# ─── Toggle (single call for UI button) ────────────────────
+
+func toggle_music():
+	if is_transitioning:  # ← block spam clicks
+		return
+	is_transitioning = true
+
+	if music_enabled:
+		await disable_music()
+	else:
+		enable_music()
+
+	is_transitioning = false  # ← unlock after done
+
+# ─── Change Track ───────────────────────────────────────────
+
+func change_music(audio: AudioStreamOggVorbis) -> void:
+	if last_music == audio:
+		return
+
+	await fade_volume(bg_music, 0, -40, 1.0)
+	bg_music.stop()
+
+	last_music = audio  # ← update BEFORE playing
+
+	if audio and music_enabled:
+		audio.loop = true
+		bg_music.stream = audio
+		bg_music.play()
+		fade_volume(bg_music, -40, 0, 1.0)
+
+# ─── Fade Helper ────────────────────────────────────────────
+
+func fade_volume(player: AudioStreamPlayer, from_db: float, to_db: float, duration: float) -> void:
+	player.volume_db = from_db
 	var tween = create_tween()
-	bg_music.volume_db = from_db
-	tween.tween_property(player,"volume_db",to_db,duration)
-   
-	 
+	tween.tween_property(player, "volume_db", to_db, duration)
+	await tween.finished

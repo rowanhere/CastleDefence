@@ -3,16 +3,27 @@ extends Control
 @onready var tower_btn_ring: TextureRect = $TowerBtnRing
 @onready var cost_and_type_button: TextureButton = $TowerBtnRing/CostAndTypeButton
 @onready var coin: Label = $TowerBtnRing/CostAndTypeButton/coin
-@export var coinAmt = 100
+
+@export var coinAmt: int = 100
 @export var towerBuilderPosition: Vector2
-var insertTower = preload("res://scenes/helpers/tower.tscn")
+
+signal purchased
+
+
+var insertTower = {
+	"archer": preload("res://data/archer/archerTower.tscn"),
+	#"barrack": preload("res://data/barrack/barrackTower.tscn"),
+	#"magic": preload("res://data/magic/magicTower.tscn"),
+	#"bomb": preload("res://data/bomb/bombTower.tscn")
+}
+
+
 const towerBtnsImages = {
 	"archer": preload("res://assets/images/levelImages/towerBtnArrow.png"),
 	"barrack": preload("res://assets/images/levelImages/towerBtnBarrack.png"),
 	"magic": preload("res://assets/images/levelImages/towerBtnMagic.png"),
 	"bomb": preload("res://assets/images/levelImages/towerBtnBomb.png")
 }
-signal purchased
 
 
 func _ready() -> void:
@@ -20,47 +31,95 @@ func _ready() -> void:
 	cost_and_type_button.visible = false
 
 
-func _process(delta: float) -> void:
-	pass
-
-
 func insertFour() -> void:
+	clear_buttons()
+
 	var positions = [
-		{ "name": "archer", "pos": Vector2.ZERO },
-		{ "name": "barrack", "pos": Vector2(tower_btn_ring.size.x - cost_and_type_button.size.x, 0) },
-		{ "name": "magic", "pos": Vector2(0, tower_btn_ring.size.y - cost_and_type_button.size.y) },
-		{ "name": "bomb", "pos": tower_btn_ring.size - cost_and_type_button.size },
+		{
+			"name": "archer",
+			"pos": Vector2.ZERO
+		},
+		{
+			"name": "barrack",
+			"pos": Vector2(
+				tower_btn_ring.size.x - cost_and_type_button.size.x,
+				0
+			)
+		},
+		{
+			"name": "magic",
+			"pos": Vector2(
+				0,
+				tower_btn_ring.size.y - cost_and_type_button.size.y
+			)
+		},
+		{
+			"name": "bomb",
+			"pos": tower_btn_ring.size - cost_and_type_button.size
+		}
 	]
-	for i in positions:
-		insertBtns(i.pos, i.name)
+
+	for tower in positions:
+		insertBtns(tower.pos, tower.name)
 
 
-func insertTwo() -> void:
-	var positions = [
-		{ "name": "upgrade", "pos": Vector2((tower_btn_ring.size.x - cost_and_type_button.size.x) / 2, 0) },
-		{ "name": "sell",    "pos": Vector2((tower_btn_ring.size.x - cost_and_type_button.size.x) / 2, tower_btn_ring.size.y - cost_and_type_button.size.y) },
-	]
-	for i in positions:
-		insertBtns(i.pos, i.name)
-
-
-func insertBtns(pos: Vector2, type: String) -> void:
+func insertBtns(pos: Vector2, tower_type: String) -> void:
 	var new_btn = cost_and_type_button.duplicate()
+
 	tower_btn_ring.add_child(new_btn)
-	new_btn.pressed.connect(_purchase_tower.bind(type))
-	await get_tree().process_frame
+
 	new_btn.position = pos
-	new_btn.get_node("purchaseTypeImg").texture = towerBtnsImages[type]
 	new_btn.visible = true
 
+	new_btn.get_node("purchaseTypeImg").texture = towerBtnsImages[tower_type]
 
-func _purchase_tower(type: String) -> void:
-	#print("trying to purchase: ", type)
-	#print("position: ", towerBuilderPosition)
-	var addTowerOnMap = insertTower.instantiate()
-	var towerInserted = addTowerOnMap.purchaseTower(type) #check if tower exists 
-	if towerInserted:
-		get_parent().get_parent().add_child(addTowerOnMap)
-		addTowerOnMap.z_index = 100
-		addTowerOnMap.global_position = Vector2(towerBuilderPosition.x + 10, towerBuilderPosition.y-40)
-		purchased.emit()
+	new_btn.pressed.connect(
+		func():
+			_purchase_tower(tower_type)
+	)
+
+
+func _purchase_tower(tower_type: String) -> void:
+	if !insertTower.has(tower_type):
+		print("Tower not found: ", tower_type)
+		return
+
+	var tower_scene: PackedScene = insertTower[tower_type]
+	var tower_instance = tower_scene.instantiate()
+
+	get_parent().get_parent().add_child(tower_instance)
+
+	tower_instance.global_position = towerBuilderPosition
+	tower_instance.z_index = 100
+
+	play_place_animation(tower_instance)
+
+	purchased.emit()
+	queue_free()
+
+
+func play_place_animation(tower: Node2D) -> void:
+	tower.scale = Vector2.ZERO
+	tower.modulate.a = 0.0
+
+	var tween = tower.create_tween().set_parallel(true)
+
+	tween.tween_property(
+		tower,
+		"scale",
+		Vector2.ONE,
+		0.35
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	tween.tween_property(
+		tower,
+		"modulate:a",
+		1.0,
+		0.25
+	)
+
+
+func clear_buttons() -> void:
+	for child in tower_btn_ring.get_children():
+		if child != cost_and_type_button:
+			child.queue_free()

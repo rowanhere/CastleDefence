@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://jmeetu0lbiyg"]
+
+[ext_resource type="Script" uid="uid://b21ahg2vwacft" path="res://scripts/resources/game_sound.gd" id="1_tmcmx"]
+
+[node name="gameSound" type="Node2D" unique_id=1393599781]
+script = ExtResource("1_tmcmx")

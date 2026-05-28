@@ -1,28 +1,17 @@
 [gd_scene format=3 uid="uid://dv1b58cxs8a4v"]
 
-[ext_resource type="Script" uid="uid://cf64hbpyrr071" path="res://scripts/music_btn_helper.gd" id="1_2d5k0"]
 [ext_resource type="Texture2D" uid="uid://mnuwx1q64bb3" path="res://assets/images/Menu/button_sound.png" id="1_eh4y1"]
 [ext_resource type="Texture2D" uid="uid://c34fi353s75i2" path="res://assets/images/Menu/button_sound_off.png" id="2_2d5k0"]
+[ext_resource type="Script" uid="uid://brxm42f20krgf" path="res://scripts/music_btn.gd" id="3_2d5k0"]
 
-[node name="Musichelper" type="Control" unique_id=1243087452]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("1_2d5k0")
-
-[node name="MusicBtn" type="TextureButton" parent="." unique_id=685775921]
-layout_mode = 1
+[node name="MusicBtn" type="TextureButton" unique_id=685775921]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture_normal = ExtResource("1_eh4y1")
-texture_disabled = ExtResource("2_2d5k0")
+texture_pressed = ExtResource("2_2d5k0")
 ignore_texture_size = true
 stretch_mode = 5
-
-[connection signal="pressed" from="MusicBtn" to="." method="_on_music_btn_pressed"]
+script = ExtResource("3_2d5k0")

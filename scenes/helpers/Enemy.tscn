@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dd4eagysiekuo" path="res://scripts/enemy.gd" id="1_7f415"]
 [ext_resource type="Texture2D" uid="uid://bfy2vv23842nn" path="res://assets/images/enemiesImages/Walk.png" id="2_7f415"]
 [ext_resource type="Texture2D" uid="uid://dsx4o67raxicb" path="res://assets/images/enemiesImages/Dead.png" id="2_tikue"]
+[ext_resource type="Texture2D" uid="uid://b687ijnwp1e37" path="res://assets/images/enemiesImages/Hurt.png" id="3_6xwlq"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_iesjy"]
 atlas = ExtResource("2_tikue")
@@ -15,6 +16,22 @@ region = Rect2(128, 0, 128, 128)
 [sub_resource type="AtlasTexture" id="AtlasTexture_a0s3n"]
 atlas = ExtResource("2_tikue")
 region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wqoha"]
+atlas = ExtResource("3_6xwlq")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4hgnm"]
+atlas = ExtResource("3_6xwlq")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e0k7p"]
+atlas = ExtResource("3_6xwlq")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tec05"]
+atlas = ExtResource("3_6xwlq")
+region = Rect2(384, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_7f415"]
 atlas = ExtResource("2_7f415")
@@ -54,6 +71,23 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_wqoha")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4hgnm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e0k7p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tec05")
+}],
+"loop": false,
+"name": &"hurt",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_7f415")
 }, {
 "duration": 1.0,
@@ -90,7 +124,7 @@ script = ExtResource("1_7f415")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=257982932]
 sprite_frames = SubResource("SpriteFrames_wqoha")
-animation = &"walk"
+animation = &"hurt"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=513907511]
 position = Vector2(-1, 19)
@@ -105,3 +139,4 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_7f415")
 step = 10.0
 value = 100.0
 show_percentage = false
+metadata/_edit_use_anchors_ = true

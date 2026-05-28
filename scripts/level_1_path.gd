@@ -3,7 +3,7 @@ extends Path2D
 var enemy = preload("res://scenes/helpers/Enemy.tscn")
 @onready var timer: Timer = $Timer
 
-var wave_count = 5
+var wave_count = 10
 var spawned = 0
 
 func _ready() -> void:

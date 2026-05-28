@@ -1,0 +1,71 @@
+[gd_scene format=3 uid="uid://xxqbcxbagqbi"]
+
+[ext_resource type="Texture2D" uid="uid://wulxelqjr0km" path="res://assets/images/towerPlaceHolder/towers/ArcherTower/Level1.png" id="1_hi7s8"]
+[ext_resource type="Script" uid="uid://die6ypi7a3j1f" path="res://data/archer_tower_attack.gd" id="1_yxy31"]
+[ext_resource type="Script" uid="uid://j0uru4vynyxa" path="res://scenes/helpers/range_circle.gd" id="2_40nbp"]
+[ext_resource type="Script" uid="uid://d4jh25ps2i4fm" path="res://scripts/resources/tower_collision_animation.gd" id="2_lxsxb"]
+[ext_resource type="Texture2D" uid="uid://svpavy17wlvy" path="res://assets/images/towerPlaceHolder/towers/ArcherTower/level1archer/64.png" id="3_yt5k7"]
+[ext_resource type="Texture2D" uid="uid://gl4bcnhsu306" path="res://assets/images/towerPlaceHolder/towers/ArcherTower/level1archer/65.png" id="4_cgmxq"]
+[ext_resource type="Texture2D" uid="uid://kmltnfclq6nk" path="res://assets/images/towerPlaceHolder/towers/ArcherTower/level1archer/66.png" id="5_lxsxb"]
+[ext_resource type="Texture2D" uid="uid://bvcxf8bltxhiu" path="res://assets/images/towerPlaceHolder/towers/ArcherTower/level1archer/67.png" id="6_yxy31"]
+[ext_resource type="Texture2D" uid="uid://d3ju4f27su60l" path="res://assets/images/towerPlaceHolder/towers/ArcherTower/level1archer/68.png" id="7_kuhl5"]
+[ext_resource type="Texture2D" uid="uid://bsob61aocppnd" path="res://assets/images/towerPlaceHolder/towers/ArcherTower/level1archer/69.png" id="8_b6r06"]
+[ext_resource type="Texture2D" uid="uid://cjryulwvcsvxm" path="res://assets/images/towerPlaceHolder/towers/ArcherTower/towerTop1.png" id="9_cgmxq"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_0xixk"]
+radius = 250.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_v0j6r"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_yt5k7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_cgmxq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_lxsxb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_yxy31")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_kuhl5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_b6r06")
+}],
+"loop": true,
+"name": &"attack",
+"speed": 10.0
+}]
+
+[node name="ArcherTower" type="Node2D" unique_id=2131783486]
+script = ExtResource("1_yxy31")
+
+[node name="TowerImage" type="Sprite2D" parent="." unique_id=1518335931]
+texture = ExtResource("1_hi7s8")
+script = ExtResource("2_lxsxb")
+
+[node name="towerArea" type="Area2D" parent="TowerImage" unique_id=1026137039]
+
+[node name="towerCollision" type="CollisionShape2D" parent="TowerImage/towerArea" unique_id=1837244387]
+modulate = Color(0.39607844, 0.007843138, 0.09411765, 0.3137255)
+shape = SubResource("CircleShape2D_0xixk")
+debug_color = Color(0, 0.6, 0.7019608, 0.41960785)
+
+[node name="Range circle" type="Node2D" parent="TowerImage/towerArea" unique_id=1200715806]
+visible = false
+script = ExtResource("2_40nbp")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=908571970]
+z_index = 1
+position = Vector2(-3, -122)
+sprite_frames = SubResource("SpriteFrames_v0j6r")
+animation = &"attack"
+
+[node name="TowerTop" type="Sprite2D" parent="." unique_id=1579696632]
+position = Vector2(-17, -82)
+scale = Vector2(1.0163934, 1.0405406)
+texture = ExtResource("9_cgmxq")

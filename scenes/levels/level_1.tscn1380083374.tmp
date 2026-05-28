@@ -19,7 +19,6 @@
 [ext_resource type="Texture2D" uid="uid://dq6eb3whtorbp" path="res://assets/images/levelImages/layers/decor_5.png" id="11_bahl2"]
 [ext_resource type="Texture2D" uid="uid://bsepkj5gi5rc7" path="res://assets/images/levelImages/layers/stone_4.png" id="12_np2pn"]
 [ext_resource type="PackedScene" uid="uid://1uaob8q3oij4" path="res://scenes/towerHelpers/tower_builder.tscn" id="14_mkypq"]
-[ext_resource type="PackedScene" uid="uid://dcqujjrg5pu8i" path="res://scenes/levels/level1_path.tscn" id="14_ndtll"]
 [ext_resource type="Texture2D" uid="uid://dsb32edbam5kw" path="res://assets/images/Menu/pak1.png" id="20_gmpev"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ksju7"]
@@ -1252,8 +1251,6 @@ tile_map_data = PackedByteArray("AABOAAsAAAAAAAAAAAA=")
 tile_set = SubResource("TileSet_7h2jl")
 
 [node name="PathNode" type="Node2D" parent="." unique_id=1047641971]
-
-[node name="level1path" parent="PathNode" unique_id=1408373372 instance=ExtResource("14_ndtll")]
 
 [node name="road_1" type="TileMapLayer" parent="PathNode" unique_id=423951793]
 tile_map_data = PackedByteArray("AAALADAAAAAAAAAAAAA=")

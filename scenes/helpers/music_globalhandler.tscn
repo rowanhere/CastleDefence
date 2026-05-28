@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://bs00ucyojleag"]
+
+[ext_resource type="PackedScene" uid="uid://dv1b58cxs8a4v" path="res://scenes/helpers/music_btn.tscn" id="1_coohs"]
+
+[node name="MusicGlobalhandler" type="CanvasLayer" unique_id=1391027081]
+
+[node name="MusicBtn" parent="." unique_id=685775921 instance=ExtResource("1_coohs")]
+custom_minimum_size = Vector2(20, 20)
+anchors_preset = 1
+anchor_left = 1.0
+anchor_bottom = 0.0
+offset_left = -23.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = 23.0
+grow_horizontal = 0
+grow_vertical = 1

@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://da6yjq3vlqlnu"]
+
+[ext_resource type="Script" uid="uid://bi3rxqrho4kns" path="res://scripts/resources/arrow.gd" id="1_23jat"]
+[ext_resource type="Texture2D" uid="uid://ighhllnl1gnh" path="res://assets/images/towerPlaceHolder/damage_arrow.png" id="2_q8ifc"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7ckq1"]
+size = Vector2(31, 11)
+
+[node name="Arrow" type="Area2D" unique_id=1849057898]
+z_index = 100
+script = ExtResource("1_23jat")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=386701175]
+texture = ExtResource("2_q8ifc")
+
+[node name="arrowCollision" type="CollisionShape2D" parent="." unique_id=1058961891]
+position = Vector2(1.5, 0.5)
+shape = SubResource("RectangleShape2D_7ckq1")
