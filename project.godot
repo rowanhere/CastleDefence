@@ -38,6 +38,11 @@ enabled=PackedStringArray("res://addons/gdscript_formatter/plugin.cfg")
 
 theme/custom_font="uid://dyvhjaetpi6cw"
 
+[layer_names]
+
+2d_physics/layer_1="enemies"
+2d_physics/layer_2="soldiers"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

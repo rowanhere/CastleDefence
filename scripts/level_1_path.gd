@@ -7,6 +7,8 @@ var wave_count = 10
 var spawned = 0
 
 func _ready() -> void:
+	print("Adding to level path group")
+	add_to_group("level_path")
 	print("Spawner ready, starting timer")
 	timer.wait_time = 1.0
 	timer.timeout.connect(_on_timer_timeout)

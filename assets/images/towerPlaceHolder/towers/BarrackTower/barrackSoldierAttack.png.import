@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6ffc47f6i7at"
-path="res://.godot/imported/Slime_boss1_Run_with_shadow.png-3cb6efe6982d9c017d119a723b84a690.ctex"
+uid="uid://seo5d6egcep7"
+path="res://.godot/imported/barrackSoldierAttack.png-c905086427aa60dfe592dcbdde71ed90.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/images/enemiesImages/Slime_boss1_Run_with_shadow.png"
-dest_files=["res://.godot/imported/Slime_boss1_Run_with_shadow.png-3cb6efe6982d9c017d119a723b84a690.ctex"]
+source_file="res://assets/images/towerPlaceHolder/towers/BarrackTower/barrackSoldierAttack.png"
+dest_files=["res://.godot/imported/barrackSoldierAttack.png-c905086427aa60dfe592dcbdde71ed90.ctex"]
 
 [params]
 

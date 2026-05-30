@@ -1232,10 +1232,10 @@ tile_map_data = PackedByteArray("AAAqAAoAAAAAAAAAAAAlAAkAAQAAAAAAAAAuAAoAAQAAAAA
 tile_set = SubResource("TileSet_nsrm0")
 
 [node name="TowerBuilder" parent="." unique_id=1993546959 instance=ExtResource("14_mkypq")]
-position = Vector2(250, 74)
+position = Vector2(228, 86)
 
 [node name="TowerBuilder2" parent="." unique_id=2036473358 instance=ExtResource("14_mkypq")]
-position = Vector2(123, 485)
+position = Vector2(111, 485)
 
 [node name="TowerBuilder3" parent="." unique_id=1523364149 instance=ExtResource("14_mkypq")]
 position = Vector2(934, 371)

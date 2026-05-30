@@ -12,7 +12,7 @@ signal purchased
 
 var insertTower = {
 	"archer": preload("res://data/archer/archerTower.tscn"),
-	#"barrack": preload("res://data/barrack/barrackTower.tscn"),
+	"barrack": preload("res://data/barrack/barrackTower.tscn"),
 	#"magic": preload("res://data/magic/magicTower.tscn"),
 	#"bomb": preload("res://data/bomb/bombTower.tscn")
 }
