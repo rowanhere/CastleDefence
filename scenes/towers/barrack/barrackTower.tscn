@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://c0sudqgvpxcx0"]
+
+[ext_resource type="Script" uid="uid://bgf6el6wnu5i0" path="res://scripts/towers/barrackTower.gd" id="1_14i48"]
+[ext_resource type="Texture2D" uid="uid://bx2vsk7cfeomv" path="res://assets/textures/towers/barrack/level1.png" id="1_xfvv0"]
+[ext_resource type="Script" uid="uid://d4jh25ps2i4fm" path="res://scripts/towers/tower_collision_animation.gd" id="2_14i48"]
+[ext_resource type="Script" uid="uid://j0uru4vynyxa" path="res://scripts/components/range_circle.gd" id="3_mo5b3"]
+[ext_resource type="Texture2D" uid="uid://dnggqlmm678qw" path="res://assets/textures/towers/barrack/circle bar under.png" id="5_7i3cw"]
+[ext_resource type="Texture2D" uid="uid://dtj1fjmj5mihe" path="res://assets/textures/towers/barrack/circle bar over.png" id="6_jl2rc"]
+[ext_resource type="Texture2D" uid="uid://g6yu10bq7bri" path="res://assets/textures/towers/barrack/circle bar progress red.png" id="7_7i3cw"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_xwfnr"]
+radius = 250.0
+
+[node name="BarrackTower" type="Node2D" unique_id=564833731]
+script = ExtResource("1_14i48")
+
+[node name="TowerImage" type="Sprite2D" parent="." unique_id=1643250184]
+texture = ExtResource("1_xfvv0")
+script = ExtResource("2_14i48")
+
+[node name="towerArea" type="Area2D" parent="TowerImage" unique_id=1136113474]
+
+[node name="towerCollision" type="CollisionShape2D" parent="TowerImage/towerArea" unique_id=1257728463]
+modulate = Color(0.39607844, 0.007843138, 0.09411765, 0.3137255)
+shape = SubResource("CircleShape2D_xwfnr")
+debug_color = Color(0, 0.6, 0.7019608, 0.41960785)
+
+[node name="Range circle" type="Node2D" parent="TowerImage/towerArea" unique_id=1725500]
+visible = false
+script = ExtResource("3_mo5b3")
+
+[node name="Timer" type="Timer" parent="." unique_id=1901883395]
+wait_time = 4.0
+
+[node name="RespawnProgress" type="TextureProgressBar" parent="." unique_id=1246370148]
+offset_left = -27.0
+offset_top = -144.0
+offset_right = -11.0
+offset_bottom = -128.0
+scale = Vector2(2.5, 2.5)
+value = 50.0
+fill_mode = 5
+texture_under = ExtResource("5_7i3cw")
+texture_over = ExtResource("6_jl2rc")
+texture_progress = ExtResource("7_7i3cw")
+
+[node name="DoorMark" type="Marker2D" parent="." unique_id=117048295]
+position = Vector2(-6, 51)

@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://fvoma4b5igs0"]
+
+[ext_resource type="Script" uid="uid://bwwcidqds0v35" path="res://scripts/gameplay/damage_number.gd" id="1_2pbce"]
+
+[node name="HealthPoints" type="Label" unique_id=103292844]
+offset_left = -11.818184
+offset_top = -49.999977
+offset_right = 8.181816
+offset_bottom = -34.999977
+text = "-10"
+script = ExtResource("1_2pbce")

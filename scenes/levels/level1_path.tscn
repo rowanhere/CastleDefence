@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dcqujjrg5pu8i"]
 
-[ext_resource type="Script" uid="uid://5ycj3y403wb5" path="res://scripts/level_1_path.gd" id="1_j1ir5"]
+[ext_resource type="Script" uid="uid://5ycj3y403wb5" path="res://scripts/gameplay/level_1_path.gd" id="1_j1ir5"]
 
 [sub_resource type="Curve2D" id="Curve2D_ewlje"]
 _data = {

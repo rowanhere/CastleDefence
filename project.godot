@@ -11,15 +11,15 @@ config_version=5
 [application]
 
 config/name="Defence"
-run/main_scene="uid://mnyxg3cr2t6i"
+run/main_scene="res://scenes/ui/menu.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-AudioController="*uid://sxxq2bk0gy6e"
-MusicGlobalhandler="*uid://bs00ucyojleag"
-GameSound="*uid://jmeetu0lbiyg"
+AudioController="*res://scenes/autoload/audio_controller.tscn"
+MusicGlobalhandler="*res://scenes/autoload/music_globalhandler.tscn"
+GameSound="*res://scenes/autoload/game_sound.tscn"
 
 [display]
 
@@ -28,7 +28,7 @@ window/size/viewport_height=180
 window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
-mouse_cursor/custom_image="uid://b40sf1at10ngd"
+mouse_cursor/custom_image="res://assets/textures/ui/mouse/pointer.png"
 
 [editor_plugins]
 
@@ -36,7 +36,7 @@ enabled=PackedStringArray("res://addons/gdscript_formatter/plugin.cfg")
 
 [gui]
 
-theme/custom_font="uid://dyvhjaetpi6cw"
+theme/custom_font="res://assets/textures/ui/alagard.ttf"
 
 [layer_names]
 
