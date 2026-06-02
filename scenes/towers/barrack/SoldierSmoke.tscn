@@ -1,0 +1,68 @@
+[gd_scene format=3 uid="uid://dia6286wyci4y"]
+
+[ext_resource type="Texture2D" uid="uid://c6sm424wuisvm" path="res://assets/textures/towers/barrack/BarrackSmoke.png" id="1_0lbn3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h0pnu"]
+atlas = ExtResource("1_0lbn3")
+region = Rect2(640, 0, 640, 640)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mj4nt"]
+atlas = ExtResource("1_0lbn3")
+region = Rect2(2560, 0, 640, 640)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2ai0k"]
+atlas = ExtResource("1_0lbn3")
+region = Rect2(3200, 0, 640, 640)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d4670"]
+atlas = ExtResource("1_0lbn3")
+region = Rect2(3840, 0, 640, 640)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1hmah"]
+atlas = ExtResource("1_0lbn3")
+region = Rect2(4480, 0, 640, 640)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t6jaq"]
+atlas = ExtResource("1_0lbn3")
+region = Rect2(5120, 0, 640, 640)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6l06x"]
+atlas = ExtResource("1_0lbn3")
+region = Rect2(5760, 0, 640, 640)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_qhe0s"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h0pnu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mj4nt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2ai0k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d4670")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1hmah")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t6jaq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6l06x")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="SoldierSmoke" type="Node2D" unique_id=573487483]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1851122604]
+position = Vector2(-1, 1)
+scale = Vector2(0.21796876, 0.203125)
+sprite_frames = SubResource("SpriteFrames_qhe0s")
+frame_progress = 0.76464915

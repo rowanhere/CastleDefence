@@ -7,9 +7,13 @@ var getSoldier = preload("res://scenes/towers/barrack/BarrackSoldier.tscn")
 @onready var timer: Timer = $Timer
 @onready var respawn_progress: TextureProgressBar = $RespawnProgress
 
-const MAX_SOLDIERS := 3
+const MAX_SOLDIERS := 3     # 1 real soldier + 2 shadow clones
 const RESPAWN_TIME := 10.0
 const INITIAL_SPAWN_DELAY := 3.0
+
+# Index 0 = real soldier (normal colour)
+# Index 1, 2 = shadow clones (blue tint)
+const CLONE_START_INDEX := 1
 
 var soldiers: Array = []
 var enemies_in_range: Array[Node2D] = []
@@ -35,15 +39,72 @@ func _ready() -> void:
 # ─── Spawning ────────────────────────────────────────────────────────────────
 
 var spawn_sound: AudioStream = preload("res://assets/audio/sfx/soldierSpawn.mp3")
+var clone_sound: AudioStream = preload("res://assets/audio/sfx/clone.mp3")
+var smoke_scene: PackedScene = preload("res://scenes/towers/barrack/SoldierSmoke.tscn")
 
 func _spawn_all_soldiers() -> void:
-	for i in MAX_SOLDIERS:
-		_create_soldier(i)
+	# Step 1: real soldier — no smoke, just walks out of the door normally
+	var real_soldier = _create_soldier(0, door_mark.global_position)
+	soldiers.append(real_soldier)
+	GameSound.play(spawn_sound, -40.0)
+
+	# Step 2: smoke appears at each clone's final wait position, clone fades in from there
+	var clone_spawn_delay: float = 0.6  # first clone after 0.6s
+
+	for i in range(CLONE_START_INDEX, MAX_SOLDIERS):
+		var clone_index: int = i
+		var clone_wait_pos: Vector2 = _get_wait_position(clone_index)
+
+		get_tree().create_timer(clone_spawn_delay).timeout.connect(
+			func():
+				# 1) Blue smoke appears at the clone's final wait position
+				var smoke = smoke_scene.instantiate()
+				get_tree().current_scene.add_child(smoke)
+				smoke.global_position = clone_wait_pos
+				smoke.modulate = Color.WHITE
+				var anim: AnimatedSprite2D = smoke.get_node("AnimatedSprite2D")
+				anim.play("default")
+
+				# 2) Clone spawns already at its wait position, fully invisible
+				var clone = _create_soldier(clone_index, clone_wait_pos)
+				soldiers.append(clone)
+				clone.modulate.a = 0.0
+
+				# 3) After a short peek of smoke, quickly fade smoke out and snap clone in
+				get_tree().create_timer(0.2).timeout.connect(
+					func():
+						if is_instance_valid(smoke):
+							var smoke_tween: Tween = get_tree().create_tween()
+							smoke_tween.tween_property(smoke, "modulate:a", 0.0, 0.2)
+							smoke_tween.tween_callback(smoke.queue_free)
+						if is_instance_valid(clone):
+							var clone_tween: Tween = get_tree().create_tween()
+							clone_tween.tween_property(clone, "modulate:a", 0.85, 0.15)
+				)
+
+				GameSound.play(clone_sound, -40.0)
+		)
+		clone_spawn_delay += 0.6  # each clone 0.6s apart
+
 	respawning = false
 	respawn_progress.hide()
 
 
-func _create_soldier(index: int) -> void:
+func _get_wait_position(index: int) -> Vector2:
+	var path2d: Path2D = get_tree().get_first_node_in_group("level_path") as Path2D
+	var offsets := [Vector2(-50, 20), Vector2(0, 40), Vector2(50, 20)]
+	if path2d != null:
+		var local_pos: Vector2 = path2d.to_local(global_position)
+		var closest_offset: float = path2d.curve.get_closest_offset(local_pos)
+		var base_pos: Vector2 = path2d.to_global(path2d.curve.sample_baked(closest_offset))
+		var wait_off: Vector2 = offsets[index] if index < offsets.size() else Vector2(index * 50, 20)
+		return base_pos + wait_off
+	else:
+		var spawn_offset: Vector2 = offsets[index] if index < offsets.size() else Vector2(index * 50, 20)
+		return global_position + spawn_offset
+
+
+func _create_soldier(index: int, spawn_from: Vector2) -> Node2D:
 	var path2d: Path2D = get_tree().get_first_node_in_group("level_path") as Path2D
 	var soldier = getSoldier.instantiate()
 	get_tree().current_scene.add_child(soldier)
@@ -69,21 +130,29 @@ func _create_soldier(index: int) -> void:
 	soldier.last_direction = Vector2.RIGHT
 	soldier.wait_position = final_pos
 
-	# Start hidden at the door marker — tween outward so they march out of the gate
-	soldier.global_position = door_mark.global_position
-	soldier.modulate.a = 0.0
+	# Clones are blue-tinted; real soldier is normal
+	if index >= CLONE_START_INDEX:
+		soldier.modulate = Color(0.45, 0.75, 1.0, 0.0)
+		soldier.scale = Vector2(1.5, 1.5)  # start small, pop to full size
+	else:
+		soldier.modulate = Color(1.0, 1.0, 1.0, 0.0)
 
-	# Play spawn sound once per soldier at 60% volume (-4.4 dB), timed with the stagger
-	get_tree().create_timer(index * 0.25).timeout.connect(func(): GameSound.play(spawn_sound, -40.0))
+	# All soldiers start at the given spawn_from position
+	soldier.global_position = spawn_from
 
-	var stagger_delay: float = index * 0.25
 	var tween: Tween = get_tree().create_tween()
-	tween.tween_interval(stagger_delay)
-	tween.tween_property(soldier, "global_position", final_pos, 0.4) \
-		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(soldier, "modulate:a", 1.0, 0.3)
+	if index >= CLONE_START_INDEX:
+		# Clone already starts at its final position — no movement, just scale pop
+		# (fade-in is handled by the smoke crossfade in _spawn_all_soldiers)
+		tween.tween_property(soldier, "scale", Vector2(2.5, 2.5), 0.3) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	else:
+		# Real soldier walks from door to wait position
+		tween.tween_property(soldier, "global_position", final_pos, 0.4) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(soldier, "modulate:a", 1.0, 0.3)
 
-	soldiers.append(soldier)
+	return soldier
 
 
 # ─── Validation helpers ──────────────────────────────────────────────────────
