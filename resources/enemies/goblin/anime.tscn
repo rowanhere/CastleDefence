@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://dxo7wg6cb370h"]
+
+[ext_resource type="SpriteFrames" uid="uid://qop5onni8k8l" path="res://resources/enemies/goblin/GoblinFrames.tres" id="1_xb4g4"]
+
+[node name="Anime" type="Node2D" unique_id=1519569856]
+
+[node name="AnimatableBody2D" type="AnimatedSprite2D" parent="." unique_id=616848334]
+sprite_frames = ExtResource("1_xb4g4")
+animation = &"walkUp"

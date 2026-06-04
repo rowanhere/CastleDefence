@@ -1,5 +1,10 @@
 extends CharacterBody2D
 
+var data: EnemyData = null:
+	set(value):
+		data = value
+		_apply_data()
+
 @onready var health_bar: ProgressBar = $HealthBar
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
 @onready var attack_area: Area2D = $AttackArea
@@ -14,6 +19,31 @@ var attack_speed = 1.0
 var attack_timer = 0.0
 var locked_soldier: Node2D = null
 
+var _dir_suffix: String = "Down"
+var _detached: bool = false
+var _returning: bool = false
+var _attack_slot_angle: float = -1.0
+const ATTACK_SLOT_RADIUS: float = 55.0
+
+
+func _apply_data() -> void:
+	if not is_node_ready() or not data:
+		return
+	speed         = data.speed
+	hp            = data.health
+	attack_damage = data.attack_damage
+	attack_speed  = data.attack_speed
+	attack_timer  = attack_speed
+	if data.scale != Vector2.ZERO:
+		scale = data.scale
+	health_bar.max_value = hp
+	health_bar.value = hp
+	if data.sprite_frames:
+		anim.sprite_frames = data.sprite_frames
+		anim.play("walkDown")
+	else:
+		print("[Enemy] WARNING: ", data.enemy_name, " has no sprite_frames in .tres!")
+
 
 func _ready() -> void:
 	add_to_group("enemies")
@@ -21,31 +51,19 @@ func _ready() -> void:
 	health_bar.value = hp
 
 
-func _other_scale(other: Node2D) -> float:
-	if other == null or not is_instance_valid(other):
-		return 1.0
-	return other.scale.x
-
-
-func _engage_range(other: Node2D) -> float:
-	# Soldiers are scaled up; use the larger scale so melee actually connects.
-	return 22.0 * max(scale.x, _other_scale(other)) + 14.0
-
-
-func _disengage_range(other: Node2D) -> float:
-	return _engage_range(other) * 1.35
-
-
-func _is_valid_soldier(soldier) -> bool:
-	if soldier == null:
+func _is_valid_soldier(s) -> bool:
+	if s == null or not is_instance_valid(s):
 		return false
-	if not is_instance_valid(soldier):
-		return false
-	return soldier.is_in_group("soldier") and not soldier.is_dead
+	return s.is_in_group("soldier") and not s.is_dead
 
 
 func _distance_to(other: Node2D) -> float:
 	return global_position.distance_to(other.global_position)
+
+
+func _engage_range(other: Node2D) -> float:
+	var other_scale: float = other.scale.x if (other != null and is_instance_valid(other)) else 1.0
+	return 22.0 * max(scale.x, other_scale) + 14.0
 
 
 func _soldier_in_attack_area() -> Node2D:
@@ -55,54 +73,85 @@ func _soldier_in_attack_area() -> Node2D:
 	return null
 
 
-func _can_engage(soldier: Node2D) -> bool:
-	if not _is_valid_soldier(soldier):
-		return false
-	if _distance_to(soldier) <= _engage_range(soldier):
-		return true
-	return _soldier_in_attack_area() == soldier
+func _pick_soldier() -> Node2D:
+	var touch := _soldier_in_attack_area()
+	if touch:
+		return touch
+	var closest: Node2D = null
+	var closest_dist: float = INF
+	for node in get_tree().get_nodes_in_group("soldier"):
+		if not _is_valid_soldier(node):
+			continue
+		var d: float = _distance_to(node)
+		if d <= 150.0 and d < closest_dist:
+			closest_dist = d
+			closest = node
+	return closest
 
 
-func _still_in_combat(soldier: Node2D) -> bool:
-	if not _is_valid_soldier(soldier):
-		return false
-	return _distance_to(soldier) <= _disengage_range(soldier)
+func _claim_attack_slot(soldier: Node2D) -> float:
+	var taken: Array = []
+	for other in get_tree().get_nodes_in_group("enemies"):
+		if other == self or not is_instance_valid(other):
+			continue
+		if other._attack_slot_angle >= 0.0 and other.locked_soldier == soldier:
+			taken.append(other._attack_slot_angle)
+	for i in range(8):
+		var angle: float = (TAU / 8.0) * i
+		var blocked: bool = false
+		for a in taken:
+			if abs(angle - a) < 0.4:
+				blocked = true
+				break
+		if not blocked:
+			return angle
+	return randf() * TAU
+
+
+func _detach_from_path() -> void:
+	if _detached:
+		return
+	var path_follow: PathFollow2D = get_parent() as PathFollow2D
+	if path_follow == null:
+		return
+	_detached = true
+	_returning = false
+	reparent(get_tree().current_scene, true)
+	path_follow.queue_free()
 
 
 func _sanitize_lock() -> void:
+	var had_soldier: bool = locked_soldier != null
 	if locked_soldier != null and not is_instance_valid(locked_soldier):
 		locked_soldier = null
 	elif locked_soldier != null and not _is_valid_soldier(locked_soldier):
 		locked_soldier = null
+	if had_soldier and locked_soldier == null:
+		_attack_slot_angle = -1.0
+		_returning = true
 
 
-func _pick_combat_soldier() -> Node2D:
-	var touch: Node2D = _soldier_in_attack_area()
-	if touch:
-		return touch
-	var closest_soldier: Node2D = null
-	var closest_distance: float = INF
-	for node in get_tree().get_nodes_in_group("soldier"):
-		if not _is_valid_soldier(node):
-			continue
-		var distance: float = _distance_to(node)
-		var range_limit: float = _engage_range(node)
-		if distance <= range_limit and distance < closest_distance:
-			closest_distance = distance
-			closest_soldier = node
-	return closest_soldier
+func _get_dir_suffix(dir: Vector2) -> String:
+	if abs(dir.x) >= abs(dir.y):
+		return "Right" if dir.x >= 0 else "Left"
+	else:
+		return "Down" if dir.y >= 0 else "Up"
 
 
-func _fight_soldier(soldier: Node2D, delta: float) -> void:
-	locked_soldier = soldier
-	velocity = Vector2.ZERO
-	# Do not call move_and_slide — parent PathFollow2D handles position while walking.
-	if anim.animation != "attack" and anim.animation != "hurt":
-		anim.play("attack")
-	attack_timer -= delta
-	if attack_timer <= 0.0:
-		attack_timer = attack_speed
-		soldier.take_damage(attack_damage)
+func _anim_name(base: String) -> String:
+	return base + _dir_suffix
+
+
+func _play_dir(base: String, force: bool = false) -> void:
+	if not anim.sprite_frames:
+		return
+	var anim_name: String = _anim_name(base)
+	if anim.sprite_frames.has_animation(anim_name):
+		if force or anim.animation != anim_name or not anim.is_playing():
+			anim.play(anim_name)
+	elif anim.sprite_frames.has_animation(base):
+		if force or anim.animation != base or not anim.is_playing():
+			anim.play(base)
 
 
 func _physics_process(delta: float) -> void:
@@ -111,30 +160,88 @@ func _physics_process(delta: float) -> void:
 
 	_sanitize_lock()
 
-	var path_follow: PathFollow2D = get_parent() as PathFollow2D
+	# ── Detached (free movement) ──────────────────────────────────────────────
+	if _detached:
+		# Always check for a new soldier first
+		var new_soldier := _pick_soldier()
+		if new_soldier:
+			locked_soldier = new_soldier
+			_returning = false
 
-	if locked_soldier != null and is_instance_valid(locked_soldier) and _still_in_combat(locked_soldier):
-		_fight_soldier(locked_soldier, delta)
+		# In combat — move to slot and attack
+		if locked_soldier != null:
+			var to_soldier: Vector2 = (locked_soldier.global_position - global_position).normalized()
+			_dir_suffix = _get_dir_suffix(to_soldier)
+
+			if _attack_slot_angle < 0.0:
+				_attack_slot_angle = _claim_attack_slot(locked_soldier)
+
+			var slot_pos: Vector2 = locked_soldier.global_position \
+				+ Vector2(cos(_attack_slot_angle), sin(_attack_slot_angle)) * ATTACK_SLOT_RADIUS
+			var dist_to_slot: float = global_position.distance_to(slot_pos)
+
+			if dist_to_slot > 8.0:
+				var dir: Vector2 = (slot_pos - global_position).normalized()
+				_dir_suffix = _get_dir_suffix(dir)
+				global_position = global_position.move_toward(slot_pos, speed * delta)
+				_play_dir("walk")
+			else:
+				velocity = Vector2.ZERO
+				attack_timer -= delta
+				if not anim.animation.begins_with("attack") or not anim.is_playing():
+					_play_dir("attack", true)
+				if attack_timer <= 0.0:
+					attack_timer = attack_speed
+					locked_soldier.take_damage(attack_damage)
+			return
+
+		# Fallback — detached with no soldier and not marked as returning
+		if not _returning:
+			_returning = true
+
+		# Returning to path — walk toward nearest path point
+		if _returning:
+			var path2d: Path2D = get_tree().get_first_node_in_group("level_path") as Path2D
+			if path2d:
+				var local_pos: Vector2 = path2d.to_local(global_position)
+				var closest_offset: float = path2d.curve.get_closest_offset(local_pos)
+				var target: Vector2 = path2d.to_global(path2d.curve.sample_baked(closest_offset))
+				if global_position.distance_to(target) > 6.0:
+					var dir: Vector2 = (target - global_position).normalized()
+					_dir_suffix = _get_dir_suffix(dir)
+					global_position = global_position.move_toward(target, speed * delta)
+					_play_dir("walk")
+				else:
+					# Arrived — reparent back cleanly
+					_returning = false
+					_detached = false
+					var follow := PathFollow2D.new()
+					follow.rotates = false
+					follow.loop = false
+					path2d.add_child(follow)
+					follow.progress = closest_offset
+					reparent(follow, false)
+					position = Vector2.ZERO
 		return
 
-	locked_soldier = null
-	var new_soldier: Node2D = _pick_combat_soldier()
-	if new_soldier:
-		_fight_soldier(new_soldier, delta)
+	# ── On path ──────────────────────────────────────────────────────────────
+	var path_follow: PathFollow2D = get_parent() as PathFollow2D
+
+	var soldier := _pick_soldier()
+	if soldier:
+		locked_soldier = soldier
+		_detach_from_path()
 		return
 
 	if path_follow == null:
 		return
 
-	# Only advance along the path when not in combat.
+	var prev_pos: Vector2 = global_position
 	path_follow.progress += speed * delta
-	if anim.animation == "hurt" and not anim.is_playing():
-		anim.play("walk")
-	elif anim.animation != "hurt" and anim.animation != "die":
-		anim.play("walk")
-
-	var forward: Vector2 = path_follow.transform.x
-	anim.flip_h = forward.x < 0
+	var move_delta: Vector2 = global_position - prev_pos
+	if move_delta.length() > 0.1:
+		_dir_suffix = _get_dir_suffix(move_delta)
+	_play_dir("walk")
 
 	if path_follow.progress_ratio >= 1.0:
 		reach_castle()
@@ -148,8 +255,6 @@ func take_damage(amount: float) -> void:
 	if hp <= 0:
 		die()
 		return
-	if not _still_in_combat(locked_soldier):
-		anim.play("hurt")
 	_spawn_damage_number(amount)
 
 
@@ -170,7 +275,7 @@ func die() -> void:
 	is_dead = true
 	locked_soldier = null
 	health_bar.hide()
-	anim.play("die")
+	_play_dir("die")
 	await anim.animation_finished
 	queue_free()
 

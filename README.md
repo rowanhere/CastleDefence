@@ -42,12 +42,29 @@ Place towers along the enemy path, fight off waves, and protect your castle's HP
 
 ## 👹 Enemies
 
-- Walk along the path using Godot's `PathFollow2D`
-- **Stop and fight** soldiers when in melee range
-- Resume walking once all nearby soldiers are dead
+Enemies use a **3-state system** powered by dynamic reparenting:
+
+| State | Behaviour |
+|---|---|
+| **On path** | Walks via `PathFollow2D`, detects soldiers within 150px |
+| **In combat** | Reparented to scene root — moves freely, claims a unique angle slot around the soldier, attacks when at slot |
+| **Returning** | Walks `move_toward` the nearest point on the path curve, reparents back once it physically arrives |
+
+**Key details:**
+- Each enemy claims one of 8 evenly-spaced angle slots around the soldier so they physically surround it
+- Combat uses direct position movement (no physics collision) so enemies don't push each other
+- When a soldier dies, enemies walk back to the path smoothly — no teleporting
+- If a new soldier appears while returning, the enemy immediately re-enters combat
 - Show **floating red damage numbers** when hit
 - Play a death animation before being freed
-- Reaching the castle end → damages castle HP → **game over** when HP = 0
+- Reaching the castle end → damages castle HP
+
+### Enemy Types
+| Enemy | HP | Speed | Damage |
+|---|---|---|---|
+| Goblin | 100 | 80 | 12 |
+| Orc | *(coming soon)* | — | — |
+| Troll | *(coming soon)* | — | — |
 
 ---
 

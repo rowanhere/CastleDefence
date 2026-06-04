@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://cs1mwnqtgvubb"]
+
+[ext_resource type="Script" uid="uid://c1rydd1oj05bl" path="res://scripts/gameplay/EnemeyData.gd" id="1_troll"]
+
+[resource]
+script = ExtResource("1_troll")
+enemy_name = "Troll"
+health = 400
+speed = 40.0
+attack_damage = 35.0
+attack_speed = 0.5
+scale = Vector2(1.5, 1.5)

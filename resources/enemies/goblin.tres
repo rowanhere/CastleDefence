@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://dlihcjewbqxou"]
+
+[ext_resource type="Script" uid="uid://c1rydd1oj05bl" path="res://scripts/gameplay/EnemeyData.gd" id="1_goblin"]
+[ext_resource type="SpriteFrames" uid="uid://qop5onni8k8l" path="res://resources/enemies/goblin/GoblinFrames.tres" id="2_8t8dg"]
+
+[resource]
+script = ExtResource("1_goblin")
+enemy_name = "Goblin"
+health = 200
+speed = 100.0
+attack_damage = 30.0
+attack_speed = 1.2
+sprite_frames = ExtResource("2_8t8dg")
+scale = Vector2(2, 2)
