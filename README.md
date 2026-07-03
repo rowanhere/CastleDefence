@@ -10,9 +10,18 @@ Place towers along the enemy path, fight off waves, and protect your castle's HP
 - Enemies spawn and follow a fixed **Path2D** toward your castle
 - Place towers at designated spots alongside the path to stop them
 - Each tower costs **400 coins** to place
+- Enemies now **drop coins on death**
 - Enemies that reach the end of the path **damage the castle**
 - **Game over** when the castle's HP hits zero
 - Survive all **10 waves** to complete the level
+
+## 📌 Current Build
+
+- One playable level is currently set up under `scenes/levels/level1/`
+- Enemy spawning is driven by a level spawn resource: `level1_spawn.tres`
+- Waves use timed starts instead of one hardcoded enemy list
+- Enemy stats and coin rewards scale by level through `GameHandler`
+- The final scheduled wave is currently a **boss placeholder** using a goblin until a real boss is added
 
 
 
@@ -63,8 +72,8 @@ Enemies use a **3-state system** powered by dynamic reparenting:
 | Enemy | HP | Speed | Damage |
 |---|---|---|---|
 | Goblin | 100 | 80 | 12 |
-| Orc | *(coming soon)* | — | — |
-| Troll | *(coming soon)* | — | — |
+| Orc | Implemented | Implemented | Implemented |
+| Troll | Stats/resource scaffolded | Implemented in data | Implemented in data |
 
 ---
 
@@ -112,7 +121,7 @@ defence/
 ├── scenes/
 │   ├── autoload/        # AudioController, GameSound singletons
 │   ├── enemies/         # enemy.tscn, DamageNumber.tscn
-│   ├── levels/          # level_1.tscn, level1_path.tscn
+│   ├── levels/          # level1/level_1.tscn, level1/level1_path.tscn
 │   ├── projectiles/     # arrow.tscn
 │   ├── systems/tower/   # Tower builder UI popup
 │   ├── towers/
@@ -122,6 +131,7 @@ defence/
 └── scripts/
     ├── autoload/        # music_player.gd
     ├── gameplay/        # enemy.gd, level_1_path.gd, damage_number.gd
+    │                    # game_handler.gd, enemy_spawn_schedule.gd, enemy_spawn_wave.gd
     ├── systems/         # tower_builder.gd, tower_builder_button.gd
     ├── towers/          # barrackTower.gd, barrackSoldierHandler.gd
     │                    # archer_tower_attack.gd, arrow.gd, game_sound.gd
@@ -152,7 +162,7 @@ defence/
 - [ ] Castle HP bar + proper game over screen
 - [ ] Magic Tower
 - [ ] Bomb Tower
-- [ ] Enemy waves with increasing difficulty
+- [ ] Better wave presentation / countdown UI
 - [ ] Tower upgrade system
-- [ ] Coin earning on enemy kill
+- [ ] Real boss enemy and boss encounter flow
 - [ ] Level unlock progression
