@@ -1,0 +1,65 @@
+[gd_scene format=3 uid="uid://p67x0s04oqdc"]
+
+[ext_resource type="Texture2D" uid="uid://wulxelqjr0km" path="res://assets/textures/towers/archer/Level1.png" id="1_hi7s8"]
+[ext_resource type="Texture2D" uid="uid://cjryulwvcsvxm" path="res://assets/textures/towers/archer/towerTop1.png" id="2_cgmxq"]
+[ext_resource type="Texture2D" uid="uid://svpavy17wlvy" path="res://assets/textures/towers/archer/level1archer/64.png" id="3_yt5k7"]
+[ext_resource type="Texture2D" uid="uid://gl4bcnhsu306" path="res://assets/textures/towers/archer/level1archer/65.png" id="4_cgmxq"]
+[ext_resource type="Texture2D" uid="uid://kmltnfclq6nk" path="res://assets/textures/towers/archer/level1archer/66.png" id="5_lxsxb"]
+[ext_resource type="Texture2D" uid="uid://bvcxf8bltxhiu" path="res://assets/textures/towers/archer/level1archer/67.png" id="6_yxy31"]
+[ext_resource type="Texture2D" uid="uid://d3ju4f27su60l" path="res://assets/textures/towers/archer/level1archer/68.png" id="7_kuhl5"]
+[ext_resource type="Texture2D" uid="uid://bsob61aocppnd" path="res://assets/textures/towers/archer/level1archer/69.png" id="8_b6r06"]
+[ext_resource type="Script" uid="uid://dragghost00gd" path="res://scripts/towers/drag_ghost.gd" id="9_ghost"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ghost"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_yt5k7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_cgmxq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_lxsxb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_yxy31")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_kuhl5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_b6r06")
+}],
+"loop": true,
+"name": &"attack",
+"speed": 10.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ghost"]
+size = Vector2(52, 64)
+
+[node name="ArcherTowerGhost" type="Node2D"]
+script = ExtResource("9_ghost")
+
+[node name="TowerImage" type="Sprite2D" parent="."]
+texture = ExtResource("1_hi7s8")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 1
+position = Vector2(-3, -122)
+sprite_frames = SubResource("SpriteFrames_ghost")
+animation = &"attack"
+autoplay = "attack"
+
+[node name="TowerTop" type="Sprite2D" parent="."]
+position = Vector2(-17, -82)
+scale = Vector2(1.0163934, 1.0405406)
+texture = ExtResource("2_cgmxq")
+
+[node name="PlacementArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlacementArea"]
+shape = SubResource("RectangleShape2D_ghost")

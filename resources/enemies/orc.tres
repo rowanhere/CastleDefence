@@ -10,5 +10,6 @@ health = 200
 speed = 60.0
 attack_damage = 20.0
 attack_speed = 0.8
+coin_drop = 18
 sprite_frames = ExtResource("2_orc")
 scale = Vector2(1.2, 1.2)

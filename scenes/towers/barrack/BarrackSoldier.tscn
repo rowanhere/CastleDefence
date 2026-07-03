@@ -274,7 +274,6 @@ atlas = ExtResource("2_vd4b4")
 region = Rect2(192, 192, 64, 64)
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_6m2mj"]
-load_path = "res://.godot/imported/barrackSoldierwalkAttack.png-bd76016f5330597cb4c410520ca781ba.ctex"
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4vwna"]
 atlas = SubResource("CompressedTexture2D_6m2mj")

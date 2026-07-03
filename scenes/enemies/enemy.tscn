@@ -6,7 +6,7 @@
 radius = 8.181818
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7f415"]
-bg_color = Color(0.9304878, 0.43906388, 0.091980286, 1)
+bg_color = Color(0.11655869, 0.075290434, 0.32217935, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
@@ -28,10 +28,11 @@ position = Vector2(0, 7.2727275)
 shape = SubResource("CircleShape2D_tgkek")
 
 [node name="HealthBar" type="ProgressBar" parent="." unique_id=669873120]
-offset_left = -10.000005
-offset_top = -30.0
-offset_right = 9.999995
-offset_bottom = -26.0
+offset_left = -3.6363642
+offset_top = -27.272726
+offset_right = 16.363636
+offset_bottom = -23.272726
+scale = Vector2(0.5, 0.5)
 theme_override_styles/fill = SubResource("StyleBoxFlat_7f415")
 step = 10.0
 value = 100.0

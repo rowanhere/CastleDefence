@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://cq1db36l61vnb"]
+
+[ext_resource type="Script" uid="uid://2ijedftbsa8d" path="res://scripts/ui/game_hud.gd" id="1_hud"]
+[ext_resource type="PackedScene" uid="uid://cfaensirowc7i" path="res://scenes/systems/tower/PlayerButtons.tscn" id="2_3b1cv"]
+[ext_resource type="PackedScene" uid="uid://blpg12rugqbbr" path="res://scenes/systems/tower/LevelData.tscn" id="3_h4ju2"]
+
+[node name="GameHUD" type="CanvasLayer" unique_id=711150710]
+layer = 10
+script = ExtResource("1_hud")
+
+[node name="PlayerButtonsHolder" parent="." unique_id=531148795 instance=ExtResource("2_3b1cv")]
+
+[node name="LevelData" parent="." unique_id=1844176880 instance=ExtResource("3_h4ju2")]

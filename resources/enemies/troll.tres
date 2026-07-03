@@ -9,4 +9,5 @@ health = 400
 speed = 40.0
 attack_damage = 35.0
 attack_speed = 0.5
+coin_drop = 30
 scale = Vector2(1.5, 1.5)

@@ -2,6 +2,7 @@ extends Control
 const LevelButton = preload("res://scenes/ui/level_button.tscn")
 const lockedButton = preload("res://scenes/ui/speech_bubble.tscn")
 var levelMap = preload("res://assets/audio/music/levelMap.ogg")
+const GameHandlerScript = preload("res://scripts/gameplay/game_handler.gd")
 var lBtn
 @onready var level_group: Control = $LevelGroup
 @onready var color_rect: ColorRect = $ColorRect
@@ -29,6 +30,7 @@ var positions: Array[Vector2] = [
 	Vector2(281.0, 4.0)
 ]
 var unlocked_levels:Array[int] = [1]
+var current_level_number: int = 1
 func _ready() -> void:
 	set_process(false)
 	level_load.visible = false
@@ -62,11 +64,11 @@ func _process(delta: float) -> void:
 
 	# only switch scene when BOTH fake timer and resource are done
 	if fake_timer >= fake_duration and resource_ready:
-		var scene = ResourceLoader.load_threaded_get(loading_path)
 		loading_path = ""
 		set_process(false)
 		AudioController.stop_music()
-		get_tree().change_scene_to_packed(scene)
+		GameHandlerScript.queued_level = current_level_number
+		get_tree().change_scene_to_file("res://scenes/gameplay/GameHandler.tscn")
 	elif status == ResourceLoader.THREAD_LOAD_FAILED:
 		print("Failed to load: ", loading_path)
 		loading_path = ""
@@ -94,7 +96,8 @@ func _on_level_button_pressed(level_number: int,Locked_position:Vector2) -> void
 #shake animation
 func handle_unlockedLevel(level_number: int) -> void:
 	print("Level ", level_number, " is unlocked")
-	loading_path = "res://scenes/levels/level_%d.tscn" % level_number
+	current_level_number = level_number
+	loading_path = GameHandlerScript.get_level_scene_path(level_number)
 	level_load.visible = true
 	color_rect.visible = true
 

@@ -1,0 +1,110 @@
+[gd_scene format=3 uid="uid://blpg12rugqbbr"]
+
+[ext_resource type="Texture2D" uid="uid://b4su6jolokp5e" path="res://assets/textures/ui/heart.png" id="1_03pd5"]
+[ext_resource type="Texture2D" uid="uid://dre6okf88iy5n" path="res://assets/textures/ui/load_bar_1.png" id="1_iugn0"]
+[ext_resource type="Texture2D" uid="uid://drm6xbibk601p" path="res://assets/textures/ui/Waveskull.png" id="3_03pd5"]
+[ext_resource type="Texture2D" uid="uid://ckx4uc35waymp" path="res://assets/textures/ui/IconCoin.png" id="8_n18h0"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_iugn0"]
+load_path = "res://.godot/imported/load_bar_1.png-7507115f3ed9ad3688ad3740948ed89c.ctex"
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_it5mp"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 0.0
+bg_color = Color(1, 1, 1, 0.11764706)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[node name="LevelData" type="Node2D" unique_id=1844176880]
+
+[node name="WaveTextureProgress" type="TextureProgressBar" parent="." unique_id=1800805475]
+offset_left = 111.0
+offset_top = 15.0
+offset_right = 209.0
+offset_bottom = 17.0
+step = 0.0
+value = 50.0
+nine_patch_stretch = true
+texture_under = SubResource("CompressedTexture2D_iugn0")
+texture_progress = ExtResource("1_iugn0")
+tint_under = Color(0.0627451, 0.019607844, 0.003921569, 0.19607843)
+tint_progress = Color(0.7764706, 0.101960786, 0.4745098, 0.39215687)
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=733678111]
+clip_contents = true
+offset_left = 107.0
+offset_top = 4.0
+offset_right = 214.0
+offset_bottom = 16.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_it5mp")
+
+[node name="LifeNode" type="Node2D" parent="PanelContainer" unique_id=1285696006]
+position = Vector2(10, 10)
+
+[node name="Sprite2D" type="Sprite2D" parent="PanelContainer/LifeNode" unique_id=1744214758]
+position = Vector2(2.3375854, -2.8700867)
+scale = Vector2(0.19796826, 0.17394465)
+texture = ExtResource("1_03pd5")
+
+[node name="CoinsAmt" type="Label" parent="PanelContainer/LifeNode" unique_id=348351946]
+offset_left = 7.0
+offset_top = -7.0
+offset_right = 18.0
+offset_bottom = 1.0
+theme_override_font_sizes/font_size = 7
+text = "100"
+
+[node name="CoinNode" type="Node2D" parent="PanelContainer" unique_id=1722288221]
+position = Vector2(10, 10)
+
+[node name="Sprite2D" type="Sprite2D" parent="PanelContainer/CoinNode" unique_id=269039721]
+position = Vector2(37.4375, -3.46875)
+scale = Vector2(0.027832042, 0.027099617)
+texture = ExtResource("8_n18h0")
+
+[node name="CoinsAmt" type="Label" parent="PanelContainer/CoinNode" unique_id=2022679858]
+offset_left = 42.0
+offset_top = -7.0
+offset_right = 53.0
+offset_bottom = 1.0
+theme_override_font_sizes/font_size = 7
+text = "500"
+
+[node name="WaveNode" type="Node2D" parent="PanelContainer" unique_id=2022495857]
+position = Vector2(10, 10)
+
+[node name="Sprite2D" type="Sprite2D" parent="PanelContainer/WaveNode" unique_id=333306184]
+position = Vector2(73.47424, -3.4592896)
+scale = Vector2(0.06590192, 0.06465962)
+texture = ExtResource("3_03pd5")
+
+[node name="CurrentWave" type="Label" parent="PanelContainer/WaveNode" unique_id=835935724]
+offset_left = 79.0
+offset_top = -7.0
+offset_right = 83.0
+offset_bottom = 1.0
+theme_override_font_sizes/font_size = 7
+text = "1"
+
+[node name="Label" type="Label" parent="PanelContainer/WaveNode" unique_id=125466220]
+offset_left = 87.174095
+offset_top = -7.0446186
+offset_right = 92.22939
+offset_bottom = 0.9553814
+rotation = 1.1484267
+theme_override_font_sizes/font_size = 7
+text = "\\"
+
+[node name="TotalWave" type="Label" parent="PanelContainer/WaveNode" unique_id=257911520]
+offset_left = 87.0
+offset_top = -7.0
+offset_right = 91.0
+offset_bottom = 1.0
+theme_override_font_sizes/font_size = 7
+text = "5"

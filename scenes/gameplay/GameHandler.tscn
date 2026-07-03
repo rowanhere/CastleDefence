@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://dm57lpkh1aima"]
+
+[ext_resource type="Script" uid="uid://cwkhenjctiojw" path="res://scripts/gameplay/game_handler.gd" id="1_gh"]
+[ext_resource type="PackedScene" uid="uid://cq1db36l61vnb" path="res://scenes/ui/GameHUD.tscn" id="2_hud"]
+
+[node name="GameHandler" type="Node2D" unique_id=262920643]
+script = ExtResource("1_gh")
+
+[node name="LevelContainer" type="Node2D" parent="." unique_id=1894237254]
+
+[node name="GameHUD" parent="." unique_id=1826837012 instance=ExtResource("2_hud")]

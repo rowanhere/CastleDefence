@@ -14,10 +14,12 @@ var DamageNumber = preload("res://scenes/enemies/DamageNumber.tscn")
 var speed = 80.0
 var hp = 100
 var is_dead = false
+var coin_drop = 0
 var attack_damage = 12.0
 var attack_speed = 1.0
 var attack_timer = 0.0
 var locked_soldier: Node2D = null
+var is_boss_enemy: bool = false
 
 var _dir_suffix: String = "Down"
 var _detached: bool = false
@@ -31,6 +33,7 @@ func _apply_data() -> void:
 		return
 	speed         = data.speed
 	hp            = data.health
+	coin_drop     = data.coin_drop
 	attack_damage = data.attack_damage
 	attack_speed  = data.attack_speed
 	attack_timer  = attack_speed
@@ -269,16 +272,22 @@ func _spawn_damage_number(amount: float) -> void:
 	dmg_label.add_theme_color_override("font_color", Color(1, 0.2, 0.2))
 
 
-func die() -> void:
+func die(reward_coins: bool = true) -> void:
 	if is_dead:
 		return
 	is_dead = true
 	locked_soldier = null
+	if reward_coins:
+		GameHandler.add_coins(coin_drop)
 	health_bar.hide()
 	_play_dir("die")
 	await anim.animation_finished
+	if is_boss_enemy:
+		var handler := get_tree().current_scene
+		if handler != null and handler.has_method("handle_boss_defeated"):
+			handler.handle_boss_defeated()
 	queue_free()
 
 
 func reach_castle() -> void:
-	die()
+	die(false)

@@ -1,0 +1,96 @@
+extends Node2D
+class_name GameHandler
+
+static var queued_level: int = 1
+static var coins: int = 500
+const HEALTH_SCALE_PER_LEVEL := 0.20
+const DAMAGE_SCALE_PER_LEVEL := 0.12
+const SPEED_SCALE_PER_LEVEL := 0.03
+const COIN_SCALE_PER_LEVEL := 0.15
+const MAX_SPEED_SCALE := 2.0
+
+# Boss formulas can live here later once boss data/resources are added.
+# const BOSS_HEALTH_SCALE_PER_LEVEL := 0.35
+# const BOSS_DAMAGE_SCALE_PER_LEVEL := 0.18
+# const BOSS_SPEED_SCALE_PER_LEVEL := 0.04
+# const BOSS_COIN_SCALE_PER_LEVEL := 0.30
+
+@onready var level_container: Node2D = $LevelContainer
+@onready var game_hud: CanvasLayer = $GameHUD
+
+func _ready() -> void:
+	var path: String = get_level_scene_path(queued_level)
+	var packed: PackedScene = load(path)
+	if packed == null:
+		push_error("GameHandler: failed to load level %d" % queued_level)
+		return
+	level_container.add_child(packed.instantiate())
+	_update_hud()
+
+
+static func get_level_scene_path(level_number: int) -> String:
+	return "res://scenes/levels/level%d/level_%d.tscn" % [level_number, level_number]
+
+
+static func get_level_spawn_schedule_path(level_number: int) -> String:
+	return "res://scenes/levels/level%d/level%d_spawn.tres" % [level_number, level_number]
+
+
+static func get_scaled_enemy_data(base_data: EnemyData, level_number: int, is_boss: bool = false) -> EnemyData:
+	var scaled_data: EnemyData = base_data.duplicate(true)
+	var level_offset: int = max(level_number - 1, 0)
+
+	if is_boss:
+		# Uncomment and tune once boss enemies are added.
+		# scaled_data.health = int(round(base_data.health * (1.0 + level_offset * BOSS_HEALTH_SCALE_PER_LEVEL)))
+		# scaled_data.attack_damage = base_data.attack_damage * (1.0 + level_offset * BOSS_DAMAGE_SCALE_PER_LEVEL)
+		# scaled_data.speed = base_data.speed * min(1.0 + level_offset * BOSS_SPEED_SCALE_PER_LEVEL, MAX_SPEED_SCALE)
+		# scaled_data.coin_drop = int(round(base_data.coin_drop * (1.0 + level_offset * BOSS_COIN_SCALE_PER_LEVEL)))
+		return scaled_data
+
+	scaled_data.health = int(round(base_data.health * (1.0 + level_offset * HEALTH_SCALE_PER_LEVEL)))
+	scaled_data.attack_damage = base_data.attack_damage * (1.0 + level_offset * DAMAGE_SCALE_PER_LEVEL)
+	scaled_data.speed = base_data.speed * min(1.0 + level_offset * SPEED_SCALE_PER_LEVEL, MAX_SPEED_SCALE)
+	scaled_data.coin_drop = int(round(base_data.coin_drop * (1.0 + level_offset * COIN_SCALE_PER_LEVEL)))
+	return scaled_data
+
+
+static func add_coins(amount: int) -> void:
+	coins += amount
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	var handler := tree.current_scene
+	if handler != null and handler.has_method("_update_hud"):
+		handler._update_hud()
+
+
+func _update_hud() -> void:
+	if game_hud == null:
+		return
+	game_hud.set_coins(coins, false)
+
+
+func update_wave_status(current_wave: int, total_waves: int, progress_ratio: float) -> void:
+	if game_hud == null:
+		return
+	game_hud.set_current_wave(current_wave, false)
+	game_hud.set_total_waves(total_waves, false)
+	game_hud.set_wave_progress(progress_ratio)
+
+
+func update_wave_labels(current_wave: int, total_waves: int) -> void:
+	if game_hud == null:
+		return
+	game_hud.set_current_wave(current_wave, false)
+	game_hud.set_total_waves(total_waves, false)
+
+
+func clear_wave_alert() -> void:
+	if game_hud == null:
+		return
+	game_hud.clear_wave_alert()
+
+
+func handle_boss_defeated() -> void:
+	print("Boss defeated. Level complete.")
