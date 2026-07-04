@@ -3,6 +3,7 @@ class_name GameHandler
 
 static var queued_level: int = 1
 static var coins: int = 500
+static var _enemy_data_cache: Dictionary = {}
 const HEALTH_SCALE_PER_LEVEL := 0.20
 const DAMAGE_SCALE_PER_LEVEL := 0.12
 const SPEED_SCALE_PER_LEVEL := 0.03
@@ -34,6 +35,23 @@ static func get_level_scene_path(level_number: int) -> String:
 
 static func get_level_spawn_schedule_path(level_number: int) -> String:
 	return "res://scenes/levels/level%d/level%d_spawn.tres" % [level_number, level_number]
+
+
+static func get_enemy_data_by_id(enemy_id: String) -> EnemyData:
+	var normalized_id: String = enemy_id.strip_edges().to_lower()
+	if normalized_id.is_empty():
+		return null
+	if _enemy_data_cache.has(normalized_id):
+		return _enemy_data_cache[normalized_id]
+
+	var enemy_path: String = "res://resources/enemies/%s.tres" % normalized_id
+	var enemy_data = load(enemy_path)
+	if enemy_data == null:
+		push_warning("GameHandler: failed to load enemy data at %s" % enemy_path)
+		return null
+
+	_enemy_data_cache[normalized_id] = enemy_data
+	return enemy_data
 
 
 static func get_scaled_enemy_data(base_data: EnemyData, level_number: int, is_boss: bool = false) -> EnemyData:

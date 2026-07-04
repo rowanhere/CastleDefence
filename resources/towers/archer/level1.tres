@@ -7,6 +7,8 @@
 
 [resource]
 script = ExtResource("1_i0qi6")
+damage = 50.0
+attackSpeed = 5.0
 tower_range = 300.0
 towerImage = SubResource("CompressedTexture2D_upk41")
 isTowerTop = true

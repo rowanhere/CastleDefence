@@ -5,6 +5,7 @@
 
 [sub_resource type="Resource" id="Resource_8ko3h"]
 script = ExtResource("2_wave")
+enemy_pool = Array[String](["goblin", "gnoll"])
 
 [sub_resource type="Resource" id="EnemySpawnWave_1"]
 script = ExtResource("2_wave")

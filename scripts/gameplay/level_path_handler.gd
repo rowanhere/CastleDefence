@@ -1,20 +1,12 @@
 extends Path2D
 
 const ENEMY_SCENE = preload("res://scenes/enemies/enemy.tscn")
-const GOBLIN_DATA = preload("res://resources/enemies/goblin.tres")
-const ORC_DATA = preload("res://resources/enemies/orc.tres")
-const TROLL_DATA = preload("res://resources/enemies/troll.tres")
 var spawn_schedule: Resource
 
 @onready var timer: Timer = $Timer
 var spawn_queue: Array[Dictionary] = []
 var elapsed_time: float = 0.0
 var next_entry_index: int = 0
-var enemy_data_by_id := {
-	"goblin": GOBLIN_DATA,
-	"orc": ORC_DATA,
-	"troll": TROLL_DATA
-}
 
 
 func _ready() -> void:
@@ -81,7 +73,7 @@ func _enqueue_entry(entry_index: int) -> void:
 		spawn_count = int(ceil(float(total_multiplier) / float(enemy_pool.size())))
 
 	for enemy_id in enemy_pool:
-		var enemy_data: EnemyData = _get_enemy_data_by_id(enemy_id)
+		var enemy_data: EnemyData = GameHandler.get_enemy_data_by_id(enemy_id)
 		if enemy_data == null:
 			push_warning("Unknown enemy id in spawn entry: %s" % enemy_id)
 			continue
@@ -89,14 +81,7 @@ func _enqueue_entry(entry_index: int) -> void:
 			spawn_queue.append({
 				"enemy_data": enemy_data,
 				"is_boss_wave": is_boss_wave
-			})
-
-
-func _get_enemy_data_by_id(enemy_id: String) -> EnemyData:
-	var normalized_id: String = enemy_id.strip_edges().to_lower()
-	if enemy_data_by_id.has(normalized_id):
-		return enemy_data_by_id[normalized_id]
-	return null
+		})
 
 
 func _update_wave_status_ui() -> void:

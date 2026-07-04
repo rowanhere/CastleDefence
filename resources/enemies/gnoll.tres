@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://bk7sntdihlxcr"]
+
+[ext_resource type="Script" uid="uid://c1rydd1oj05bl" path="res://scripts/gameplay/EnemeyData.gd" id="1_tr3m1"]
+[ext_resource type="SpriteFrames" uid="uid://8cm23rn0ynwr" path="res://resources/enemies/gnoll/GnollFrames.tres" id="2_tr3m1"]
+
+[resource]
+script = ExtResource("1_tr3m1")
+enemy_name = "Gnoll"
+health = 50
+speed = 100.0
+attack_damage = 30.0
+attack_speed = 1.2
+sprite_frames = ExtResource("2_tr3m1")
+scale = Vector2(2, 2)

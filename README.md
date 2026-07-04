@@ -130,7 +130,7 @@ defence/
 │   └── ui/              # main_menu, level select, HUD, buttons
 └── scripts/
     ├── autoload/        # music_player.gd
-    ├── gameplay/        # enemy.gd, level_1_path.gd, damage_number.gd
+    ├── gameplay/        # enemy.gd, level_path_handler.gd, damage_number.gd
     │                    # game_handler.gd, enemy_spawn_schedule.gd, enemy_spawn_wave.gd
     ├── systems/         # tower_builder.gd, tower_builder_button.gd
     ├── towers/          # barrackTower.gd, barrackSoldierHandler.gd

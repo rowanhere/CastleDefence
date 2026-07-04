@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dxo7wg6cb370h"]
 
-[ext_resource type="SpriteFrames" uid="uid://qop5onni8k8l" path="res://resources/enemies/goblin/GoblinFrames.tres" id="1_xb4g4"]
+[ext_resource type="SpriteFrames" uid="uid://8cm23rn0ynwr" path="res://resources/enemies/gnoll/GnollFrames.tres" id="1_xb4g4"]
 
 [node name="Anime" type="Node2D" unique_id=1519569856]
 
