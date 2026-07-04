@@ -1,6 +1,8 @@
 extends Node2D
 
 var getSoldier = preload("res://scenes/towers/barrack/BarrackSoldier.tscn")
+var barrack_tower_data: TowerData = preload("res://resources/towers/barrack/barrack.tres")
+var active_upgrade: UpgradeData = null
 @onready var door_mark: Marker2D = $DoorMark
 
 @onready var tower_area: Area2D = $TowerImage/towerArea
@@ -22,6 +24,8 @@ var current_wait_time := INITIAL_SPAWN_DELAY
 
 
 func _ready() -> void:
+	if barrack_tower_data != null:
+		active_upgrade = barrack_tower_data.get_base_upgrade()
 	tower_area.body_entered.connect(_on_body_entered)
 	tower_area.body_exited.connect(_on_body_exited)
 	timer.one_shot = true
@@ -43,6 +47,7 @@ var clone_sound: AudioStream = preload("res://assets/audio/sfx/clone.mp3")
 var smoke_scene: PackedScene = preload("res://scenes/towers/barrack/SoldierSmoke.tscn")
 
 func _spawn_all_soldiers() -> void:
+	var soldier_count: int = _get_active_soldier_count()
 	# Step 1: real soldier — no smoke, just walks out of the door normally
 	var real_soldier = _create_soldier(0, door_mark.global_position)
 	soldiers.append(real_soldier)
@@ -51,7 +56,7 @@ func _spawn_all_soldiers() -> void:
 	# Step 2: smoke appears at each clone's final wait position, clone fades in from there
 	var clone_spawn_delay: float = 0.6  # first clone after 0.6s
 
-	for i in range(CLONE_START_INDEX, MAX_SOLDIERS):
+	for i in range(CLONE_START_INDEX, soldier_count):
 		var clone_index: int = i
 		var clone_wait_pos: Vector2 = _get_wait_position(clone_index)
 
@@ -129,6 +134,9 @@ func _create_soldier(index: int, spawn_from: Vector2) -> Node2D:
 	soldier.scale = Vector2(2.5, 2.5)
 	soldier.last_direction = Vector2.RIGHT
 	soldier.wait_position = final_pos
+	if active_upgrade != null:
+		soldier.attack_damage = active_upgrade.damage
+		soldier.attack_speed = 1.0 / max(active_upgrade.attackSpeed, 0.01)
 
 	# Clones are blue-tinted; real soldier is normal
 	if index >= CLONE_START_INDEX:
@@ -245,3 +253,9 @@ func _on_timer_timeout() -> void:
 	_spawn_all_soldiers()
 	# Re-assign targets in case enemies are still in range
 	_assign_targets()
+
+
+func _get_active_soldier_count() -> int:
+	if active_upgrade == null:
+		return 1
+	return clampi(active_upgrade.level, 1, MAX_SOLDIERS)

@@ -5,8 +5,7 @@
 
 [resource]
 script = ExtResource("1_m5aov")
-damage = 100.0
-attackSpeed = 5.0
+damage = 30.0
 tower_range = 300.0
 towerImage = ExtResource("2_tj6ap")
 metadata/_custom_type_script = "uid://jcojfonhgt1j"

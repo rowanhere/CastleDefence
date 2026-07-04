@@ -10,6 +10,7 @@ var data: EnemyData = null:
 @onready var attack_area: Area2D = $AttackArea
 
 var DamageNumber = preload("res://scenes/enemies/DamageNumber.tscn")
+var CoinsDropNumber = preload("res://scenes/enemies/CoinsDropNumber.tscn")
 
 var speed = 80.0
 var hp = 100
@@ -272,12 +273,22 @@ func _spawn_damage_number(amount: float) -> void:
 	dmg_label.add_theme_color_override("font_color", Color(1, 0.2, 0.2))
 
 
+func _spawn_coin_drop_number(amount: int) -> void:
+	var coin_label = CoinsDropNumber.instantiate()
+	coin_label.amount = amount
+	coin_label.velocity = Vector2(randf_range(-20, 20), -65)
+	coin_label.lifetime = 1.0
+	get_tree().current_scene.add_child(coin_label)
+	coin_label.global_position = global_position + Vector2(randf_range(-10, 10), -42)
+
+
 func die(reward_coins: bool = true) -> void:
 	if is_dead:
 		return
 	is_dead = true
 	locked_soldier = null
 	if reward_coins:
+		_spawn_coin_drop_number(coin_drop)
 		GameHandler.add_coins(coin_drop)
 	health_bar.hide()
 	_play_dir("die")

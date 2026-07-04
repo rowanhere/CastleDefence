@@ -68,19 +68,15 @@ func _enqueue_entry(entry_index: int) -> void:
 	if enemy_pool.is_empty() or total_multiplier <= 0:
 		return
 
-	var spawn_count: int = total_multiplier
-	if enemy_pool.size() > 1:
-		spawn_count = int(ceil(float(total_multiplier) / float(enemy_pool.size())))
-
-	for enemy_id in enemy_pool:
+	for i in range(total_multiplier):
+		var enemy_id: String = enemy_pool[i % enemy_pool.size()]
 		var enemy_data: EnemyData = GameHandler.get_enemy_data_by_id(enemy_id)
 		if enemy_data == null:
 			push_warning("Unknown enemy id in spawn entry: %s" % enemy_id)
 			continue
-		for _i in range(spawn_count):
-			spawn_queue.append({
-				"enemy_data": enemy_data,
-				"is_boss_wave": is_boss_wave
+		spawn_queue.append({
+			"enemy_data": enemy_data,
+			"is_boss_wave": is_boss_wave
 		})
 
 

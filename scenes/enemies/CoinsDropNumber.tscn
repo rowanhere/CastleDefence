@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://o0v5mcm0hysl"]
+
+[ext_resource type="Texture2D" uid="uid://ckx4uc35waymp" path="res://assets/textures/ui/IconCoin.png" id="1_0fvru"]
+[ext_resource type="Script" uid="uid://cqbgbeqjrtodr" path="res://scripts/gameplay/coins_drop_number.gd" id="1_bxnc0"]
+
+[node name="CoinsDropNumber" type="Node2D" unique_id=843108402]
+script = ExtResource("1_bxnc0")
+
+[node name="CoinDrop" type="Label" parent="." unique_id=1510561197]
+offset_left = 12.0
+offset_top = -1.0
+offset_right = 30.0
+offset_bottom = 12.0
+theme_override_font_sizes/font_size = 15
+text = "+10"
+metadata/_edit_use_anchors_ = true
+
+[node name="CoinImg" type="TextureRect" parent="." unique_id=1916898292]
+offset_right = 10.0
+offset_bottom = 10.0
+texture = ExtResource("1_0fvru")
+expand_mode = 1
+stretch_mode = 5

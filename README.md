@@ -20,6 +20,7 @@ Place towers along the enemy path, fight off waves, and protect your castle's HP
 - One playable level is currently set up under `scenes/levels/level1/`
 - Enemy spawning is driven by a level spawn resource: `level1_spawn.tres`
 - Waves use timed starts instead of one hardcoded enemy list
+- Mixed enemy pools are spawned in **round-robin order** until the wave multiplier total is reached
 - Enemy stats and coin rewards scale by level through `GameHandler`
 - The final scheduled wave is currently a **boss placeholder** using a goblin until a real boss is added
 

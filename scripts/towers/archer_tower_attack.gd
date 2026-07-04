@@ -13,8 +13,9 @@ var attack_rate: float = 1.0
 var attack_timer: float = 0.0
 
 func _ready() -> void:
-	if archer_tower_data != null and not archer_tower_data.upgrades.is_empty():
-		active_upgrade = archer_tower_data.upgrades[0]
+	if archer_tower_data != null:
+		active_upgrade = archer_tower_data.get_base_upgrade()
+	if active_upgrade != null:
 		attack_rate = max(active_upgrade.attackSpeed, 0.01)
 	tower_area.body_entered.connect(_on_body_entered)
 	tower_area.body_exited.connect(_on_body_exited)
