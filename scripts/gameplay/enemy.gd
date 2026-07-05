@@ -16,6 +16,7 @@ var speed = 80.0
 var hp = 100
 var is_dead = false
 var coin_drop = 0
+var path_spacing = 28.0
 var attack_damage = 12.0
 var attack_speed = 1.0
 var attack_timer = 0.0
@@ -27,6 +28,7 @@ var _detached: bool = false
 var _returning: bool = false
 var _attack_slot_angle: float = -1.0
 const ATTACK_SLOT_RADIUS: float = 55.0
+const DEPTH_SORT_DIVISOR := 4.0
 
 
 func _apply_data() -> void:
@@ -35,6 +37,7 @@ func _apply_data() -> void:
 	speed         = data.speed
 	hp            = data.health
 	coin_drop     = data.coin_drop
+	path_spacing  = data.path_spacing
 	attack_damage = data.attack_damage
 	attack_speed  = data.attack_speed
 	attack_timer  = attack_speed
@@ -42,6 +45,7 @@ func _apply_data() -> void:
 		scale = data.scale
 	health_bar.max_value = hp
 	health_bar.value = hp
+	_apply_health_bar_color()
 	if data.sprite_frames:
 		anim.sprite_frames = data.sprite_frames
 		anim.play("walkDown")
@@ -51,8 +55,26 @@ func _apply_data() -> void:
 
 func _ready() -> void:
 	add_to_group("enemies")
+	z_as_relative = false
 	health_bar.max_value = hp
 	health_bar.value = hp
+	_update_depth()
+
+
+func _update_depth() -> void:
+	z_index = clampi(int(round(global_position.y / DEPTH_SORT_DIVISOR)), -4096, 4096)
+
+
+func _apply_health_bar_color() -> void:
+	if health_bar == null or data == null:
+		return
+	var fill_style := health_bar.get("theme_override_styles/fill") as StyleBoxFlat
+	if fill_style == null:
+		fill_style = StyleBoxFlat.new()
+	else:
+		fill_style = fill_style.duplicate()
+	fill_style.bg_color = data.health_bar_color
+	health_bar.add_theme_stylebox_override("fill", fill_style)
 
 
 func _is_valid_soldier(s) -> bool:
@@ -158,11 +180,81 @@ func _play_dir(base: String, force: bool = false) -> void:
 			anim.play(base)
 
 
+func _path_follow_has_live_enemy(path_follow: PathFollow2D) -> bool:
+	if path_follow == null:
+		return false
+	for child in path_follow.get_children():
+		var enemy := child as CharacterBody2D
+		if enemy != null and is_instance_valid(enemy) and not enemy.is_dead:
+			return true
+	return false
+
+
+func _collect_occupied_path_progress(path2d: Path2D) -> Array[float]:
+	var occupied: Array[float] = []
+	if path2d == null:
+		return occupied
+
+	for child in path2d.get_children():
+		var other_follow := child as PathFollow2D
+		if other_follow == null or other_follow == get_parent():
+			continue
+		if not _path_follow_has_live_enemy(other_follow):
+			continue
+		occupied.append(other_follow.progress)
+
+	for other in get_tree().get_nodes_in_group("enemies"):
+		if other == self or not is_instance_valid(other) or other.is_dead:
+			continue
+		if other._detached and other._returning:
+			var other_local_pos: Vector2 = path2d.to_local(other.global_position)
+			occupied.append(path2d.curve.get_closest_offset(other_local_pos))
+
+	occupied.sort()
+	return occupied
+
+
+func _find_open_path_progress(path2d: Path2D, desired_progress: float) -> float:
+	if path2d == null:
+		return desired_progress
+
+	var candidate: float = max(desired_progress, 0.0)
+	var min_spacing: float = max(path_spacing, 8.0)
+	var occupied: Array[float] = _collect_occupied_path_progress(path2d)
+	for progress_value in occupied:
+		if abs(progress_value - candidate) < min_spacing:
+			if candidate <= progress_value:
+				candidate = max(progress_value - min_spacing, 0.0)
+			else:
+				candidate = progress_value + min_spacing
+
+	return candidate
+
+
+func _get_max_allowed_progress(path2d: Path2D, path_follow: PathFollow2D) -> float:
+	if path2d == null or path_follow == null:
+		return INF
+
+	var max_progress: float = INF
+	var min_spacing: float = max(path_spacing, 8.0)
+	for child in path2d.get_children():
+		var other_follow := child as PathFollow2D
+		if other_follow == null or other_follow == path_follow:
+			continue
+		if not _path_follow_has_live_enemy(other_follow):
+			continue
+		if other_follow.progress > path_follow.progress:
+			max_progress = min(max_progress, other_follow.progress - min_spacing)
+
+	return max_progress
+
+
 func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
 
 	_sanitize_lock()
+	_update_depth()
 
 	# ── Detached (free movement) ──────────────────────────────────────────────
 	if _detached:
@@ -209,7 +301,8 @@ func _physics_process(delta: float) -> void:
 			if path2d:
 				var local_pos: Vector2 = path2d.to_local(global_position)
 				var closest_offset: float = path2d.curve.get_closest_offset(local_pos)
-				var target: Vector2 = path2d.to_global(path2d.curve.sample_baked(closest_offset))
+				var rejoin_progress: float = _find_open_path_progress(path2d, closest_offset)
+				var target: Vector2 = path2d.to_global(path2d.curve.sample_baked(rejoin_progress))
 				if global_position.distance_to(target) > 6.0:
 					var dir: Vector2 = (target - global_position).normalized()
 					_dir_suffix = _get_dir_suffix(dir)
@@ -223,7 +316,7 @@ func _physics_process(delta: float) -> void:
 					follow.rotates = false
 					follow.loop = false
 					path2d.add_child(follow)
-					follow.progress = closest_offset
+					follow.progress = rejoin_progress
 					reparent(follow, false)
 					position = Vector2.ZERO
 		return
@@ -241,7 +334,9 @@ func _physics_process(delta: float) -> void:
 		return
 
 	var prev_pos: Vector2 = global_position
-	path_follow.progress += speed * delta
+	var next_progress: float = path_follow.progress + speed * delta
+	var max_allowed_progress: float = _get_max_allowed_progress(path_follow.get_parent() as Path2D, path_follow)
+	path_follow.progress = max(path_follow.progress, min(next_progress, max_allowed_progress))
 	var move_delta: Vector2 = global_position - prev_pos
 	if move_delta.length() > 0.1:
 		_dir_suffix = _get_dir_suffix(move_delta)
@@ -257,7 +352,7 @@ func take_damage(amount: float) -> void:
 	hp -= amount
 	health_bar.value = hp
 	if hp <= 0:
-		die()
+		_start_death(true)
 		return
 	_spawn_damage_number(amount)
 
@@ -282,11 +377,25 @@ func _spawn_coin_drop_number(amount: int) -> void:
 	coin_label.global_position = global_position + Vector2(randf_range(-10, 10), -42)
 
 
-func die(reward_coins: bool = true) -> void:
+func _start_death(reward_coins: bool) -> void:
 	if is_dead:
 		return
 	is_dead = true
 	locked_soldier = null
+	collision_layer = 0
+	collision_mask = 0
+	velocity = Vector2.ZERO
+	if attack_area != null:
+		attack_area.set_deferred("monitoring", false)
+		attack_area.set_deferred("monitorable", false)
+	call_deferred("_finish_death", reward_coins)
+
+
+func _finish_death(reward_coins: bool) -> void:
+	var parent_follow := get_parent() as PathFollow2D
+	if parent_follow != null and is_instance_valid(parent_follow):
+		reparent(get_tree().current_scene, true)
+		parent_follow.queue_free()
 	if reward_coins:
 		_spawn_coin_drop_number(coin_drop)
 		GameHandler.add_coins(coin_drop)
@@ -300,5 +409,9 @@ func die(reward_coins: bool = true) -> void:
 	queue_free()
 
 
+func die(reward_coins: bool = true) -> void:
+	_start_death(reward_coins)
+
+
 func reach_castle() -> void:
-	die(false)
+	_start_death(false)

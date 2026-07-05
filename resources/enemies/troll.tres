@@ -10,4 +10,5 @@ speed = 40.0
 attack_damage = 35.0
 attack_speed = 0.5
 coin_drop = 30
+health_bar_color = Color(0.905882, 0.298039, 0.235294, 1)
 scale = Vector2(1.5, 1.5)

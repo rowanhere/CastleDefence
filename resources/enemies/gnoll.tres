@@ -6,9 +6,11 @@
 [resource]
 script = ExtResource("1_tr3m1")
 enemy_name = "Gnoll"
-health = 50
-speed = 100.0
-attack_damage = 30.0
-attack_speed = 1.2
+health = 140
+speed = 95.0
+attack_damage = 18.0
+attack_speed = 0.8
+coin_drop = 16
+health_bar_color = Color(0.952941, 0.611765, 0.0705882, 1)
 sprite_frames = ExtResource("2_tr3m1")
 scale = Vector2(2, 2)

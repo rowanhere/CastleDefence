@@ -1,6 +1,8 @@
 extends Path2D
 
 const ENEMY_SCENE = preload("res://scenes/enemies/enemy.tscn")
+const DEFAULT_SPAWN_INTERVAL := 0.3
+const MIN_SPAWN_INTERVAL := 0.18
 var spawn_schedule: Resource
 
 @onready var timer: Timer = $Timer
@@ -15,9 +17,9 @@ func _ready() -> void:
 	if spawn_schedule == null:
 		push_error("Failed to load spawn schedule for level %d" % GameHandler.queued_level)
 		return
-	timer.wait_time = 0.3
+	timer.one_shot = true
+	timer.wait_time = DEFAULT_SPAWN_INTERVAL
 	timer.timeout.connect(_on_timer_timeout)
-	timer.start()
 	_update_wave_status_ui()
 
 
@@ -35,6 +37,8 @@ func _process(delta: float) -> void:
 		_enqueue_entry(next_entry_index)
 		next_entry_index += 1
 
+	_ensure_spawn_timer()
+
 
 func _on_timer_timeout() -> void:
 	if spawn_queue.is_empty():
@@ -43,19 +47,38 @@ func _on_timer_timeout() -> void:
 		return
 
 	var spawn_data: Dictionary = spawn_queue.pop_front()
+	var base_data: EnemyData = spawn_data["enemy_data"]
+	var is_boss_wave: bool = spawn_data.get("is_boss_wave", false)
+	var scaled_data: EnemyData = GameHandler.get_scaled_enemy_data(base_data, GameHandler.queued_level, is_boss_wave)
+	timer.wait_time = _get_spawn_interval(scaled_data)
 	var follow = PathFollow2D.new()
 	follow.rotates = false
 	follow.loop = false
 	add_child(follow)
 	var enemy_instance = ENEMY_SCENE.instantiate()
 	follow.add_child(enemy_instance)     # _ready() runs here first
-	var base_data: EnemyData = spawn_data["enemy_data"]
-	var is_boss_wave: bool = spawn_data.get("is_boss_wave", false)
-	var scaled_data: EnemyData = GameHandler.get_scaled_enemy_data(base_data, GameHandler.queued_level, is_boss_wave)
 	if is_boss_wave:
 		scaled_data.coin_drop = 0
 	enemy_instance.is_boss_enemy = is_boss_wave
 	enemy_instance.data = scaled_data  # set AFTER so _ready+@onready vars are ready
+	_ensure_spawn_timer()
+
+
+func _get_spawn_interval(enemy_data: EnemyData) -> float:
+	if enemy_data == null:
+		return DEFAULT_SPAWN_INTERVAL
+	var spacing: float = max(enemy_data.path_spacing, 1.0)
+	var enemy_speed: float = max(enemy_data.speed, 1.0)
+	return maxf(spacing / enemy_speed, MIN_SPAWN_INTERVAL)
+
+
+func _ensure_spawn_timer() -> void:
+	if timer == null or not timer.is_stopped() or spawn_queue.is_empty():
+		return
+	var next_data: EnemyData = spawn_queue[0].get("enemy_data", null)
+	var is_boss_wave: bool = spawn_queue[0].get("is_boss_wave", false)
+	var scaled_data: EnemyData = GameHandler.get_scaled_enemy_data(next_data, GameHandler.queued_level, is_boss_wave)
+	timer.start(_get_spawn_interval(scaled_data))
 
 
 func _enqueue_entry(entry_index: int) -> void:

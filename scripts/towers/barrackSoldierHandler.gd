@@ -22,13 +22,22 @@ var hp: float = 100.0
 var is_dead: bool = false
 
 # Spread soldiers around the enemy — each index gets a different angle
-const COMBAT_OFFSETS := [Vector2(-55, 0), Vector2(55, 0), Vector2(0, 55)]
+const SLOT_ARRIVAL_RADIUS := 10.0
+const ENEMY_FEET_OFFSET_Y := 14.0
+const COMBAT_OFFSETS := [Vector2(-48, 14), Vector2(48, 14), Vector2(0, 42)]
+const DEPTH_SORT_DIVISOR := 4.0
 
 
 func _ready() -> void:
 	add_to_group("soldier")
+	z_as_relative = false
 	health_bar.max_value = hp
 	health_bar.value = hp
+	_update_depth()
+
+
+func _update_depth() -> void:
+	z_index = clampi(int(round(global_position.y / DEPTH_SORT_DIVISOR)), -4096, 4096)
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -78,15 +87,18 @@ func is_fighting() -> bool:
 # ─── Combat ──────────────────────────────────────────────────────────────────
 
 func _combat_slot(enemy: Node2D) -> Vector2:
+	var foot_anchor: Vector2 = enemy.global_position + Vector2(0, ENEMY_FEET_OFFSET_Y * max(enemy.scale.y, 1.0))
 	var offset: Vector2 = COMBAT_OFFSETS[soldier_index] if soldier_index < COMBAT_OFFSETS.size() else Vector2(soldier_index * 55, 0)
-	return enemy.global_position + offset
+	return foot_anchor + offset
 
 
 func _fight_enemy(enemy: Node2D, delta: float) -> void:
 	locked_enemy = enemy
-	_face(enemy.global_position)
+	var slot: Vector2 = _combat_slot(enemy)
+	var dist_to_slot: float = global_position.distance_to(slot)
+	_face(slot)
 	# Attack as soon as within engage range of the enemy — no slot gating
-	if _dist_to(enemy) <= _engage_range(enemy):
+	if dist_to_slot <= SLOT_ARRIVAL_RADIUS or _enemy_in_attack_area() == enemy:
 		velocity = Vector2.ZERO
 		_play_attack_anim()
 		attack_timer -= delta
@@ -96,7 +108,6 @@ func _fight_enemy(enemy: Node2D, delta: float) -> void:
 			GameSound.play(hitSound)
 		return
 	# Not in range yet — move toward personal slot around the enemy
-	var slot: Vector2 = _combat_slot(enemy)
 	var dir: Vector2 = (slot - global_position).normalized()
 	velocity = dir * speed
 	move_and_slide()
@@ -131,6 +142,7 @@ func _physics_process(delta: float) -> void:
 
 	# Always reset velocity — no carry-over momentum (prevents gliding)
 	velocity = Vector2.ZERO
+	_update_depth()
 
 	# Clean up stale refs — also drop dying enemies (is_dead=true but not freed yet)
 	if locked_enemy != null and (not is_instance_valid(locked_enemy) or not _is_valid_enemy(locked_enemy)):

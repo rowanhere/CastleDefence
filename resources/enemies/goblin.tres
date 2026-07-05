@@ -6,9 +6,12 @@
 [resource]
 script = ExtResource("1_goblin")
 enemy_name = "Goblin"
+health = 80
 speed = 100.0
-attack_damage = 50.0
-attack_speed = 1.2
-coin_drop = 15
+speed = 110.0
+attack_damage = 10.0
+attack_speed = 1.0
+coin_drop = 10
+health_bar_color = Color(0.101961, 0.737255, 0.611765, 1)
 sprite_frames = ExtResource("2_8t8dg")
 scale = Vector2(2, 2)

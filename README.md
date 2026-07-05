@@ -22,6 +22,7 @@ Place towers along the enemy path, fight off waves, and protect your castle's HP
 - Waves use timed starts instead of one hardcoded enemy list
 - Mixed enemy pools are spawned in **round-robin order** until the wave multiplier total is reached
 - Enemy stats and coin rewards scale by level through `GameHandler`
+- Enemy visuals now support **per-enemy health bar colors** through `EnemyData`
 - The final scheduled wave is currently a **boss placeholder** using a goblin until a real boss is added
 
 
@@ -70,11 +71,18 @@ Enemies use a **3-state system** powered by dynamic reparenting:
 - Reaching the castle end → damages castle HP
 
 ### Enemy Types
-| Enemy | HP | Speed | Damage |
-|---|---|---|---|
-| Goblin | 100 | 80 | 12 |
-| Orc | Implemented | Implemented | Implemented |
-| Troll | Stats/resource scaffolded | Implemented in data | Implemented in data |
+| Enemy | HP | Speed | Attack Speed | Damage | Coin Drop | Health Bar Color |
+|---|---:|---:|---:|---:|---:|---|
+| Goblin | 80 | 110 | 1.0 | 10 | 10 | `#1ABC9C` |
+| Gnoll | 140 | 95 | 0.8 | 18 | 16 | `#F39C12` |
+| Demon | 220 | 85 | 0.9 | 24 | 22 | `#8E44AD` |
+| Golem | 320 | 50 | 1.7 | 30 | 28 | `#3498DB` |
+
+**Balance notes:**
+- Goblins are the fast, low-health frontline swarm enemy
+- Gnolls are mid-tier melee bruisers with better damage and staying power
+- Demons are elite pressure units that hit harder than gnolls without replacing the golem tank role
+- Golems are slow, heavy lane tanks with the largest health pool and highest melee damage
 
 ---
 
