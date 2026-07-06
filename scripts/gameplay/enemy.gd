@@ -22,25 +22,24 @@ var attack_speed = 1.0
 var attack_timer = 0.0
 var locked_soldier: Node2D = null
 var is_boss_enemy: bool = false
+var barrack_hold_progress: float = -1.0
 
 var _dir_suffix: String = "Down"
-var _detached: bool = false
-var _returning: bool = false
-var _attack_slot_angle: float = -1.0
-const ATTACK_SLOT_RADIUS: float = 55.0
+var _path_progress_hint: float = 0.0
+
 const DEPTH_SORT_DIVISOR := 4.0
 
 
 func _apply_data() -> void:
 	if not is_node_ready() or not data:
 		return
-	speed         = data.speed
-	hp            = data.health
-	coin_drop     = data.coin_drop
-	path_spacing  = data.path_spacing
+	speed = data.speed
+	hp = data.health
+	coin_drop = data.coin_drop
+	path_spacing = max(data.path_spacing, 26.0 * max(data.scale.x, 1.0))
 	attack_damage = data.attack_damage
-	attack_speed  = data.attack_speed
-	attack_timer  = attack_speed
+	attack_speed = data.attack_speed
+	attack_timer = attack_speed
 	if data.scale != Vector2.ZERO:
 		scale = data.scale
 	health_bar.max_value = hp
@@ -99,14 +98,20 @@ func _soldier_in_attack_area() -> Node2D:
 	return null
 
 
+func _soldier_is_assigned_to_me(soldier: Node2D) -> bool:
+	if not _is_valid_soldier(soldier):
+		return false
+	return soldier.locked_enemy == self or soldier.target == self
+
+
 func _pick_soldier() -> Node2D:
 	var touch := _soldier_in_attack_area()
-	if touch:
+	if touch and _soldier_is_assigned_to_me(touch) and _soldier_can_accept_enemy(touch):
 		return touch
 	var closest: Node2D = null
 	var closest_dist: float = INF
 	for node in get_tree().get_nodes_in_group("soldier"):
-		if not _is_valid_soldier(node):
+		if not _soldier_is_assigned_to_me(node) or not _soldier_can_accept_enemy(node):
 			continue
 		var d: float = _distance_to(node)
 		if d <= 150.0 and d < closest_dist:
@@ -115,53 +120,73 @@ func _pick_soldier() -> Node2D:
 	return closest
 
 
-func _claim_attack_slot(soldier: Node2D) -> float:
-	var taken: Array = []
-	for other in get_tree().get_nodes_in_group("enemies"):
-		if other == self or not is_instance_valid(other):
-			continue
-		if other._attack_slot_angle >= 0.0 and other.locked_soldier == soldier:
-			taken.append(other._attack_slot_angle)
-	for i in range(8):
-		var angle: float = (TAU / 8.0) * i
-		var blocked: bool = false
-		for a in taken:
-			if abs(angle - a) < 0.4:
-				blocked = true
-				break
-		if not blocked:
-			return angle
-	return randf() * TAU
+func _soldier_can_accept_enemy(soldier: Node2D) -> bool:
+	return soldier != null and is_instance_valid(soldier) \
+		and soldier.has_method("can_reserve_enemy") \
+		and soldier.can_reserve_enemy(self)
 
 
-func _detach_from_path() -> void:
-	if _detached:
+func can_reserve_soldier(soldier: Node2D) -> bool:
+	return _is_valid_soldier(soldier)
+
+
+func reserve_soldier(soldier: Node2D) -> bool:
+	if not can_reserve_soldier(soldier):
+		return false
+	if locked_soldier == null:
+		locked_soldier = soldier
+	return true
+
+
+func release_soldier(soldier: Node2D = null) -> void:
+	if soldier == null or locked_soldier == soldier:
+		locked_soldier = null
+		attack_timer = attack_speed
+
+
+func set_barrack_hold(progress: float, soldier: Node2D = null) -> void:
+	if soldier != null and locked_soldier != null and locked_soldier != soldier:
 		return
+	barrack_hold_progress = progress
+
+
+func clear_barrack_hold(soldier: Node2D = null) -> void:
+	if soldier != null and locked_soldier != null and locked_soldier != soldier:
+		return
+	barrack_hold_progress = -1.0
+
+
+func get_path_progress() -> float:
 	var path_follow: PathFollow2D = get_parent() as PathFollow2D
-	if path_follow == null:
-		return
-	_detached = true
-	_returning = false
-	reparent(get_tree().current_scene, true)
-	path_follow.queue_free()
+	if path_follow != null:
+		return path_follow.progress
+	return _path_progress_hint
+
+
+func _try_lock_soldier(soldier: Node2D) -> bool:
+	if not _is_valid_soldier(soldier):
+		return false
+	if locked_soldier == soldier:
+		return true
+	if locked_soldier != null and locked_soldier != soldier:
+		return false
+	if not soldier.has_method("reserve_enemy") or not soldier.reserve_enemy(self):
+		return false
+	locked_soldier = soldier
+	return true
 
 
 func _sanitize_lock() -> void:
-	var had_soldier: bool = locked_soldier != null
 	if locked_soldier != null and not is_instance_valid(locked_soldier):
 		locked_soldier = null
 	elif locked_soldier != null and not _is_valid_soldier(locked_soldier):
 		locked_soldier = null
-	if had_soldier and locked_soldier == null:
-		_attack_slot_angle = -1.0
-		_returning = true
 
 
 func _get_dir_suffix(dir: Vector2) -> String:
 	if abs(dir.x) >= abs(dir.y):
 		return "Right" if dir.x >= 0 else "Left"
-	else:
-		return "Down" if dir.y >= 0 else "Up"
+	return "Down" if dir.y >= 0 else "Up"
 
 
 func _anim_name(base: String) -> String:
@@ -171,13 +196,20 @@ func _anim_name(base: String) -> String:
 func _play_dir(base: String, force: bool = false) -> void:
 	if not anim.sprite_frames:
 		return
-	var anim_name: String = _anim_name(base)
+	var anim_name := _anim_name(base)
 	if anim.sprite_frames.has_animation(anim_name):
 		if force or anim.animation != anim_name or not anim.is_playing():
 			anim.play(anim_name)
 	elif anim.sprite_frames.has_animation(base):
 		if force or anim.animation != base or not anim.is_playing():
 			anim.play(base)
+
+
+func set_initial_path_direction(direction: Vector2) -> void:
+	if direction.length_squared() <= 0.001:
+		return
+	_dir_suffix = _get_dir_suffix(direction.normalized())
+	_play_dir("walk", true)
 
 
 func _path_follow_has_live_enemy(path_follow: PathFollow2D) -> bool:
@@ -190,63 +222,26 @@ func _path_follow_has_live_enemy(path_follow: PathFollow2D) -> bool:
 	return false
 
 
-func _collect_occupied_path_progress(path2d: Path2D) -> Array[float]:
-	var occupied: Array[float] = []
+func _get_nearest_ahead_progress(path2d: Path2D, current_progress: float) -> float:
 	if path2d == null:
-		return occupied
-
+		return INF
+	var nearest_ahead := INF
 	for child in path2d.get_children():
 		var other_follow := child as PathFollow2D
 		if other_follow == null or other_follow == get_parent():
 			continue
 		if not _path_follow_has_live_enemy(other_follow):
 			continue
-		occupied.append(other_follow.progress)
-
-	for other in get_tree().get_nodes_in_group("enemies"):
-		if other == self or not is_instance_valid(other) or other.is_dead:
-			continue
-		if other._detached and other._returning:
-			var other_local_pos: Vector2 = path2d.to_local(other.global_position)
-			occupied.append(path2d.curve.get_closest_offset(other_local_pos))
-
-	occupied.sort()
-	return occupied
+		if other_follow.progress > current_progress:
+			nearest_ahead = min(nearest_ahead, other_follow.progress)
+	return nearest_ahead
 
 
-func _find_open_path_progress(path2d: Path2D, desired_progress: float) -> float:
-	if path2d == null:
-		return desired_progress
-
-	var candidate: float = max(desired_progress, 0.0)
-	var min_spacing: float = max(path_spacing, 8.0)
-	var occupied: Array[float] = _collect_occupied_path_progress(path2d)
-	for progress_value in occupied:
-		if abs(progress_value - candidate) < min_spacing:
-			if candidate <= progress_value:
-				candidate = max(progress_value - min_spacing, 0.0)
-			else:
-				candidate = progress_value + min_spacing
-
-	return candidate
-
-
-func _get_max_allowed_progress(path2d: Path2D, path_follow: PathFollow2D) -> float:
-	if path2d == null or path_follow == null:
+func _get_max_allowed_progress(path2d: Path2D, current_progress: float) -> float:
+	var nearest_ahead: float = _get_nearest_ahead_progress(path2d, current_progress)
+	if not is_finite(nearest_ahead):
 		return INF
-
-	var max_progress: float = INF
-	var min_spacing: float = max(path_spacing, 8.0)
-	for child in path2d.get_children():
-		var other_follow := child as PathFollow2D
-		if other_follow == null or other_follow == path_follow:
-			continue
-		if not _path_follow_has_live_enemy(other_follow):
-			continue
-		if other_follow.progress > path_follow.progress:
-			max_progress = min(max_progress, other_follow.progress - min_spacing)
-
-	return max_progress
+	return max(nearest_ahead - max(path_spacing, 8.0), current_progress)
 
 
 func _physics_process(delta: float) -> void:
@@ -256,87 +251,38 @@ func _physics_process(delta: float) -> void:
 	_sanitize_lock()
 	_update_depth()
 
-	# ── Detached (free movement) ──────────────────────────────────────────────
-	if _detached:
-		# Always check for a new soldier first
-		var new_soldier := _pick_soldier()
-		if new_soldier:
-			locked_soldier = new_soldier
-			_returning = false
-
-		# In combat — move to slot and attack
-		if locked_soldier != null:
-			var to_soldier: Vector2 = (locked_soldier.global_position - global_position).normalized()
-			_dir_suffix = _get_dir_suffix(to_soldier)
-
-			if _attack_slot_angle < 0.0:
-				_attack_slot_angle = _claim_attack_slot(locked_soldier)
-
-			var slot_pos: Vector2 = locked_soldier.global_position \
-				+ Vector2(cos(_attack_slot_angle), sin(_attack_slot_angle)) * ATTACK_SLOT_RADIUS
-			var dist_to_slot: float = global_position.distance_to(slot_pos)
-
-			if dist_to_slot > 8.0:
-				var dir: Vector2 = (slot_pos - global_position).normalized()
-				_dir_suffix = _get_dir_suffix(dir)
-				global_position = global_position.move_toward(slot_pos, speed * delta)
-				_play_dir("walk")
-			else:
-				velocity = Vector2.ZERO
-				attack_timer -= delta
-				if not anim.animation.begins_with("attack") or not anim.is_playing():
-					_play_dir("attack", true)
-				if attack_timer <= 0.0:
-					attack_timer = attack_speed
-					locked_soldier.take_damage(attack_damage)
-			return
-
-		# Fallback — detached with no soldier and not marked as returning
-		if not _returning:
-			_returning = true
-
-		# Returning to path — walk toward nearest path point
-		if _returning:
-			var path2d: Path2D = get_tree().get_first_node_in_group("level_path") as Path2D
-			if path2d:
-				var local_pos: Vector2 = path2d.to_local(global_position)
-				var closest_offset: float = path2d.curve.get_closest_offset(local_pos)
-				var rejoin_progress: float = _find_open_path_progress(path2d, closest_offset)
-				var target: Vector2 = path2d.to_global(path2d.curve.sample_baked(rejoin_progress))
-				if global_position.distance_to(target) > 6.0:
-					var dir: Vector2 = (target - global_position).normalized()
-					_dir_suffix = _get_dir_suffix(dir)
-					global_position = global_position.move_toward(target, speed * delta)
-					_play_dir("walk")
-				else:
-					# Arrived — reparent back cleanly
-					_returning = false
-					_detached = false
-					var follow := PathFollow2D.new()
-					follow.rotates = false
-					follow.loop = false
-					path2d.add_child(follow)
-					follow.progress = rejoin_progress
-					reparent(follow, false)
-					position = Vector2.ZERO
-		return
-
-	# ── On path ──────────────────────────────────────────────────────────────
 	var path_follow: PathFollow2D = get_parent() as PathFollow2D
-
-	var soldier := _pick_soldier()
-	if soldier:
-		locked_soldier = soldier
-		_detach_from_path()
-		return
 
 	if path_follow == null:
 		return
 
+	if locked_soldier == null:
+		var soldier := _pick_soldier()
+		if soldier:
+			_try_lock_soldier(soldier)
+
+	if locked_soldier != null:
+		var soldier_in_range := _distance_to(locked_soldier) <= _engage_range(locked_soldier) or _soldier_in_attack_area() == locked_soldier
+		if soldier_in_range:
+			velocity = Vector2.ZERO
+			var to_soldier: Vector2 = locked_soldier.global_position - global_position
+			if to_soldier.length_squared() > 0.001:
+				_dir_suffix = _get_dir_suffix(to_soldier.normalized())
+			attack_timer -= delta
+			_play_dir("attack", true)
+			if attack_timer <= 0.0:
+				attack_timer = attack_speed
+				locked_soldier.take_damage(attack_damage)
+			return
+
+	_path_progress_hint = path_follow.progress
 	var prev_pos: Vector2 = global_position
+	var path2d := path_follow.get_parent() as Path2D
 	var next_progress: float = path_follow.progress + speed * delta
-	var max_allowed_progress: float = _get_max_allowed_progress(path_follow.get_parent() as Path2D, path_follow)
-	path_follow.progress = max(path_follow.progress, min(next_progress, max_allowed_progress))
+	var max_allowed_progress: float = _get_max_allowed_progress(path2d, path_follow.progress)
+	if barrack_hold_progress >= 0.0:
+		max_allowed_progress = min(max_allowed_progress, barrack_hold_progress)
+	path_follow.progress = min(next_progress, max_allowed_progress)
 	var move_delta: Vector2 = global_position - prev_pos
 	if move_delta.length() > 0.1:
 		_dir_suffix = _get_dir_suffix(move_delta)
@@ -381,6 +327,8 @@ func _start_death(reward_coins: bool) -> void:
 	if is_dead:
 		return
 	is_dead = true
+	if locked_soldier != null and is_instance_valid(locked_soldier) and locked_soldier.has_method("release_enemy"):
+		locked_soldier.release_enemy(self)
 	locked_soldier = null
 	collision_layer = 0
 	collision_mask = 0

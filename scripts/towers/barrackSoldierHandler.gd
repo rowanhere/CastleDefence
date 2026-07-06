@@ -3,17 +3,19 @@ extends CharacterBody2D
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
 @onready var attack_area: Area2D = $AttackArea
 @onready var health_bar: ProgressBar = $HealthBar
+
 var hitSound = preload("res://assets/audio/sfx/swordHit.mp3")
-# Set by the tower when spawned
+
 var home: Vector2 = Vector2.ZERO
 var wait_position: Vector2 = Vector2.ZERO
 var soldier_index: int = 0
-var target: Node2D = null  # assigned by barrackTower
+var target: Node2D = null
 
 var speed: float = 50.0
 var last_direction: Vector2 = Vector2.RIGHT
 
 var locked_enemy: Node2D = null
+var forced_enemy: Node2D = null
 var attack_damage: float = 10.0
 var attack_speed: float = 1.0
 var attack_timer: float = 0.0
@@ -21,11 +23,9 @@ var attack_timer: float = 0.0
 var hp: float = 100.0
 var is_dead: bool = false
 
-# Spread soldiers around the enemy — each index gets a different angle
-const SLOT_ARRIVAL_RADIUS := 10.0
-const ENEMY_FEET_OFFSET_Y := 14.0
 const COMBAT_OFFSETS := [Vector2(-48, 14), Vector2(48, 14), Vector2(0, 42)]
 const DEPTH_SORT_DIVISOR := 4.0
+const SUPPORT_ATTACK_RANGE := 110.0
 
 
 func _ready() -> void:
@@ -40,11 +40,12 @@ func _update_depth() -> void:
 	z_index = clampi(int(round(global_position.y / DEPTH_SORT_DIVISOR)), -4096, 4096)
 
 
-# ─── Helpers ─────────────────────────────────────────────────────────────────
+func _step_toward(target_pos: Vector2, delta: float) -> void:
+	global_position = global_position.move_toward(target_pos, speed * delta)
+
 
 func _is_valid_enemy(enemy) -> bool:
-	return enemy != null and is_instance_valid(enemy) \
-		and enemy.is_in_group("enemies") and not enemy.is_dead
+	return enemy != null and is_instance_valid(enemy) and enemy.is_in_group("enemies") and not enemy.is_dead
 
 
 func _dist_to(node: Node2D) -> float:
@@ -79,26 +80,57 @@ func _still_in_combat(enemy: Node2D) -> bool:
 	return _dist_to(enemy) <= _disengage_range(enemy)
 
 
-## Called by barrackTower to check whether this soldier is busy fighting.
+func can_reserve_enemy(enemy: Node2D) -> bool:
+	return not is_dead and _is_valid_enemy(enemy)
+
+
+func reserve_enemy(enemy: Node2D) -> bool:
+	if not can_reserve_enemy(enemy):
+		return false
+	locked_enemy = enemy
+	target = enemy
+	return true
+
+
+func release_enemy(enemy: Node2D = null, clear_target: bool = true) -> void:
+	if enemy == null or locked_enemy == enemy:
+		locked_enemy = null
+	if enemy == null or forced_enemy == enemy:
+		forced_enemy = null
+	if clear_target and (enemy == null or target == enemy):
+		target = null
+	attack_timer = attack_speed
+
+
 func is_fighting() -> bool:
-	return _still_in_combat(locked_enemy)
+	return _is_valid_enemy(forced_enemy) or _is_valid_enemy(locked_enemy) or _is_valid_enemy(target)
 
 
-# ─── Combat ──────────────────────────────────────────────────────────────────
+func force_target_enemy(enemy: Node2D) -> void:
+	if _is_valid_enemy(enemy):
+		forced_enemy = enemy
+		target = enemy
+		locked_enemy = enemy
+
+
+func clear_forced_enemy(enemy: Node2D = null) -> void:
+	if enemy == null or forced_enemy == enemy:
+		forced_enemy = null
+
 
 func _combat_slot(enemy: Node2D) -> Vector2:
-	var foot_anchor: Vector2 = enemy.global_position + Vector2(0, ENEMY_FEET_OFFSET_Y * max(enemy.scale.y, 1.0))
+	var foot_anchor: Vector2 = enemy.global_position + Vector2(0, 14.0 * max(enemy.scale.y, 1.0))
 	var offset: Vector2 = COMBAT_OFFSETS[soldier_index] if soldier_index < COMBAT_OFFSETS.size() else Vector2(soldier_index * 55, 0)
 	return foot_anchor + offset
 
 
 func _fight_enemy(enemy: Node2D, delta: float) -> void:
-	locked_enemy = enemy
-	var slot: Vector2 = _combat_slot(enemy)
-	var dist_to_slot: float = global_position.distance_to(slot)
-	_face(slot)
-	# Attack as soon as within engage range of the enemy — no slot gating
-	if dist_to_slot <= SLOT_ARRIVAL_RADIUS or _enemy_in_attack_area() == enemy:
+	if not reserve_enemy(enemy):
+		return
+	var dist_to_enemy: float = _dist_to(enemy)
+	_face(enemy.global_position)
+	var attack_range: float = SUPPORT_ATTACK_RANGE if soldier_index > 0 else _engage_range(enemy)
+	if dist_to_enemy <= attack_range or _enemy_in_attack_area() == enemy:
 		velocity = Vector2.ZERO
 		_play_attack_anim()
 		attack_timer -= delta
@@ -107,10 +139,11 @@ func _fight_enemy(enemy: Node2D, delta: float) -> void:
 			enemy.take_damage(attack_damage)
 			GameSound.play(hitSound)
 		return
-	# Not in range yet — move toward personal slot around the enemy
-	var dir: Vector2 = (slot - global_position).normalized()
-	velocity = dir * speed
-	move_and_slide()
+	var move_target: Vector2 = enemy.global_position if soldier_index > 0 else _combat_slot(enemy)
+	var dir: Vector2 = (move_target - global_position).normalized()
+	last_direction = dir
+	velocity = Vector2.ZERO
+	_step_toward(move_target, delta)
 	if not _is_attacking():
 		_play_walk_anim(dir)
 
@@ -128,73 +161,60 @@ func die() -> void:
 	if is_dead:
 		return
 	is_dead = true
-	locked_enemy = null
-	target = null
+	release_enemy()
 	health_bar.hide()
 	queue_free()
 
-
-# ─── Physics ─────────────────────────────────────────────────────────────────
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
 
-	# Always reset velocity — no carry-over momentum (prevents gliding)
 	velocity = Vector2.ZERO
 	_update_depth()
 
-	# Clean up stale refs — also drop dying enemies (is_dead=true but not freed yet)
 	if locked_enemy != null and (not is_instance_valid(locked_enemy) or not _is_valid_enemy(locked_enemy)):
 		locked_enemy = null
+	if forced_enemy != null and (not is_instance_valid(forced_enemy) or not _is_valid_enemy(forced_enemy)):
+		forced_enemy = null
 	if target != null and (not is_instance_valid(target) or not _is_valid_enemy(target)):
 		target = null
 
-	# 1. Keep fighting locked enemy while still in combat range
-	if _still_in_combat(locked_enemy):
-		_fight_enemy(locked_enemy, delta)
+	var active_enemy: Node2D = null
+	if _is_valid_enemy(forced_enemy):
+		active_enemy = forced_enemy
+	elif _is_valid_enemy(locked_enemy):
+		active_enemy = locked_enemy
+	else:
+		active_enemy = target
+	if _is_valid_enemy(active_enemy):
+		locked_enemy = active_enemy
+		target = active_enemy
+		_fight_enemy(active_enemy, delta)
 		return
 
 	locked_enemy = null
-	# Enemy is gone — stop attack animation immediately
 	if _is_attacking():
 		_play_idle_anim()
 		return
 
-	# 2. Check if anything is literally touching our attack area
 	var touch: Node2D = _enemy_in_attack_area()
 	if touch:
 		_fight_enemy(touch, delta)
 		return
 
-	# 3. Chase the assigned target (set by the tower)
-	if _is_valid_enemy(target):
-		if _can_engage(target):
-			_fight_enemy(target, delta)
-		else:
-			var dir: Vector2 = (target.global_position - global_position).normalized()
-			last_direction = dir
-			velocity = dir * speed
-			move_and_slide()
-			if not _is_attacking():
-				_play_walk_anim(dir)
-		return
-
-	# 4. No target — walk back to wait position near the tower
 	var dist_to_wait: float = global_position.distance_to(wait_position)
 	if dist_to_wait > 8.0:
 		var dir: Vector2 = (wait_position - global_position).normalized()
 		last_direction = dir
-		velocity = dir * speed
-		move_and_slide()
+		velocity = Vector2.ZERO
+		_step_toward(wait_position, delta)
 		if not _is_attacking():
 			_play_walk_anim(dir)
 	else:
-		move_and_slide()
+		velocity = Vector2.ZERO
 		_play_idle_anim()
 
-
-# ─── Animation ───────────────────────────────────────────────────────────────
 
 func _face(target_pos: Vector2) -> void:
 	var d: Vector2 = target_pos - global_position
@@ -224,13 +244,11 @@ func _play_walk_anim(dir: Vector2) -> void:
 		name = "walkRight" if dir.x > 0 else "walkLeft"
 	else:
 		name = "walkDown" if dir.y > 0 else "walkUp"
-	# Always play so the loop never gets stuck on the last frame
 	if str(anim.animation) != name or not anim.is_playing():
 		anim.play(name)
 
 
 func _play_idle_anim() -> void:
-	# No guard — idle must be able to override attack when combat ends
 	var name: String
 	if abs(last_direction.x) > abs(last_direction.y):
 		name = "idleRight" if last_direction.x > 0 else "idleLeft"

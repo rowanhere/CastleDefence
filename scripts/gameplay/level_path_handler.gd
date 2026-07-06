@@ -3,6 +3,7 @@ extends Path2D
 const ENEMY_SCENE = preload("res://scenes/enemies/enemy.tscn")
 const DEFAULT_SPAWN_INTERVAL := 0.3
 const MIN_SPAWN_INTERVAL := 0.18
+const SPAWN_RETRY_INTERVAL := 0.08
 var spawn_schedule: Resource
 
 @onready var timer: Timer = $Timer
@@ -50,6 +51,10 @@ func _on_timer_timeout() -> void:
 	var base_data: EnemyData = spawn_data["enemy_data"]
 	var is_boss_wave: bool = spawn_data.get("is_boss_wave", false)
 	var scaled_data: EnemyData = GameHandler.get_scaled_enemy_data(base_data, GameHandler.queued_level, is_boss_wave)
+	if not _can_spawn_enemy_now(scaled_data):
+		spawn_queue.push_front(spawn_data)
+		timer.start(SPAWN_RETRY_INTERVAL)
+		return
 	timer.wait_time = _get_spawn_interval(scaled_data)
 	var follow = PathFollow2D.new()
 	follow.rotates = false
@@ -61,6 +66,7 @@ func _on_timer_timeout() -> void:
 		scaled_data.coin_drop = 0
 	enemy_instance.is_boss_enemy = is_boss_wave
 	enemy_instance.data = scaled_data  # set AFTER so _ready+@onready vars are ready
+	_apply_spawn_facing(enemy_instance)
 	_ensure_spawn_timer()
 
 
@@ -70,6 +76,30 @@ func _get_spawn_interval(enemy_data: EnemyData) -> float:
 	var spacing: float = max(enemy_data.path_spacing, 1.0)
 	var enemy_speed: float = max(enemy_data.speed, 1.0)
 	return maxf(spacing / enemy_speed, MIN_SPAWN_INTERVAL)
+
+
+func _can_spawn_enemy_now(enemy_data: EnemyData) -> bool:
+	if enemy_data == null:
+		return true
+	var required_spacing: float = max(enemy_data.path_spacing, 1.0)
+	for child in get_children():
+		var follow := child as PathFollow2D
+		if follow == null:
+			continue
+		if not _path_follow_has_live_enemy(follow):
+			continue
+		if follow.progress < required_spacing:
+			return false
+	return true
+
+
+func _path_follow_has_live_enemy(path_follow: PathFollow2D) -> bool:
+	if path_follow == null:
+		return false
+	for child in path_follow.get_children():
+		if child.is_in_group("enemies") and not child.is_dead:
+			return true
+	return false
 
 
 func _ensure_spawn_timer() -> void:
@@ -146,3 +176,19 @@ func _update_wave_status_ui() -> void:
 		progress_ratio = clampf(elapsed_time / wave_end_time, 0.0, 1.0)
 
 	handler.update_wave_status(current_wave, total_waves, progress_ratio)
+
+
+func _apply_spawn_facing(enemy_instance: Node) -> void:
+	if enemy_instance == null or not is_instance_valid(enemy_instance):
+		return
+	if curve == null:
+		return
+	var path_length: float = curve.get_baked_length()
+	if path_length <= 0.0:
+		return
+	var start_pos: Vector2 = curve.sample_baked(0.0)
+	var look_ahead: float = minf(24.0, path_length)
+	var next_pos: Vector2 = curve.sample_baked(look_ahead)
+	var direction: Vector2 = next_pos - start_pos
+	if enemy_instance.has_method("set_initial_path_direction"):
+		enemy_instance.set_initial_path_direction(direction)
