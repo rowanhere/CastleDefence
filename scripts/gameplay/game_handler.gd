@@ -1,8 +1,10 @@
 extends Node2D
 class_name GameHandler
 
+const DAMAGE_NUMBER_SCENE := preload("res://scenes/enemies/DamageNumber.tscn")
+
 static var queued_level: int = 1
-static var coins: int = 500
+static var coins: int = 5000
 static var _enemy_data_cache: Dictionary = {}
 const HEALTH_SCALE_PER_LEVEL := 0.20
 const DAMAGE_SCALE_PER_LEVEL := 0.12
@@ -81,6 +83,37 @@ static func add_coins(amount: int) -> void:
 	var handler := tree.current_scene
 	if handler != null and handler.has_method("_update_hud"):
 		handler._update_hud()
+
+
+static func play_purchase_failed_feedback() -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	var handler := tree.current_scene
+	if handler == null:
+		return
+	var hud = handler.get_node_or_null("GameHUD")
+	if hud != null and hud.has_method("play_purchase_failed_feedback"):
+		hud.play_purchase_failed_feedback()
+
+
+static func show_floating_message(world_position: Vector2, text: String, color: Color = Color(1.0, 0.25, 0.25), font_size: int = 15) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	var handler := tree.current_scene
+	if handler == null:
+		return
+	var popup := DAMAGE_NUMBER_SCENE.instantiate()
+	handler.add_child(popup)
+	popup.global_position = world_position
+	popup.text = text
+	popup.velocity = Vector2(randf_range(-12, 12), -64)
+	popup.lifetime = 1.1
+	popup.add_theme_font_size_override("font_size", font_size)
+	popup.add_theme_color_override("font_color", color)
+
+
 
 
 func _update_hud() -> void:

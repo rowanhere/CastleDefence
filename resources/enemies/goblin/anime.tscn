@@ -6,4 +6,6 @@
 
 [node name="AnimatableBody2D" type="AnimatedSprite2D" parent="." unique_id=616848334]
 sprite_frames = ExtResource("1_xb4g4")
-animation = &"walkUp"
+animation = &"attackLeft"
+frame = 9
+frame_progress = 1.0

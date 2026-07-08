@@ -26,8 +26,26 @@ var barrack_hold_progress: float = -1.0
 
 var _dir_suffix: String = "Down"
 var _path_progress_hint: float = 0.0
+var _detached: bool = false
+var _attack_slot_angle: float = -1.0
+var _path_lane_offset: Vector2 = Vector2.ZERO
+var _path_lane_index: int = 0
+var _has_path_lane: bool = false
+var _spawn_lane_index: int = 0
+var _has_spawn_lane: bool = false
 
 const DEPTH_SORT_DIVISOR := 4.0
+const SOLDIER_DETECT_RANGE := 150.0
+const ATTACK_SLOT_RADIUS := 42.0
+const PATH_LANE_WIDTH := 10.0
+const PATH_ROW_DEPTH := 5.0
+const PATH_LANE_PROGRESS_RANGE := 18.0
+const PATH_LANE_SMOOTH := 10.0
+const SPAWN_LANE_PROGRESS := 96.0
+const CROWD_SPACING_RANGE := 34.0
+const CROWD_MIN_SPEED_SCALE := 0.82
+const CROWD_MAX_SPEED_SCALE := 1.16
+const CROWD_SPACE_PUSH := 0.18
 
 
 func _apply_data() -> void:
@@ -98,23 +116,17 @@ func _soldier_in_attack_area() -> Node2D:
 	return null
 
 
-func _soldier_is_assigned_to_me(soldier: Node2D) -> bool:
-	if not _is_valid_soldier(soldier):
-		return false
-	return soldier.locked_enemy == self or soldier.target == self
-
-
 func _pick_soldier() -> Node2D:
 	var touch := _soldier_in_attack_area()
-	if touch and _soldier_is_assigned_to_me(touch) and _soldier_can_accept_enemy(touch):
+	if touch and _soldier_can_accept_enemy(touch):
 		return touch
 	var closest: Node2D = null
 	var closest_dist: float = INF
 	for node in get_tree().get_nodes_in_group("soldier"):
-		if not _soldier_is_assigned_to_me(node) or not _soldier_can_accept_enemy(node):
+		if not _is_valid_soldier(node) or not _soldier_can_accept_enemy(node):
 			continue
 		var d: float = _distance_to(node)
-		if d <= 150.0 and d < closest_dist:
+		if d <= SOLDIER_DETECT_RANGE and d < closest_dist:
 			closest_dist = d
 			closest = node
 	return closest
@@ -176,11 +188,71 @@ func _try_lock_soldier(soldier: Node2D) -> bool:
 	return true
 
 
+func _claim_attack_slot(soldier: Node2D) -> float:
+	var taken: Array[float] = []
+	for other in get_tree().get_nodes_in_group("enemies"):
+		if other == self or not is_instance_valid(other):
+			continue
+		if other.locked_soldier == soldier and other._attack_slot_angle >= 0.0:
+			taken.append(other._attack_slot_angle)
+
+	for i in range(8):
+		var angle: float = (TAU / 8.0) * float(i)
+		var available := true
+		for taken_angle in taken:
+			if abs(wrapf(angle - taken_angle, -PI, PI)) < 0.35:
+				available = false
+				break
+		if available:
+			return angle
+	return randf() * TAU
+
+
+func _detach_from_path() -> void:
+	if _detached:
+		return
+	var path_follow: PathFollow2D = get_parent() as PathFollow2D
+	if path_follow == null:
+		return
+	_path_progress_hint = path_follow.progress
+	_detached = true
+	_path_lane_offset = Vector2.ZERO
+	_has_path_lane = false
+	reparent(get_tree().current_scene, true)
+	path_follow.queue_free()
+
+
+func _rejoin_path() -> void:
+	if not _detached:
+		return
+	var path2d: Path2D = get_tree().get_first_node_in_group("level_path") as Path2D
+	if path2d == null or path2d.curve == null:
+		return
+	var local_pos: Vector2 = path2d.to_local(global_position)
+	var closest_offset: float = path2d.curve.get_closest_offset(local_pos)
+	var follow := PathFollow2D.new()
+	follow.rotates = false
+	follow.loop = false
+	path2d.add_child(follow)
+	follow.progress = max(closest_offset, _path_progress_hint)
+	_path_progress_hint = follow.progress
+	_detached = false
+	_attack_slot_angle = -1.0
+	reparent(follow, false)
+	position = Vector2.ZERO
+	_path_lane_offset = Vector2.ZERO
+	_path_lane_index = _claim_path_lane(path2d, follow)
+	_has_path_lane = true
+	refresh_path_crowd_offset()
+
+
 func _sanitize_lock() -> void:
 	if locked_soldier != null and not is_instance_valid(locked_soldier):
 		locked_soldier = null
 	elif locked_soldier != null and not _is_valid_soldier(locked_soldier):
 		locked_soldier = null
+	if locked_soldier == null:
+		_attack_slot_angle = -1.0
 
 
 func _get_dir_suffix(dir: Vector2) -> String:
@@ -222,26 +294,148 @@ func _path_follow_has_live_enemy(path_follow: PathFollow2D) -> bool:
 	return false
 
 
-func _get_nearest_ahead_progress(path2d: Path2D, current_progress: float) -> float:
-	if path2d == null:
-		return INF
-	var nearest_ahead := INF
+func _get_lane_index(path2d: Path2D, path_follow: PathFollow2D) -> int:
+	if path2d == null or path_follow == null:
+		return 0
+	if _has_spawn_lane and path_follow.progress <= SPAWN_LANE_PROGRESS:
+		return _spawn_lane_index
+	_has_spawn_lane = false
+	if _has_path_lane:
+		return _path_lane_index
+	var nearby: Array = []
 	for child in path2d.get_children():
 		var other_follow := child as PathFollow2D
-		if other_follow == null or other_follow == get_parent():
+		if other_follow == null:
 			continue
 		if not _path_follow_has_live_enemy(other_follow):
 			continue
-		if other_follow.progress > current_progress:
-			nearest_ahead = min(nearest_ahead, other_follow.progress)
-	return nearest_ahead
+		if abs(other_follow.progress - path_follow.progress) <= PATH_LANE_PROGRESS_RANGE:
+			nearby.append(other_follow)
+	if nearby.size() <= 1:
+		return 0
+	nearby.sort_custom(func(a, b):
+		return a.get_instance_id() < b.get_instance_id()
+	)
+	var rank: int = nearby.find(path_follow)
+	var lanes: Array[int] = [0, -1, 1, -2, 2, -3, 3]
+	_path_lane_index = lanes[rank % lanes.size()]
+	_has_path_lane = true
+	return _path_lane_index
 
 
-func _get_max_allowed_progress(path2d: Path2D, current_progress: float) -> float:
-	var nearest_ahead: float = _get_nearest_ahead_progress(path2d, current_progress)
-	if not is_finite(nearest_ahead):
-		return INF
-	return max(nearest_ahead - max(path_spacing, 8.0), current_progress)
+func _get_enemy_from_follow(path_follow: PathFollow2D) -> Node:
+	if path_follow == null:
+		return null
+	for child in path_follow.get_children():
+		if child.is_in_group("enemies") and not child.is_dead:
+			return child
+	return null
+
+
+func _claim_path_lane(path2d: Path2D, path_follow: PathFollow2D) -> int:
+	if path2d == null or path_follow == null:
+		return 0
+	var taken: Array[int] = []
+	for child in path2d.get_children():
+		var other_follow := child as PathFollow2D
+		if other_follow == null or other_follow == path_follow:
+			continue
+		if abs(other_follow.progress - path_follow.progress) > PATH_LANE_PROGRESS_RANGE:
+			continue
+		var other_enemy := _get_enemy_from_follow(other_follow)
+		if other_enemy == null or not is_instance_valid(other_enemy):
+			continue
+		if other_enemy.get("_has_path_lane") or other_enemy.get("_has_spawn_lane"):
+			taken.append(int(other_enemy.get("_path_lane_index")))
+
+	var lanes: Array[int] = [-1, 1, -2, 2, 0, -3, 3, -4, 4]
+	for lane in lanes:
+		if lane not in taken:
+			return lane
+	return lanes[get_instance_id() % lanes.size()]
+
+
+func _get_crowd_speed_scale(path2d: Path2D, path_follow: PathFollow2D) -> float:
+	if path2d == null or path_follow == null:
+		return 1.0
+	var progress: float = path_follow.progress
+	var nearest_ahead_gap: float = INF
+	var nearest_behind_gap: float = INF
+	for child in path2d.get_children():
+		var other_follow := child as PathFollow2D
+		if other_follow == null or other_follow == path_follow:
+			continue
+		if not _path_follow_has_live_enemy(other_follow):
+			continue
+		var gap: float = other_follow.progress - progress
+		if gap > 0.0:
+			nearest_ahead_gap = min(nearest_ahead_gap, gap)
+		elif gap < 0.0:
+			nearest_behind_gap = min(nearest_behind_gap, abs(gap))
+
+	var speed_scale := 1.0
+	if nearest_ahead_gap < CROWD_SPACING_RANGE:
+		var ahead_crowd_amount: float = 1.0 - nearest_ahead_gap / CROWD_SPACING_RANGE
+		speed_scale -= ahead_crowd_amount * CROWD_SPACE_PUSH
+	if nearest_behind_gap < CROWD_SPACING_RANGE:
+		var behind_crowd_amount: float = 1.0 - nearest_behind_gap / CROWD_SPACING_RANGE
+		speed_scale += behind_crowd_amount * CROWD_SPACE_PUSH
+	return clampf(speed_scale, CROWD_MIN_SPEED_SCALE, CROWD_MAX_SPEED_SCALE)
+
+
+func _get_path_normal(path2d: Path2D, progress: float) -> Vector2:
+	if path2d == null or path2d.curve == null:
+		return Vector2.ZERO
+	var path_length: float = path2d.curve.get_baked_length()
+	if path_length <= 0.0:
+		return Vector2.ZERO
+	var before: Vector2 = path2d.curve.sample_baked(clampf(progress - 8.0, 0.0, path_length))
+	var after: Vector2 = path2d.curve.sample_baked(clampf(progress + 8.0, 0.0, path_length))
+	var tangent: Vector2 = after - before
+	if tangent.length_squared() <= 0.001:
+		return Vector2.ZERO
+	tangent = tangent.normalized()
+	return Vector2(-tangent.y, tangent.x)
+
+
+func _get_path_tangent(path2d: Path2D, progress: float) -> Vector2:
+	if path2d == null or path2d.curve == null:
+		return Vector2.ZERO
+	var path_length: float = path2d.curve.get_baked_length()
+	if path_length <= 0.0:
+		return Vector2.ZERO
+	var before: Vector2 = path2d.curve.sample_baked(clampf(progress - 8.0, 0.0, path_length))
+	var after: Vector2 = path2d.curve.sample_baked(clampf(progress + 8.0, 0.0, path_length))
+	var tangent: Vector2 = after - before
+	if tangent.length_squared() <= 0.001:
+		return Vector2.ZERO
+	return tangent.normalized()
+
+
+func _update_path_lane_offset(path2d: Path2D, path_follow: PathFollow2D, delta: float) -> void:
+	var lane_index: int = _get_lane_index(path2d, path_follow)
+	var side_offset: Vector2 = _get_path_normal(path2d, path_follow.progress) * PATH_LANE_WIDTH * float(lane_index)
+	var depth_offset: Vector2 = _get_path_tangent(path2d, path_follow.progress) * PATH_ROW_DEPTH * float(abs(lane_index))
+	var target_offset: Vector2 = side_offset - depth_offset
+	var weight: float = clampf(delta * PATH_LANE_SMOOTH, 0.0, 1.0)
+	_path_lane_offset = _path_lane_offset.lerp(target_offset, weight)
+	position = _path_lane_offset
+
+
+func refresh_path_crowd_offset() -> void:
+	var path_follow: PathFollow2D = get_parent() as PathFollow2D
+	if path_follow == null:
+		return
+	var path2d := path_follow.get_parent() as Path2D
+	_update_path_lane_offset(path2d, path_follow, 1.0)
+
+
+func set_spawn_lane_index(lane_index: int) -> void:
+	_spawn_lane_index = lane_index
+	_has_spawn_lane = lane_index != 0
+	_path_lane_index = lane_index
+	_has_path_lane = lane_index != 0
+	refresh_path_crowd_offset()
 
 
 func _physics_process(delta: float) -> void:
@@ -253,6 +447,38 @@ func _physics_process(delta: float) -> void:
 
 	var path_follow: PathFollow2D = get_parent() as PathFollow2D
 
+	if _detached:
+		if locked_soldier == null:
+			var next_soldier := _pick_soldier()
+			if next_soldier != null:
+				_try_lock_soldier(next_soldier)
+
+		if locked_soldier != null:
+			if _attack_slot_angle < 0.0:
+				_attack_slot_angle = _claim_attack_slot(locked_soldier)
+			var slot_pos: Vector2 = locked_soldier.global_position + Vector2(cos(_attack_slot_angle), sin(_attack_slot_angle)) * ATTACK_SLOT_RADIUS
+			var dist_to_slot: float = global_position.distance_to(slot_pos)
+			var dist_to_soldier: float = _distance_to(locked_soldier)
+			if dist_to_slot > 6.0 and dist_to_soldier > _engage_range(locked_soldier):
+				var dir: Vector2 = (slot_pos - global_position).normalized()
+				_dir_suffix = _get_dir_suffix(dir)
+				global_position = global_position.move_toward(slot_pos, speed * delta)
+				_play_dir("walk")
+			else:
+				velocity = Vector2.ZERO
+				var to_soldier: Vector2 = locked_soldier.global_position - global_position
+				if to_soldier.length_squared() > 0.001:
+					_dir_suffix = _get_dir_suffix(to_soldier.normalized())
+				attack_timer -= delta
+				_play_dir("attack")
+				if attack_timer <= 0.0:
+					attack_timer = attack_speed
+					locked_soldier.take_damage(attack_damage)
+			return
+
+		_rejoin_path()
+		return
+
 	if path_follow == null:
 		return
 
@@ -260,8 +486,13 @@ func _physics_process(delta: float) -> void:
 		var soldier := _pick_soldier()
 		if soldier:
 			_try_lock_soldier(soldier)
+			_detach_from_path()
+			return
 
 	if locked_soldier != null:
+		if not _detached:
+			_detach_from_path()
+			return
 		var soldier_in_range := _distance_to(locked_soldier) <= _engage_range(locked_soldier) or _soldier_in_attack_area() == locked_soldier
 		if soldier_in_range:
 			velocity = Vector2.ZERO
@@ -269,7 +500,7 @@ func _physics_process(delta: float) -> void:
 			if to_soldier.length_squared() > 0.001:
 				_dir_suffix = _get_dir_suffix(to_soldier.normalized())
 			attack_timer -= delta
-			_play_dir("attack", true)
+			_play_dir("attack")
 			if attack_timer <= 0.0:
 				attack_timer = attack_speed
 				locked_soldier.take_damage(attack_damage)
@@ -278,11 +509,11 @@ func _physics_process(delta: float) -> void:
 	_path_progress_hint = path_follow.progress
 	var prev_pos: Vector2 = global_position
 	var path2d := path_follow.get_parent() as Path2D
-	var next_progress: float = path_follow.progress + speed * delta
-	var max_allowed_progress: float = _get_max_allowed_progress(path2d, path_follow.progress)
+	var next_progress: float = path_follow.progress + speed * _get_crowd_speed_scale(path2d, path_follow) * delta
 	if barrack_hold_progress >= 0.0:
-		max_allowed_progress = min(max_allowed_progress, barrack_hold_progress)
-	path_follow.progress = min(next_progress, max_allowed_progress)
+		next_progress = min(next_progress, barrack_hold_progress)
+	path_follow.progress = next_progress
+	_update_path_lane_offset(path2d, path_follow, delta)
 	var move_delta: Vector2 = global_position - prev_pos
 	if move_delta.length() > 0.1:
 		_dir_suffix = _get_dir_suffix(move_delta)

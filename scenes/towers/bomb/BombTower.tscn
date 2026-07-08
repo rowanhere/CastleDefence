@@ -1,0 +1,113 @@
+[gd_scene format=3 uid="uid://cw7gc8n14xyw4"]
+
+[ext_resource type="Script" uid="uid://cr8c42fu6fe0q" path="res://scripts/towers/bomb_tower_attack.gd" id="1_bomb"]
+[ext_resource type="Script" uid="uid://d4jh25ps2i4fm" path="res://scripts/towers/tower_collision_animation.gd" id="2_click"]
+[ext_resource type="Script" uid="uid://j0uru4vynyxa" path="res://scripts/components/range_circle.gd" id="3_range"]
+[ext_resource type="Texture2D" uid="uid://brrlvff745gp5" path="res://assets/textures/towers/bomb/Level1Base.png" id="4_base"]
+[ext_resource type="Texture2D" uid="uid://13pvs3akc7vh" path="res://assets/textures/towers/bomb/BombProjectile.png" id="5_4kod3"]
+[ext_resource type="Texture2D" uid="uid://8orxag1dba6o" path="res://assets/textures/towers/bomb/Level1LauncherA.png" id="5_closed"]
+[ext_resource type="Texture2D" uid="uid://b1fi1xwb1xmgx" path="res://assets/textures/towers/bomb/Level1LauncherB.png" id="6_open"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_range"]
+radius = 240.0
+
+[sub_resource type="Animation" id="Animation_attack_1"]
+resource_name = "attack_1"
+length = 0.9
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("LauncherA:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.45, 0.9),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(-3, -35), Vector2(-3, -65), Vector2(-3, -35)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("LauncherB:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.45, 0.9),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(-3, -11), Vector2(-3, -41), Vector2(-3, -11)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("BombProjectile:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.44, 0.45, 0.9),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [true, true, false, false]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("BombProjectile:position")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.45, 0.9),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0, -15), Vector2(0, -45), Vector2(0, -75)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_bomb"]
+_data = {
+&"attack_1": SubResource("Animation_attack_1")
+}
+
+[node name="BombTower" type="Node2D" unique_id=451056586]
+script = ExtResource("1_bomb")
+
+[node name="LauncherA" type="Sprite2D" parent="." unique_id=728776361]
+position = Vector2(-3, -35)
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("5_closed")
+
+[node name="TowerImage" type="Sprite2D" parent="." unique_id=1343504962]
+position = Vector2(0, -3)
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("4_base")
+script = ExtResource("2_click")
+
+[node name="towerArea" type="Area2D" parent="TowerImage" unique_id=462453350]
+position = Vector2(0, 3.5294118)
+scale = Vector2(1.1764706, 1.1764706)
+
+[node name="towerCollision" type="CollisionShape2D" parent="TowerImage/towerArea" unique_id=1329881272]
+modulate = Color(0.39607844, 0.007843138, 0.09411765, 0.3137255)
+shape = SubResource("CircleShape2D_range")
+debug_color = Color(0, 0.6, 0.7019608, 0.41960785)
+
+[node name="Range circle" type="Node2D" parent="TowerImage/towerArea" unique_id=1386355806]
+visible = false
+script = ExtResource("3_range")
+
+[node name="BombProjectile" type="Sprite2D" parent="." unique_id=1225093086]
+position = Vector2(0, -15)
+rotation = 3.1415925
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("5_4kod3")
+
+[node name="LauncherB" type="Sprite2D" parent="." unique_id=414415117]
+position = Vector2(-3, -11)
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("6_open")
+
+[node name="BombSpawnPoint" type="Marker2D" parent="." unique_id=706794222]
+position = Vector2(0, -31)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=969591454]
+libraries/ = SubResource("AnimationLibrary_bomb")

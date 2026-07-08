@@ -4,6 +4,7 @@ const ENEMY_SCENE = preload("res://scenes/enemies/enemy.tscn")
 const DEFAULT_SPAWN_INTERVAL := 0.3
 const MIN_SPAWN_INTERVAL := 0.18
 const SPAWN_RETRY_INTERVAL := 0.08
+const SPAWN_GROUP_SIZE := 2
 var spawn_schedule: Resource
 
 @onready var timer: Timer = $Timer
@@ -47,15 +48,45 @@ func _on_timer_timeout() -> void:
 			timer.stop()
 		return
 
-	var spawn_data: Dictionary = spawn_queue.pop_front()
-	var base_data: EnemyData = spawn_data["enemy_data"]
-	var is_boss_wave: bool = spawn_data.get("is_boss_wave", false)
-	var scaled_data: EnemyData = GameHandler.get_scaled_enemy_data(base_data, GameHandler.queued_level, is_boss_wave)
-	if not _can_spawn_enemy_now(scaled_data):
-		spawn_queue.push_front(spawn_data)
+	var first_spawn_data: Dictionary = spawn_queue[0]
+	var first_base_data: EnemyData = first_spawn_data["enemy_data"]
+	var first_is_boss_wave: bool = first_spawn_data.get("is_boss_wave", false)
+	var first_scaled_data: EnemyData = GameHandler.get_scaled_enemy_data(first_base_data, GameHandler.queued_level, first_is_boss_wave)
+	if not _can_spawn_enemy_now(first_scaled_data):
 		timer.start(SPAWN_RETRY_INTERVAL)
 		return
-	timer.wait_time = _get_spawn_interval(scaled_data)
+
+	var spawned_enemies: Array[Node] = []
+	var group_size: int = 1 if first_is_boss_wave else SPAWN_GROUP_SIZE
+	for i in range(group_size):
+		if spawn_queue.is_empty():
+			break
+		var spawn_data: Dictionary = spawn_queue[0]
+		var is_boss_wave: bool = spawn_data.get("is_boss_wave", false)
+		if i > 0 and is_boss_wave:
+			break
+		spawn_queue.pop_front()
+		var base_data: EnemyData = spawn_data["enemy_data"]
+		var scaled_data: EnemyData = GameHandler.get_scaled_enemy_data(base_data, GameHandler.queued_level, is_boss_wave)
+		spawned_enemies.append(_spawn_enemy(scaled_data, is_boss_wave, _get_spawn_lane_index(i, group_size)))
+
+	for enemy_instance in spawned_enemies:
+		if enemy_instance != null and is_instance_valid(enemy_instance) and enemy_instance.has_method("refresh_path_crowd_offset"):
+			enemy_instance.refresh_path_crowd_offset()
+
+	timer.wait_time = _get_spawn_interval(first_scaled_data) * float(max(spawned_enemies.size(), 1))
+	if not spawn_queue.is_empty():
+		timer.start(timer.wait_time)
+
+
+func _get_spawn_lane_index(index: int, group_size: int) -> int:
+	if group_size <= 1:
+		return 0
+	var lanes: Array[int] = [-1, 1, 0, -2, 2]
+	return lanes[index % lanes.size()]
+
+
+func _spawn_enemy(scaled_data: EnemyData, is_boss_wave: bool, spawn_lane_index: int = 0) -> Node:
 	var follow = PathFollow2D.new()
 	follow.rotates = false
 	follow.loop = false
@@ -67,7 +98,9 @@ func _on_timer_timeout() -> void:
 	enemy_instance.is_boss_enemy = is_boss_wave
 	enemy_instance.data = scaled_data  # set AFTER so _ready+@onready vars are ready
 	_apply_spawn_facing(enemy_instance)
-	_ensure_spawn_timer()
+	if enemy_instance.has_method("set_spawn_lane_index"):
+		enemy_instance.set_spawn_lane_index(spawn_lane_index)
+	return enemy_instance
 
 
 func _get_spawn_interval(enemy_data: EnemyData) -> float:

@@ -15,7 +15,6 @@ var speed: float = 50.0
 var last_direction: Vector2 = Vector2.RIGHT
 
 var locked_enemy: Node2D = null
-var forced_enemy: Node2D = null
 var attack_damage: float = 10.0
 var attack_speed: float = 1.0
 var attack_timer: float = 0.0
@@ -23,9 +22,8 @@ var attack_timer: float = 0.0
 var hp: float = 100.0
 var is_dead: bool = false
 
-const COMBAT_OFFSETS := [Vector2(-48, 14), Vector2(48, 14), Vector2(0, 42)]
+const COMBAT_OFFSET_DISTANCE := 34.0
 const DEPTH_SORT_DIVISOR := 4.0
-const SUPPORT_ATTACK_RANGE := 110.0
 
 
 func _ready() -> void:
@@ -54,7 +52,7 @@ func _dist_to(node: Node2D) -> float:
 
 func _engage_range(other: Node2D) -> float:
 	var other_scale: float = other.scale.x if (other != null and is_instance_valid(other)) else 1.0
-	return 22.0 * max(scale.x, other_scale) + 14.0
+	return 28.0 * max(scale.x, other_scale) + 18.0
 
 
 func _disengage_range(other: Node2D) -> float:
@@ -68,16 +66,33 @@ func _enemy_in_attack_area() -> Node2D:
 	return null
 
 
-func _can_engage(enemy: Node2D) -> bool:
-	if not _is_valid_enemy(enemy):
-		return false
-	return _dist_to(enemy) <= _engage_range(enemy) or _enemy_in_attack_area() == enemy
+func _enemy_attacking_me() -> Node2D:
+	var closest: Node2D = null
+	var closest_dist: float = INF
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if not _is_valid_enemy(enemy):
+			continue
+		if enemy.get("locked_soldier") != self:
+			continue
+		var d: float = _dist_to(enemy)
+		if d < closest_dist:
+			closest_dist = d
+			closest = enemy
+	return closest
 
 
 func _still_in_combat(enemy: Node2D) -> bool:
 	if not _is_valid_enemy(enemy):
 		return false
 	return _dist_to(enemy) <= _disengage_range(enemy)
+
+
+func release_enemy(enemy: Node2D = null, clear_target: bool = true) -> void:
+	if enemy == null or locked_enemy == enemy:
+		locked_enemy = null
+	if clear_target and (enemy == null or target == enemy):
+		target = null
+	attack_timer = attack_speed
 
 
 func can_reserve_enemy(enemy: Node2D) -> bool:
@@ -92,45 +107,26 @@ func reserve_enemy(enemy: Node2D) -> bool:
 	return true
 
 
-func release_enemy(enemy: Node2D = null, clear_target: bool = true) -> void:
-	if enemy == null or locked_enemy == enemy:
-		locked_enemy = null
-	if enemy == null or forced_enemy == enemy:
-		forced_enemy = null
-	if clear_target and (enemy == null or target == enemy):
-		target = null
-	attack_timer = attack_speed
-
-
 func is_fighting() -> bool:
-	return _is_valid_enemy(forced_enemy) or _is_valid_enemy(locked_enemy) or _is_valid_enemy(target)
-
-
-func force_target_enemy(enemy: Node2D) -> void:
-	if _is_valid_enemy(enemy):
-		forced_enemy = enemy
-		target = enemy
-		locked_enemy = enemy
-
-
-func clear_forced_enemy(enemy: Node2D = null) -> void:
-	if enemy == null or forced_enemy == enemy:
-		forced_enemy = null
+	return _is_valid_enemy(locked_enemy) or _is_valid_enemy(target)
 
 
 func _combat_slot(enemy: Node2D) -> Vector2:
-	var foot_anchor: Vector2 = enemy.global_position + Vector2(0, 14.0 * max(enemy.scale.y, 1.0))
-	var offset: Vector2 = COMBAT_OFFSETS[soldier_index] if soldier_index < COMBAT_OFFSETS.size() else Vector2(soldier_index * 55, 0)
-	return foot_anchor + offset
+	var away_from_enemy: Vector2 = global_position - enemy.global_position
+	if away_from_enemy.length_squared() <= 0.001:
+		away_from_enemy = wait_position - enemy.global_position
+	if away_from_enemy.length_squared() <= 0.001:
+		away_from_enemy = Vector2.RIGHT
+	return enemy.global_position + away_from_enemy.normalized() * COMBAT_OFFSET_DISTANCE
 
 
 func _fight_enemy(enemy: Node2D, delta: float) -> void:
-	if not reserve_enemy(enemy):
-		return
+	locked_enemy = enemy
+	if enemy.has_method("reserve_soldier"):
+		enemy.reserve_soldier(self)
 	var dist_to_enemy: float = _dist_to(enemy)
 	_face(enemy.global_position)
-	var attack_range: float = SUPPORT_ATTACK_RANGE if soldier_index > 0 else _engage_range(enemy)
-	if dist_to_enemy <= attack_range or _enemy_in_attack_area() == enemy:
+	if dist_to_enemy <= _engage_range(enemy) or _enemy_in_attack_area() == enemy:
 		velocity = Vector2.ZERO
 		_play_attack_anim()
 		attack_timer -= delta
@@ -139,7 +135,7 @@ func _fight_enemy(enemy: Node2D, delta: float) -> void:
 			enemy.take_damage(attack_damage)
 			GameSound.play(hitSound)
 		return
-	var move_target: Vector2 = enemy.global_position if soldier_index > 0 else _combat_slot(enemy)
+	var move_target: Vector2 = _combat_slot(enemy)
 	var dir: Vector2 = (move_target - global_position).normalized()
 	last_direction = dir
 	velocity = Vector2.ZERO
@@ -161,6 +157,8 @@ func die() -> void:
 	if is_dead:
 		return
 	is_dead = true
+	if locked_enemy != null and is_instance_valid(locked_enemy) and locked_enemy.has_method("release_soldier"):
+		locked_enemy.release_soldier(self)
 	release_enemy()
 	health_bar.hide()
 	queue_free()
@@ -175,18 +173,10 @@ func _physics_process(delta: float) -> void:
 
 	if locked_enemy != null and (not is_instance_valid(locked_enemy) or not _is_valid_enemy(locked_enemy)):
 		locked_enemy = null
-	if forced_enemy != null and (not is_instance_valid(forced_enemy) or not _is_valid_enemy(forced_enemy)):
-		forced_enemy = null
 	if target != null and (not is_instance_valid(target) or not _is_valid_enemy(target)):
 		target = null
 
-	var active_enemy: Node2D = null
-	if _is_valid_enemy(forced_enemy):
-		active_enemy = forced_enemy
-	elif _is_valid_enemy(locked_enemy):
-		active_enemy = locked_enemy
-	else:
-		active_enemy = target
+	var active_enemy: Node2D = locked_enemy if _is_valid_enemy(locked_enemy) else target
 	if _is_valid_enemy(active_enemy):
 		locked_enemy = active_enemy
 		target = active_enemy
@@ -194,25 +184,29 @@ func _physics_process(delta: float) -> void:
 		return
 
 	locked_enemy = null
-	if _is_attacking():
-		_play_idle_anim()
-		return
 
 	var touch: Node2D = _enemy_in_attack_area()
 	if touch:
 		_fight_enemy(touch, delta)
 		return
 
+	var attacker: Node2D = _enemy_attacking_me()
+	if attacker:
+		_fight_enemy(attacker, delta)
+		return
+
+	if _is_attacking():
+		_play_idle_anim()
+		return
+
 	var dist_to_wait: float = global_position.distance_to(wait_position)
 	if dist_to_wait > 8.0:
 		var dir: Vector2 = (wait_position - global_position).normalized()
 		last_direction = dir
-		velocity = Vector2.ZERO
 		_step_toward(wait_position, delta)
 		if not _is_attacking():
 			_play_walk_anim(dir)
 	else:
-		velocity = Vector2.ZERO
 		_play_idle_anim()
 
 

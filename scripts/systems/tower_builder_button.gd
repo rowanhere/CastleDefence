@@ -9,12 +9,15 @@ extends Control
 
 signal purchased
 
+const PURCHASE_SOUND: AudioStream = preload("res://assets/audio/sfx/tower_purchase.mp3")
+const SFX_VOLUME_60_PERCENT := -4.4
+
 
 var insertTower = {
 	"archer": preload("res://scenes/towers/archer/archerTower.tscn"),
 	"barrack": preload("res://scenes/towers/barrack/barrackTower.tscn"),
-	#"magic": preload("res://scenes/towers/magic/magicTower.tscn"),
-	#"bomb": preload("res://scenes/towers/bomb/bombTower.tscn")
+	"magic": preload("res://scenes/towers/magic/magicTower.tscn"),
+	"bomb": preload("res://scenes/towers/bomb/BombTower.tscn")
 }
 
 
@@ -70,6 +73,7 @@ func insertBtns(pos: Vector2, tower_type: String) -> void:
 
 	new_btn.position = pos
 	new_btn.visible = true
+	new_btn.modulate = Color.WHITE
 
 	new_btn.get_node("purchaseTypeImg").texture = towerBtnsImages[tower_type]
 
@@ -83,6 +87,15 @@ func _purchase_tower(tower_type: String) -> void:
 	if !insertTower.has(tower_type):
 		print("Tower not found: ", tower_type)
 		return
+	if GameHandler.coins < coinAmt:
+		print("Not enough coins to purchase tower: ", tower_type)
+		GameHandler.play_purchase_failed_feedback()
+		return
+
+	GameHandler.coins -= coinAmt
+	var current_scene := get_tree().current_scene
+	if current_scene != null and current_scene.has_method("_update_hud"):
+		current_scene._update_hud()
 
 	var tower_scene: PackedScene = insertTower[tower_type]
 	var tower_instance = tower_scene.instantiate()
@@ -93,6 +106,7 @@ func _purchase_tower(tower_type: String) -> void:
 	tower_instance.z_index = 100
 
 	play_place_animation(tower_instance)
+	GameSound.play(PURCHASE_SOUND, SFX_VOLUME_60_PERCENT)
 
 	purchased.emit()
 	queue_free()

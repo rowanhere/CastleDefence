@@ -1,13 +1,17 @@
 [gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://dygsqud8ksdh7"]
 
 [ext_resource type="Script" uid="uid://jcojfonhgt1j" path="res://scripts/towers/upgrade_data.gd" id="1_pu8vf"]
-[ext_resource type="Texture2D" uid="uid://bfd6p81po1mir" path="res://assets/textures/towers/magic/level2.png" id="2_pu8vf"]
+[ext_resource type="Texture2D" uid="uid://ct6y1hovaen7t" path="res://assets/textures/towers/magic/level2.png" id="2_pu8vf"]
+[ext_resource type="Texture2D" uid="uid://2s8calycgjfc" path="res://assets/textures/towers/magic/magicTop.png" id="3_top"]
 
 [resource]
 script = ExtResource("1_pu8vf")
-upgradeCost = 900
-damage = 40.0
-tower_range = 350.0
+upgradeCost = 1050
+damage = 23.0
+attackSpeed = 0.75
+tower_range = 270.0
 towerImage = ExtResource("2_pu8vf")
 level = 2
+isTowerTop = true
+towerTop = ExtResource("3_top")
 metadata/_custom_type_script = "uid://jcojfonhgt1j"

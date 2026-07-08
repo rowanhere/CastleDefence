@@ -1,0 +1,318 @@
+[gd_scene format=3 uid="uid://demk1s7lf7m2g"]
+
+[ext_resource type="FontFile" uid="uid://c26krysvv4u6l" path="res://assets/fonts/WinkySans-Italic-VariableFont_wght.ttf" id="1_font"]
+[ext_resource type="Texture2D" uid="uid://db6khv878msxc" path="res://assets/textures/towers/button_close.png" id="2_close"]
+[ext_resource type="Texture2D" uid="uid://ckx4uc35waymp" path="res://assets/textures/ui/IconCoin.png" id="3_coin"]
+[ext_resource type="Script" uid="uid://r4wcnuq7j5ql" path="res://scripts/ui/tower_upgrade_ui.gd" id="4_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scrim"]
+bg_color = Color(0, 0, 0, 0.14)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_window"]
+bg_color = Color(0.211765, 0.137255, 0.0784314, 0.97)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.862745, 0.596078, 0.247059, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_preview"]
+bg_color = Color(0.156863, 0.137255, 0.211765, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.823529, 0.658824, 0.321569, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_row"]
+bg_color = Color(0.101961, 0.0901961, 0.14902, 0.92)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_upgrade"]
+bg_color = Color(0.231373, 0.333333, 0.462745, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.486275, 0.788235, 1, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_destroy"]
+bg_color = Color(0.415686, 0.196078, 0.184314, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.972549, 0.454902, 0.368627, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[node name="TowerUpgradeUI" type="CanvasLayer" unique_id=1232543487]
+script = ExtResource("4_script")
+
+[node name="Root" type="Control" parent="." unique_id=1774607265]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Scrim" type="Panel" parent="Root" unique_id=618081744]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_scrim")
+
+[node name="Window" type="Panel" parent="Root" unique_id=1480954986]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -88.0
+offset_top = -64.0
+offset_right = 88.0
+offset_bottom = 64.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_window")
+
+[node name="Header" type="Label" parent="Root/Window" unique_id=1723051973]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 84.0
+offset_bottom = 20.0
+theme_override_colors/font_color = Color(1, 0.94902, 0.721569, 1)
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 7
+text = "Archer Tower"
+
+[node name="SubHeader" type="Label" parent="Root/Window" unique_id=1811464509]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 18.0
+offset_right = 76.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(0.776471, 0.827451, 0.92549, 1)
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 5
+text = "Level 1  ->  Level 2"
+
+[node name="TowerDescription" type="Label" parent="Root/Window" unique_id=224172409]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 28.0
+offset_right = 94.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(0.862745, 0.847059, 0.752941, 1)
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 4
+text = "Fast shots and steady lane control."
+autowrap_mode = 3
+
+[node name="CloseButton" type="TextureButton" parent="Root/Window" unique_id=1858262400]
+layout_mode = 0
+offset_left = 148.0
+offset_top = 10.0
+offset_right = 160.0
+offset_bottom = 22.0
+texture_normal = ExtResource("2_close")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="StatsCard" type="Panel" parent="Root/Window" unique_id=844603054]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 40.0
+offset_right = 164.0
+offset_bottom = 98.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_preview")
+
+[node name="StatsTitle" type="Label" parent="Root/Window/StatsCard" unique_id=431529932]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 6.0
+offset_right = 74.0
+offset_bottom = 16.0
+theme_override_colors/font_color = Color(1, 0.94902, 0.721569, 1)
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 5
+text = "Upgrade Preview"
+
+[node name="DamageRow" type="Panel" parent="Root/Window/StatsCard" unique_id=2050501300]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 18.0
+offset_right = 144.0
+offset_bottom = 28.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="DamageText" type="Label" parent="Root/Window/StatsCard/DamageRow" unique_id=14821002]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 1.0
+offset_right = 128.0
+offset_bottom = 9.0
+theme_override_colors/font_color = Color(0.972549, 0.905882, 0.8, 1)
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 4
+text = "Damage 25 -> 38"
+
+[node name="RangeRow" type="Panel" parent="Root/Window/StatsCard" unique_id=597854031]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 30.0
+offset_right = 144.0
+offset_bottom = 40.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="RangeText" type="Label" parent="Root/Window/StatsCard/RangeRow" unique_id=1956908355]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 1.0
+offset_right = 128.0
+offset_bottom = 9.0
+theme_override_colors/font_color = Color(0.972549, 0.905882, 0.8, 1)
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 4
+text = "Range 120 -> 145"
+
+[node name="SpeedRow" type="Panel" parent="Root/Window/StatsCard" unique_id=1008315856]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 42.0
+offset_right = 144.0
+offset_bottom = 52.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="SpeedText" type="Label" parent="Root/Window/StatsCard/SpeedRow" unique_id=1323167938]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 1.0
+offset_right = 128.0
+offset_bottom = 9.0
+theme_override_colors/font_color = Color(0.972549, 0.905882, 0.8, 1)
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 4
+text = "Rate 0.8 -> 0.6"
+
+[node name="UpgradeCard" type="Panel" parent="Root/Window" unique_id=773604122]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 106.0
+offset_right = 80.0
+offset_bottom = 122.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade")
+
+[node name="UpgradeTitle" type="Label" parent="Root/Window/UpgradeCard" unique_id=696876633]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 40.0
+offset_bottom = 11.0
+theme_override_colors/font_color = Color(0.909804, 0.964706, 1, 1)
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 5
+text = "Upgrade"
+
+[node name="UpgradeCoin" type="TextureRect" parent="Root/Window/UpgradeCard" unique_id=669179736]
+layout_mode = 0
+offset_left = 43.0
+offset_top = 5.0
+offset_right = 50.0
+offset_bottom = 12.0
+texture = ExtResource("3_coin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="UpgradeCostText" type="Label" parent="Root/Window/UpgradeCard" unique_id=412916037]
+layout_mode = 0
+offset_left = 51.0
+offset_top = 4.0
+offset_right = 66.0
+offset_bottom = 11.0
+theme_override_colors/font_color = Color(1, 0.94902, 0.721569, 1)
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 5
+text = "400"
+
+[node name="UpgradeDirection" type="Label" parent="Root/Window/UpgradeCard" unique_id=2010306936]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 3.0
+offset_right = 42.0
+offset_bottom = 13.0
+theme_override_font_sizes/font_size = 10
+text = "-"
+
+[node name="DestroyCard" type="Panel" parent="Root/Window" unique_id=583740260]
+layout_mode = 0
+offset_left = 96.0
+offset_top = 106.0
+offset_right = 164.0
+offset_bottom = 122.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_destroy")
+
+[node name="DestroyTitle" type="Label" parent="Root/Window/DestroyCard" unique_id=35902055]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 40.0
+offset_bottom = 11.0
+theme_override_colors/font_color = Color(1, 0.901961, 0.901961, 1)
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 5
+text = "Destroy"
+
+[node name="RefundCoin" type="TextureRect" parent="Root/Window/DestroyCard" unique_id=1612203439]
+layout_mode = 0
+offset_left = 43.0
+offset_top = 5.0
+offset_right = 50.0
+offset_bottom = 12.0
+texture = ExtResource("3_coin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RefundText" type="Label" parent="Root/Window/DestroyCard" unique_id=1173153004]
+layout_mode = 0
+offset_left = 51.0
+offset_top = 4.0
+offset_right = 66.0
+offset_bottom = 12.0
+theme_override_colors/font_color = Color(1, 0.94902, 0.721569, 1)
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 5
+text = "400"
+
+[node name="UpgradeDirection" type="Label" parent="Root/Window/DestroyCard" unique_id=2043015628]
+layout_mode = 0
+offset_left = 36.0
+offset_right = 43.0
+offset_bottom = 15.0
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 10
+text = "+"

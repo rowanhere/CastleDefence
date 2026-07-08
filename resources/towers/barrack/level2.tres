@@ -5,8 +5,10 @@
 
 [resource]
 script = ExtResource("1_pvnym")
+upgradeCost = 650
 damage = 20.0
-tower_range = 300.0
+attackSpeed = 1.25
+tower_range = 250.0
 towerImage = ExtResource("2_pvnym")
 level = 2
 metadata/_custom_type_script = "uid://jcojfonhgt1j"

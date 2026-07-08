@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://c8rwfqy2wb5up"]
+
+[ext_resource type="Script" uid="uid://lxqrwdjkcumm" path="res://scripts/towers/magic_tower_attack.gd" id="1_magic"]
+[ext_resource type="Script" uid="uid://d4jh25ps2i4fm" path="res://scripts/towers/tower_collision_animation.gd" id="2_click"]
+[ext_resource type="Script" uid="uid://j0uru4vynyxa" path="res://scripts/components/range_circle.gd" id="3_range"]
+[ext_resource type="Texture2D" uid="uid://cjkotu8qbfsfu" path="res://assets/textures/towers/magic/level1.png" id="4_base"]
+[ext_resource type="Texture2D" uid="uid://2s8calycgjfc" path="res://assets/textures/towers/magic/magicTop.png" id="5_top"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_range"]
+radius = 280.0
+
+[node name="MagicTower" type="Node2D" unique_id=2029972276]
+script = ExtResource("1_magic")
+
+[node name="TowerImage" type="Sprite2D" parent="." unique_id=922988399]
+texture = ExtResource("4_base")
+script = ExtResource("2_click")
+
+[node name="towerArea" type="Area2D" parent="TowerImage" unique_id=1876926088]
+
+[node name="towerCollision" type="CollisionShape2D" parent="TowerImage/towerArea" unique_id=776101956]
+modulate = Color(0.39607844, 0.007843138, 0.09411765, 0.3137255)
+shape = SubResource("CircleShape2D_range")
+debug_color = Color(0, 0.6, 0.7019608, 0.41960785)
+
+[node name="Range circle" type="Node2D" parent="TowerImage/towerArea" unique_id=1853881824]
+visible = false
+script = ExtResource("3_range")
+
+[node name="TowerTop" type="Sprite2D" parent="." unique_id=1552523606]
+position = Vector2(-6, -88)
+texture = ExtResource("5_top")
+
+[node name="MagicSpawnPoint" type="Marker2D" parent="TowerTop" unique_id=510221027]
+position = Vector2(-3, -2)

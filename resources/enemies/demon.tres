@@ -7,11 +7,11 @@
 script = ExtResource("1_jnts5")
 enemy_name = "Demon"
 health = 220
-speed = 85.0
+speed = 82.0
 attack_damage = 24.0
-attack_speed = 0.9
-coin_drop = 22
-path_spacing = 120.0
+attack_speed = 0.8
+coin_drop = 28
+path_spacing = 52.0
 health_bar_color = Color(0.556863, 0.266667, 0.678431, 1)
 sprite_frames = ExtResource("2_bfxqn")
 scale = Vector2(2, 2)

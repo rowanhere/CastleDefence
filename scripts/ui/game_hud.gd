@@ -10,19 +10,26 @@ const WAVE_ICON_DANGER := Color(1.35, 0.45, 0.45, 1.0)
 const WAVE_ICON_WIGGLE_SPEED := 18.0
 const WAVE_ICON_WIGGLE_AMOUNT := 0.08
 const WAVE_ICON_NORMAL_SCALE := Vector2(0.066, 0.066)
-
+const COIN_ALERT_COLOR := Color(1.0, 0.35, 0.35, 1.0)
+const COIN_NORMAL_COLOR := Color(1, 1, 1, 1)
+const COIN_SHAKE_OFFSET := 12.0
+const COIN_SHAKE_STEP := 0.045
 @onready var life_label: Label = $LevelData/PanelContainer/LifeNode/CoinsAmt
 @onready var coin_label: Label = $LevelData/PanelContainer/CoinNode/CoinsAmt
 @onready var current_wave_label: Label = $LevelData/PanelContainer/WaveNode/CurrentWave
 @onready var total_wave_label: Label = $LevelData/PanelContainer/WaveNode/TotalWave
 @onready var wave_progress: TextureProgressBar = $LevelData/WaveTextureProgress
 @onready var wave_icon: Sprite2D = $LevelData/PanelContainer/WaveNode/Sprite2D
+@onready var coin_node: Node2D = $LevelData/PanelContainer/CoinNode
 
 var _label_values: Dictionary = {}
 var _label_tweens: Dictionary = {}
 var _wave_urgency_level: int = 0
 var _wave_icon_base_position: Vector2 = Vector2.ZERO
 var _wave_wiggle_time: float = 0.0
+var _coin_base_position: Vector2 = Vector2.ZERO
+var _coin_alert_tween: Tween = null
+var _coin_alert_active: bool = false
 
 
 func _ready() -> void:
@@ -40,6 +47,10 @@ func _ready() -> void:
 		_wave_icon_base_position = wave_icon.position
 		wave_icon.modulate = WAVE_ICON_SAFE
 		wave_icon.scale = WAVE_ICON_NORMAL_SCALE
+	if coin_node != null:
+		_coin_base_position = coin_node.position
+	if coin_label != null:
+		coin_label.modulate = COIN_NORMAL_COLOR
 
 
 func _process(delta: float) -> void:
@@ -62,6 +73,41 @@ func set_life(value: int, immediate: bool = false) -> void:
 
 func set_coins(value: int, immediate: bool = false) -> void:
 	_update_counter(coin_label, value, immediate)
+	if coin_label != null and not _coin_alert_active:
+		coin_label.modulate = COIN_NORMAL_COLOR
+		coin_label.scale = Vector2.ONE
+
+
+func play_purchase_failed_feedback() -> void:
+	play_coin_warning()
+
+
+func play_coin_warning() -> void:
+	if coin_label == null or coin_node == null:
+		return
+	if _coin_alert_tween != null:
+		_coin_alert_tween.kill()
+	_coin_alert_active = true
+	coin_node.position = _coin_base_position
+	coin_label.modulate = COIN_ALERT_COLOR
+	coin_label.scale = Vector2.ONE
+	_coin_alert_tween = create_tween()
+	_coin_alert_tween.tween_property(coin_node, "position:x", _coin_base_position.x - COIN_SHAKE_OFFSET, COIN_SHAKE_STEP)
+	_coin_alert_tween.tween_property(coin_node, "position:x", _coin_base_position.x + COIN_SHAKE_OFFSET, COIN_SHAKE_STEP)
+	_coin_alert_tween.tween_property(coin_node, "position:x", _coin_base_position.x - COIN_SHAKE_OFFSET * 0.6, COIN_SHAKE_STEP)
+	_coin_alert_tween.tween_property(coin_node, "position:x", _coin_base_position.x + COIN_SHAKE_OFFSET * 0.6, COIN_SHAKE_STEP)
+	_coin_alert_tween.tween_property(coin_node, "position:x", _coin_base_position.x, COIN_SHAKE_STEP)
+	_coin_alert_tween.parallel().tween_property(coin_label, "scale", Vector2(1.12, 1.12), 0.08)
+	_coin_alert_tween.tween_property(coin_label, "modulate", COIN_NORMAL_COLOR, 0.14)
+	_coin_alert_tween.parallel().tween_property(coin_label, "scale", Vector2.ONE, 0.14)
+	_coin_alert_tween.finished.connect(
+		func():
+			coin_node.position = _coin_base_position
+			coin_label.modulate = COIN_NORMAL_COLOR
+			coin_label.scale = Vector2.ONE
+			_coin_alert_active = false
+			_coin_alert_tween = null
+	)
 
 
 func set_current_wave(value: int, immediate: bool = false) -> void:

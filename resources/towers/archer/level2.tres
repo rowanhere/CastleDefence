@@ -6,10 +6,10 @@
 
 [resource]
 script = ExtResource("1_tdjv0")
-upgradeCost = 700
-damage = 15.0
-attackSpeed = 2.0
-tower_range = 300.0
+upgradeCost = 650
+damage = 34.0
+attackSpeed = 1.9
+tower_range = 290.0
 towerImage = ExtResource("2_tdjv0")
 level = 2
 isTowerTop = true

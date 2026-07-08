@@ -4,9 +4,10 @@
 [ext_resource type="Script" uid="uid://jcojfonhgt1j" path="res://scripts/towers/upgrade_data.gd" id="2_br5oe"]
 [ext_resource type="Resource" uid="uid://b4gkoboigj8rv" path="res://resources/towers/magic/level1.tres" id="3_qywb7"]
 [ext_resource type="Resource" uid="uid://dygsqud8ksdh7" path="res://resources/towers/magic/level2.tres" id="4_shjey"]
+[ext_resource type="Resource" uid="uid://byurhmj1rbbef" path="res://resources/towers/magic/level3.tres" id="5_level3"]
 
 [resource]
 script = ExtResource("1_6gas2")
-name = "barrack"
-upgrades = Array[ExtResource("2_br5oe")]([ExtResource("3_qywb7"), ExtResource("4_shjey")])
+name = "magic"
+upgrades = Array[ExtResource("2_br5oe")]([ExtResource("3_qywb7"), ExtResource("4_shjey"), ExtResource("5_level3")])
 metadata/_custom_type_script = "uid://b455k2b8q12i1"

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://ucbj7utfa6ry"]
+
+[ext_resource type="Texture2D" uid="uid://b77pjb47fbl32" path="res://assets/textures/towers/bomb/Level3LauncherA.png" id="1_yslbw"]
+[ext_resource type="Texture2D" uid="uid://bwg5tafp6uqhi" path="res://assets/textures/towers/bomb/Level3LauncherB.png" id="2_5tv80"]
+[ext_resource type="Script" uid="uid://jcojfonhgt1j" path="res://scripts/towers/upgrade_data.gd" id="3_ma8a1"]
+[ext_resource type="Texture2D" uid="uid://c38vvcvk0pw2s" path="res://assets/textures/towers/bomb/Level3Base.png" id="4_ma8a1"]
+
+[resource]
+script = ExtResource("3_ma8a1")
+upgradeCost = 1800
+damage = 140.0
+attackSpeed = 2.0
+tower_range = 310.0
+towerImage = ExtResource("4_ma8a1")
+isBombTower = true
+launcherAImage = ExtResource("1_yslbw")
+launcherBImage = ExtResource("2_5tv80")
+level = 3
+metadata/_custom_type_script = "uid://jcojfonhgt1j"
