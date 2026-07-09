@@ -58,21 +58,36 @@ Speed scaling is capped at `135%` so later waves get stronger without becoming u
 ## 🗼 Towers
 
 ### 🏹 Archer Tower
-- Fires arrows at enemies within range
-- **25 damage** per arrow
-- Fast attack speed
-- Best for consistent ranged single-target damage
+- Fires homing arrows at the first enemy in range
+- Uses `archer.tres` with 3 upgrade levels
+- Upgrade stats:
+
+| Level | Damage | Attack Rate | Range | Upgrade Cost |
+|---|---:|---:|---:|---:|
+| 1 | 22 | 1.75/sec | 260 | 400 |
+| 2 | 34 | 2.25/sec | 290 | 650 |
+| 3 | 52 | 2.85/sec | 325 | 1050 |
+
+- Arrow speed scales from the active upgrade's attack rate
 - Plays `arrowHit.mp3` on impact
 
 ### 🪖 Barrack Tower
-- Spawns **3 soldiers** that engage enemies in melee
-- First spawn has a **3-second** delay after placement
-- If all 3 soldiers die → respawns all 3 after **10 seconds**
-- Progress bar on tower shows the respawn countdown
-- Soldiers march out of the tower door one by one (staggered tween + fade-in)
-- Each soldier takes a unique flanking position around the enemy
-- Soldiers return to their wait positions when no enemies are present
-- Plays `soldierSpawn.mp3` per soldier as they march out
+- Spawns **1 soldier** that intercepts enemies in melee
+- First soldier spawn has a **3-second** delay after placement
+- If the soldier dies, the tower respawns a new soldier after **10 seconds**
+- Progress bar on tower shows initial spawn and respawn countdowns
+- Soldier walks out from the tower door with a short tween + fade-in
+- Soldier HP is `tower level * 100`
+- Soldier scale grows by level: `2.5x` at level 1, `3.0x` at level 2
+- Current upgrade stats:
+
+| Level | Soldier Damage | Attack Rate | Range | Upgrade Cost |
+|---|---:|---:|---:|---:|
+| 1 | 14 | 1.0/sec | 230 | 400 |
+| 2 | 20 | 1.25/sec | 250 | 650 |
+
+- Frees its active soldier when the tower is destroyed
+- Plays `soldierSpawn.mp3` when the soldier marches out
 
 ### 🔮 Magic Tower
 - Fires focused magic beams from the tower top
@@ -151,12 +166,12 @@ Directional sheets for the newer enemies use row order `down`, `up`, `left`, `ri
 
 | State | Action |
 |---|---|
-| No enemies in tower area | Walk to wait position near tower, idle |
-| Enemy enters tower area | Assigned a target by the tower |
-| Target assigned | Chase enemy, take unique flanking slot |
+| No enemies in tower area | Walk to wait position near the path, idle |
+| Enemy enters valid combat window | Assigned as the soldier target by the tower |
+| Target assigned | Chase enemy and move into melee range |
 | In attack range | Stop, swing continuously, deal damage |
 | Enemy dead | Stop attacking, return to wait position |
-| All 3 soldiers dead | Tower starts 10s respawn countdown |
+| Soldier dead | Tower starts 10s respawn countdown |
 
 ---
 
@@ -164,7 +179,7 @@ Directional sheets for the newer enemies use row order `down`, `up`, `left`, `ri
 
 | File | Trigger |
 |---|---|
-| `soldierSpawn.mp3` | Each soldier marching out of barrack (staggered) |
+| `soldierSpawn.mp3` | Barrack soldier marching out |
 | `swordHit.mp3` | Soldier landing a hit on an enemy |
 | `arrowHit.mp3` | Arrow hitting an enemy |
 | `Forest Day.ogg` | Main menu background music |
