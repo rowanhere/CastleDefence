@@ -10,6 +10,7 @@ upgradeCost = 1550
 damage = 36.0
 attackSpeed = 0.9
 tower_range = 305.0
+slowPercent = 20.0
 towerImage = ExtResource("2_magic_l3")
 level = 3
 isTowerTop = true

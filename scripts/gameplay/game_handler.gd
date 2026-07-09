@@ -10,7 +10,11 @@ const HEALTH_SCALE_PER_LEVEL := 0.20
 const DAMAGE_SCALE_PER_LEVEL := 0.12
 const SPEED_SCALE_PER_LEVEL := 0.03
 const COIN_SCALE_PER_LEVEL := 0.15
-const MAX_SPEED_SCALE := 2.0
+const HEALTH_SCALE_PER_WAVE := 0.12
+const DAMAGE_SCALE_PER_WAVE := 0.08
+const SPEED_SCALE_PER_WAVE := 0.015
+const COIN_SCALE_PER_WAVE := 0.08
+const MAX_SPEED_SCALE := 1.35
 
 # Boss formulas can live here later once boss data/resources are added.
 # const BOSS_HEALTH_SCALE_PER_LEVEL := 0.35
@@ -56,9 +60,10 @@ static func get_enemy_data_by_id(enemy_id: String) -> EnemyData:
 	return enemy_data
 
 
-static func get_scaled_enemy_data(base_data: EnemyData, level_number: int, is_boss: bool = false) -> EnemyData:
+static func get_scaled_enemy_data(base_data: EnemyData, level_number: int, wave_number: int = 1, is_boss: bool = false) -> EnemyData:
 	var scaled_data: EnemyData = base_data.duplicate(true)
 	var level_offset: int = max(level_number - 1, 0)
+	var wave_offset: int = max(wave_number - 1, 0)
 
 	if is_boss:
 		# Uncomment and tune once boss enemies are added.
@@ -68,10 +73,15 @@ static func get_scaled_enemy_data(base_data: EnemyData, level_number: int, is_bo
 		# scaled_data.coin_drop = int(round(base_data.coin_drop * (1.0 + level_offset * BOSS_COIN_SCALE_PER_LEVEL)))
 		return scaled_data
 
-	scaled_data.health = int(round(base_data.health * (1.0 + level_offset * HEALTH_SCALE_PER_LEVEL)))
-	scaled_data.attack_damage = base_data.attack_damage * (1.0 + level_offset * DAMAGE_SCALE_PER_LEVEL)
-	scaled_data.speed = base_data.speed * min(1.0 + level_offset * SPEED_SCALE_PER_LEVEL, MAX_SPEED_SCALE)
-	scaled_data.coin_drop = int(round(base_data.coin_drop * (1.0 + level_offset * COIN_SCALE_PER_LEVEL)))
+	var health_scale: float = 1.0 + level_offset * HEALTH_SCALE_PER_LEVEL + wave_offset * HEALTH_SCALE_PER_WAVE
+	var damage_scale: float = 1.0 + level_offset * DAMAGE_SCALE_PER_LEVEL + wave_offset * DAMAGE_SCALE_PER_WAVE
+	var speed_scale: float = minf(1.0 + level_offset * SPEED_SCALE_PER_LEVEL + wave_offset * SPEED_SCALE_PER_WAVE, MAX_SPEED_SCALE)
+	var coin_scale: float = 1.0 + level_offset * COIN_SCALE_PER_LEVEL + wave_offset * COIN_SCALE_PER_WAVE
+
+	scaled_data.health = int(round(base_data.health * health_scale))
+	scaled_data.attack_damage = base_data.attack_damage * damage_scale
+	scaled_data.speed = base_data.speed * speed_scale
+	scaled_data.coin_drop = int(round(base_data.coin_drop * coin_scale))
 	return scaled_data
 
 

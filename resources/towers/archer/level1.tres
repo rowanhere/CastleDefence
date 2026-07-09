@@ -1,17 +1,17 @@
 [gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://bmkthfbbxh5km"]
 
 [ext_resource type="Script" uid="uid://jcojfonhgt1j" path="res://scripts/towers/upgrade_data.gd" id="1_i0qi6"]
+[ext_resource type="Texture2D" uid="uid://wulxelqjr0km" path="res://assets/textures/towers/archer/Level1.png" id="2_an4oc"]
 [ext_resource type="Texture2D" uid="uid://cjryulwvcsvxm" path="res://assets/textures/towers/archer/towerTop1.png" id="2_wurmx"]
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_upk41"]
 
 [resource]
 script = ExtResource("1_i0qi6")
 upgradeCost = 400
 damage = 22.0
-attackSpeed = 1.4
+attackSpeed = 1.75
 tower_range = 260.0
-towerImage = SubResource("CompressedTexture2D_upk41")
+slowPercent = 0.0
+towerImage = ExtResource("2_an4oc")
 isTowerTop = true
 towerTop = ExtResource("2_wurmx")
 metadata/_custom_type_script = "uid://jcojfonhgt1j"

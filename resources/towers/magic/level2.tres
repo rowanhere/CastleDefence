@@ -10,6 +10,7 @@ upgradeCost = 1050
 damage = 23.0
 attackSpeed = 0.75
 tower_range = 270.0
+slowPercent = 15.0
 towerImage = ExtResource("2_pu8vf")
 level = 2
 isTowerTop = true

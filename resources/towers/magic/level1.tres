@@ -10,6 +10,7 @@ upgradeCost = 650
 damage = 14.0
 attackSpeed = 0.65
 tower_range = 240.0
+slowPercent = 10.0
 towerImage = ExtResource("2_fegx0")
 isTowerTop = true
 towerTop = ExtResource("3_top")

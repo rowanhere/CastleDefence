@@ -19,6 +19,7 @@ var laser_sound_player: AudioStreamPlayer = null
 
 const MAX_CHAIN_TARGETS := 3
 const CHAIN_DAMAGE_FALLOFF := 0.65
+const LASER_SLOW_DURATION := 0.18
 const LASER_WIDTH := 5.0
 const LASER_GLOW_WIDTH := 12.0
 const LASER_GLOW_COLOR := Color(1.0, 0.24, 0.02, 0.35)
@@ -106,6 +107,7 @@ func _attack_enemies() -> void:
 	for index: int in range(targets.size()):
 		var enemy: Node2D = targets[index]
 		if _is_valid_enemy(enemy):
+			_apply_laser_slow(enemy)
 			var target_damage: float = damage * pow(CHAIN_DAMAGE_FALLOFF, index)
 			enemy.take_damage(target_damage)
 
@@ -140,6 +142,7 @@ func _update_lasers(targets: Array[Node2D]) -> void:
 		var enemy: Node2D = targets[index]
 		if not _is_valid_enemy(enemy):
 			continue
+		_apply_laser_slow(enemy)
 		var end_position: Vector2 = enemy.global_position + Vector2(0.0, -18.0)
 		var from_position: Vector2 = start_position if index == 0 else targets[index - 1].global_position + Vector2(0.0, -18.0)
 		var points: PackedVector2Array = _get_curved_laser_points(from_position, end_position)
@@ -223,3 +226,10 @@ func _get_attack_interval() -> float:
 
 func _is_valid_enemy(enemy: Node2D) -> bool:
 	return enemy != null and is_instance_valid(enemy) and enemy.is_in_group("enemies") and enemy.get("is_dead") != true
+
+
+func _apply_laser_slow(enemy: Node2D) -> void:
+	if enemy.has_method("apply_slow"):
+		var slow_percent: float = active_upgrade.slowPercent if active_upgrade != null else 0.0
+		var slow_multiplier: float = 1.0 - clampf(slow_percent / 100.0, 0.0, 0.95)
+		enemy.apply_slow(slow_multiplier, LASER_SLOW_DURATION)

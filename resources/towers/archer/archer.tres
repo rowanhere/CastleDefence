@@ -4,9 +4,10 @@
 [ext_resource type="Script" uid="uid://jcojfonhgt1j" path="res://scripts/towers/upgrade_data.gd" id="2_n537v"]
 [ext_resource type="Resource" uid="uid://bmkthfbbxh5km" path="res://resources/towers/archer/level1.tres" id="3_8i1gx"]
 [ext_resource type="Resource" uid="uid://b3joc8q8wwqqa" path="res://resources/towers/archer/level2.tres" id="4_tbmrm"]
+[ext_resource type="Resource" uid="uid://kap778s7owp7" path="res://resources/towers/archer/level3.tres" id="5_level3"]
 
 [resource]
 script = ExtResource("1_qo8w0")
 name = "archer"
-upgrades = Array[ExtResource("2_n537v")]([ExtResource("3_8i1gx"), ExtResource("4_tbmrm")])
+upgrades = Array[ExtResource("2_n537v")]([ExtResource("3_8i1gx"), ExtResource("4_tbmrm"), ExtResource("5_level3")])
 metadata/_custom_type_script = "uid://b455k2b8q12i1"

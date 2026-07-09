@@ -51,7 +51,8 @@ func _on_timer_timeout() -> void:
 	var first_spawn_data: Dictionary = spawn_queue[0]
 	var first_base_data: EnemyData = first_spawn_data["enemy_data"]
 	var first_is_boss_wave: bool = first_spawn_data.get("is_boss_wave", false)
-	var first_scaled_data: EnemyData = GameHandler.get_scaled_enemy_data(first_base_data, GameHandler.queued_level, first_is_boss_wave)
+	var first_wave_number: int = first_spawn_data.get("wave_number", 1)
+	var first_scaled_data: EnemyData = GameHandler.get_scaled_enemy_data(first_base_data, GameHandler.queued_level, first_wave_number, first_is_boss_wave)
 	if not _can_spawn_enemy_now(first_scaled_data):
 		timer.start(SPAWN_RETRY_INTERVAL)
 		return
@@ -67,7 +68,8 @@ func _on_timer_timeout() -> void:
 			break
 		spawn_queue.pop_front()
 		var base_data: EnemyData = spawn_data["enemy_data"]
-		var scaled_data: EnemyData = GameHandler.get_scaled_enemy_data(base_data, GameHandler.queued_level, is_boss_wave)
+		var wave_number: int = spawn_data.get("wave_number", 1)
+		var scaled_data: EnemyData = GameHandler.get_scaled_enemy_data(base_data, GameHandler.queued_level, wave_number, is_boss_wave)
 		spawned_enemies.append(_spawn_enemy(scaled_data, is_boss_wave, _get_spawn_lane_index(i, group_size)))
 
 	for enemy_instance in spawned_enemies:
@@ -140,7 +142,8 @@ func _ensure_spawn_timer() -> void:
 		return
 	var next_data: EnemyData = spawn_queue[0].get("enemy_data", null)
 	var is_boss_wave: bool = spawn_queue[0].get("is_boss_wave", false)
-	var scaled_data: EnemyData = GameHandler.get_scaled_enemy_data(next_data, GameHandler.queued_level, is_boss_wave)
+	var wave_number: int = spawn_queue[0].get("wave_number", 1)
+	var scaled_data: EnemyData = GameHandler.get_scaled_enemy_data(next_data, GameHandler.queued_level, wave_number, is_boss_wave)
 	timer.start(_get_spawn_interval(scaled_data))
 
 
@@ -162,7 +165,8 @@ func _enqueue_entry(entry_index: int) -> void:
 			continue
 		spawn_queue.append({
 			"enemy_data": enemy_data,
-			"is_boss_wave": is_boss_wave
+			"is_boss_wave": is_boss_wave,
+			"wave_number": entry_index + 1
 		})
 
 

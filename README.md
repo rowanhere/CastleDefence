@@ -1,4 +1,4 @@
-# 🏰 Castle Defence
+﻿# 🏰 Castle Defence
 
 A 2D pixel-art **castle defence** game built with **Godot 4.6**.  
 Place towers along the enemy path, fight off waves, and protect your castle's HP from reaching zero.
@@ -21,11 +21,39 @@ Place towers along the enemy path, fight off waves, and protect your castle's HP
 - Enemy spawning is driven by a level spawn resource: `level1_spawn.tres`
 - Waves use timed starts instead of one hardcoded enemy list
 - Mixed enemy pools are spawned in **round-robin order** until the wave multiplier total is reached
-- Enemy stats and coin rewards scale by level through `GameHandler`
+- Enemy stats and coin rewards scale by level and wave through `GameHandler`
 - Enemy visuals now support **per-enemy health bar colors** through `EnemyData`
 - The final scheduled wave is currently a **boss placeholder** using a goblin until a real boss is added
 
 
+
+## Enemy Scaling
+
+Enemy resources store base stats. At spawn time, `GameHandler.get_scaled_enemy_data()` duplicates the enemy data and scales it using the current level number and wave number.
+
+Formula:
+
+```gdscript
+level_offset = max(level_number - 1, 0)
+wave_offset = max(wave_number - 1, 0)
+
+health_scale = 1.0 + level_offset * 0.20 + wave_offset * 0.12
+damage_scale = 1.0 + level_offset * 0.12 + wave_offset * 0.08
+speed_scale = min(1.0 + level_offset * 0.03 + wave_offset * 0.015, 1.35)
+coin_scale = 1.0 + level_offset * 0.15 + wave_offset * 0.08
+```
+
+Level 2 example:
+
+| Wave | HP Scale | Damage Scale | Speed Scale | Coin Scale |
+|---|---:|---:|---:|---:|
+| 1 | 120% | 112% | 103.0% | 115% |
+| 2 | 132% | 120% | 104.5% | 123% |
+| 3 | 144% | 128% | 106.0% | 131% |
+| 4 | 156% | 136% | 107.5% | 139% |
+| 5 | 168% | 144% | 109.0% | 147% |
+
+Speed scaling is capped at `135%` so later waves get stronger without becoming unreadably fast.
 
 ## 🗼 Towers
 
@@ -175,3 +203,5 @@ defence/
 - [ ] Tower upgrade system
 - [ ] Real boss enemy and boss encounter flow
 - [ ] Level unlock progression
+
+

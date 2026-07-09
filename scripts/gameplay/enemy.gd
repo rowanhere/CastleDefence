@@ -33,6 +33,8 @@ var _path_lane_index: int = 0
 var _has_path_lane: bool = false
 var _spawn_lane_index: int = 0
 var _has_spawn_lane: bool = false
+var _slow_multiplier: float = 1.0
+var _slow_timer: float = 0.0
 
 const DEPTH_SORT_DIVISOR := 4.0
 const SOLDIER_DETECT_RANGE := 150.0
@@ -442,6 +444,7 @@ func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
 
+	_update_slow(delta)
 	_sanitize_lock()
 	_update_depth()
 
@@ -462,7 +465,7 @@ func _physics_process(delta: float) -> void:
 			if dist_to_slot > 6.0 and dist_to_soldier > _engage_range(locked_soldier):
 				var dir: Vector2 = (slot_pos - global_position).normalized()
 				_dir_suffix = _get_dir_suffix(dir)
-				global_position = global_position.move_toward(slot_pos, speed * delta)
+				global_position = global_position.move_toward(slot_pos, _get_current_speed() * delta)
 				_play_dir("walk")
 			else:
 				velocity = Vector2.ZERO
@@ -509,7 +512,7 @@ func _physics_process(delta: float) -> void:
 	_path_progress_hint = path_follow.progress
 	var prev_pos: Vector2 = global_position
 	var path2d := path_follow.get_parent() as Path2D
-	var next_progress: float = path_follow.progress + speed * _get_crowd_speed_scale(path2d, path_follow) * delta
+	var next_progress: float = path_follow.progress + _get_current_speed() * _get_crowd_speed_scale(path2d, path_follow) * delta
 	if barrack_hold_progress >= 0.0:
 		next_progress = min(next_progress, barrack_hold_progress)
 	path_follow.progress = next_progress
@@ -532,6 +535,24 @@ func take_damage(amount: float) -> void:
 		_start_death(true)
 		return
 	_spawn_damage_number(amount)
+
+
+func apply_slow(multiplier: float, duration: float) -> void:
+	_slow_multiplier = min(_slow_multiplier, clampf(multiplier, 0.05, 1.0))
+	_slow_timer = max(_slow_timer, duration)
+
+
+func _update_slow(delta: float) -> void:
+	if _slow_timer <= 0.0:
+		_slow_multiplier = 1.0
+		return
+	_slow_timer -= delta
+	if _slow_timer <= 0.0:
+		_slow_multiplier = 1.0
+
+
+func _get_current_speed() -> float:
+	return speed * _slow_multiplier
 
 
 func _spawn_damage_number(amount: float) -> void:
