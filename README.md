@@ -74,8 +74,18 @@ Speed scaling is capped at `135%` so later waves get stronger without becoming u
 - Soldiers return to their wait positions when no enemies are present
 - Plays `soldierSpawn.mp3` per soldier as they march out
 
-### 🔮 Magic Tower *(coming soon)*
-### 💣 Bomb Tower *(coming soon)*
+### 🔮 Magic Tower
+- Fires focused magic beams from the tower top
+- Uses `magic.tres` with 3 upgrade levels
+- Strong range-focused damage option
+- Plays `magicLaser.mp3` when firing
+
+### 💣 Bomb Tower
+- Launches arcing bomb projectiles at enemies in range
+- Attacks in short burst patterns with reload downtime
+- Uses separate base, launcher, and projectile visuals
+- Uses `bomb.tres` with 3 upgrade levels
+- Plays launcher and impact SFX for clearer hit feedback
 
 ---
 
@@ -186,7 +196,9 @@ defence/
 │   ├── systems/tower/   # Tower builder UI popup
 │   ├── towers/
 │   │   ├── archer/      # archerTower.tscn
-│   │   └── barrack/     # barrackTower.tscn, BarrackSoldier.tscn
+│   │   ├── barrack/     # barrackTower.tscn, BarrackSoldier.tscn
+│   │   ├── bomb/        # BombTower.tscn
+│   │   └── magic/       # magicTower.tscn
 │   └── ui/              # main_menu, level select, HUD, buttons
 └── scripts/
     ├── autoload/        # music_player.gd
@@ -220,8 +232,6 @@ defence/
 ## 🛣️ Roadmap
 
 - [ ] Castle HP bar + proper game over screen
-- [ ] Magic Tower
-- [ ] Bomb Tower
 - [ ] Better wave presentation / countdown UI
 - [ ] Tower upgrade system
 - [ ] Real boss enemy and boss encounter flow
