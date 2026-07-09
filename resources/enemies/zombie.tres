@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://drpf6f4c2lqbd"]
+
+[ext_resource type="Script" uid="uid://c1rydd1oj05bl" path="res://scripts/gameplay/EnemeyData.gd" id="1_zombie"]
+[ext_resource type="SpriteFrames" uid="uid://s204abdp5arm" path="res://resources/enemies/zombie/ZombieFrames.tres" id="2_zombie_frames"]
+
+[resource]
+script = ExtResource("1_zombie")
+enemy_name = "Zombie"
+health = 230
+speed = 54.0
+attack_damage = 22.0
+attack_speed = 1.25
+coin_drop = 28
+path_spacing = 65.0
+health_bar_color = Color(0.415686, 0.65098, 0.254902, 1)
+sprite_frames = ExtResource("2_zombie_frames")
+scale = Vector2(2.6, 2.6)

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://cylmysoc0t35c"]
+
+[ext_resource type="Script" uid="uid://c1rydd1oj05bl" path="res://scripts/gameplay/EnemeyData.gd" id="1_imp"]
+[ext_resource type="SpriteFrames" uid="uid://dfgr8jihvylmk" path="res://resources/enemies/imp/ImpFrames.tres" id="2_imp_frames"]
+
+[resource]
+script = ExtResource("1_imp")
+enemy_name = "Imp"
+health = 95
+speed = 104.0
+attack_damage = 14.0
+attack_speed = 0.75
+coin_drop = 16
+path_spacing = 42.0
+health_bar_color = Color(0.929412, 0.188235, 0.121569, 1)
+sprite_frames = ExtResource("2_imp_frames")
+scale = Vector2(2.5, 2.5)

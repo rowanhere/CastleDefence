@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" uid="uid://c1rydd1oj05bl" path="res://scripts/gameplay/EnemeyData.gd" id="1_predator"]
+[ext_resource type="SpriteFrames" path="res://resources/enemies/predator/PredatorFrames.tres" id="2_predator_frames"]
+
+[resource]
+script = ExtResource("1_predator")
+enemy_name = "Predator"
+health = 260
+speed = 58.0
+attack_damage = 27.0
+attack_speed = 1.15
+coin_drop = 34
+path_spacing = 70.0
+health_bar_color = Color(0.611765, 0.796078, 0.247059, 1)
+sprite_frames = ExtResource("2_predator_frames")
+scale = Vector2(2.65, 2.65)

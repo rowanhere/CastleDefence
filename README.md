@@ -23,7 +23,7 @@ Place towers along the enemy path, fight off waves, and protect your castle's HP
 - Mixed enemy pools are spawned in **round-robin order** until the wave multiplier total is reached
 - Enemy stats and coin rewards scale by level and wave through `GameHandler`
 - Enemy visuals now support **per-enemy health bar colors** through `EnemyData`
-- The final scheduled wave is currently a **boss placeholder** using a goblin until a real boss is added
+- The final scheduled wave is currently a **boss placeholder** using a golem until a real boss is added
 
 
 
@@ -99,18 +99,41 @@ Enemies use a **3-state system** powered by dynamic reparenting:
 - Reaching the castle end → damages castle HP
 
 ### Enemy Types
-| Enemy | HP | Speed | Attack Speed | Damage | Coin Drop | Health Bar Color |
-|---|---:|---:|---:|---:|---:|---|
-| Goblin | 80 | 110 | 1.0 | 10 | 10 | `#1ABC9C` |
-| Gnoll | 140 | 95 | 0.8 | 18 | 16 | `#F39C12` |
-| Demon | 220 | 85 | 0.9 | 24 | 22 | `#8E44AD` |
-| Golem | 320 | 50 | 1.7 | 30 | 28 | `#3498DB` |
+| Enemy | Role | HP | Speed | Attack Speed | Damage | Coin Drop | Path Spacing | Scale | Health Bar Color |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---|
+| Goblin | Fast swarm | 70 | 120 | 1.1 | 8 | 12 | 26 | 2.0 | `#1ABC9C` |
+| Gnoll | Mid bruiser | 130 | 95 | 0.9 | 16 | 18 | 80 | 2.0 | `#F39C12` |
+| Imp | Fast pressure | 95 | 104 | 0.75 | 14 | 16 | 42 | 2.5 | `#ED301F` |
+| Mushroom | Sturdy early tank | 180 | 76 | 1.05 | 18 | 24 | 52 | 2.0 | `#D64B40` |
+| Demon | Elite pressure | 220 | 82 | 0.8 | 24 | 28 | 52 | 2.0 | `#8E44AD` |
+| Zombie | Slow durable walker | 230 | 54 | 1.25 | 22 | 28 | 65 | 2.6 | `#6AA641` |
+| Predator | Durable mid-late bruiser | 260 | 58 | 1.15 | 27 | 34 | 70 | 2.65 | `#9CCA3F` |
+| Lizardman | Heavy melee fighter | 280 | 72 | 0.9 | 28 | 34 | 62 | 2.3 | `#3FA954` |
+| Beholder | Late heavy threat | 310 | 48 | 1.35 | 34 | 42 | 76 | 2.8 | `#B951EA` |
+| Golem | Boss placeholder tank | 360 | 45 | 1.6 | 32 | 38 | 68 | 2.2 | `#3498DB` |
 
 **Balance notes:**
-- Goblins are the fast, low-health frontline swarm enemy
-- Gnolls are mid-tier melee bruisers with better damage and staying power
-- Demons are elite pressure units that hit harder than gnolls without replacing the golem tank role
-- Golems are slow, heavy lane tanks with the largest health pool and highest melee damage
+- Goblins and imps create early speed pressure before the player has a full defence online
+- Gnolls and mushrooms fill the middle of the roster with moderate durability and predictable melee pressure
+- Zombies, predators, and lizardmen are sturdier mid-to-late enemies that test whether the player has enough sustained damage
+- Demons and beholders are higher-threat enemies with stronger attacks and better rewards
+- The golem is currently used as the final boss placeholder until a dedicated boss enemy is added
+
+### Enemy Art Resources
+| Enemy | Data Resource | SpriteFrames Resource |
+|---|---|---|
+| Goblin | `resources/enemies/goblin.tres` | `resources/enemies/goblin/GoblinFrames.tres` |
+| Gnoll | `resources/enemies/gnoll.tres` | `resources/enemies/gnoll/GnollFrames.tres` |
+| Imp | `resources/enemies/imp.tres` | `resources/enemies/imp/ImpFrames.tres` |
+| Mushroom | `resources/enemies/mushroom.tres` | `resources/enemies/mushroom/MushroomFrames.tres` |
+| Demon | `resources/enemies/demon.tres` | `resources/enemies/demon/DemonFrames.tres` |
+| Zombie | `resources/enemies/zombie.tres` | `resources/enemies/zombie/ZombieFrames.tres` |
+| Predator | `resources/enemies/predator.tres` | `resources/enemies/predator/PredatorFrames.tres` |
+| Lizardman | `resources/enemies/lizardman.tres` | `resources/enemies/Lizardman/LizardmanFrames.tres` |
+| Beholder | `resources/enemies/beholder.tres` | `resources/enemies/beholder/BeholderFrames.tres` |
+| Golem | `resources/enemies/golem.tres` | `resources/enemies/golem/GolemFrames.tres` |
+
+Directional sheets for the newer enemies use row order `down`, `up`, `left`, `right`. Their generated SpriteFrames resources expose the animation names expected by `enemy.gd`: `walkDown`, `walkUp`, `walkLeft`, `walkRight`, plus matching `attack`, `hurt`, and `die` variants.
 
 ---
 

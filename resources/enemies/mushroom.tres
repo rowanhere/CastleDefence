@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://sjhtyau48usw"]
+
+[ext_resource type="Script" uid="uid://c1rydd1oj05bl" path="res://scripts/gameplay/EnemeyData.gd" id="1_mushroom"]
+[ext_resource type="SpriteFrames" uid="uid://dewedjt3vwilk" path="res://resources/enemies/mushroom/MushroomFrames.tres" id="2_mushroom_frames"]
+
+[resource]
+script = ExtResource("1_mushroom")
+enemy_name = "Mushroom"
+health = 180
+speed = 76.0
+attack_damage = 18.0
+attack_speed = 1.05
+coin_drop = 24
+path_spacing = 52.0
+health_bar_color = Color(0.839216, 0.294118, 0.25098, 1)
+sprite_frames = ExtResource("2_mushroom_frames")
+scale = Vector2(2, 2)
