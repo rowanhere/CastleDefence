@@ -1,13 +1,176 @@
 [gd_scene format=3 uid="uid://cq1db36l61vnb"]
 
 [ext_resource type="Script" uid="uid://2ijedftbsa8d" path="res://scripts/ui/game_hud.gd" id="1_hud"]
-[ext_resource type="PackedScene" uid="uid://cfaensirowc7i" path="res://scenes/systems/tower/PlayerButtons.tscn" id="2_3b1cv"]
 [ext_resource type="PackedScene" uid="uid://blpg12rugqbbr" path="res://scenes/systems/tower/LevelData.tscn" id="3_h4ju2"]
+[ext_resource type="Texture2D" uid="uid://dq0uebwey7p0q" path="res://assets/textures/ui/inGameUi/button_menu.png" id="4_menu"]
+[ext_resource type="Texture2D" uid="uid://dn1wyy85s5457" path="res://assets/textures/ui/inGameUi/table.png" id="5_table"]
+[ext_resource type="Texture2D" uid="uid://cbhvy2rfiniox" path="res://assets/textures/ui/inGameUi/button_empty_2.png" id="6_button"]
+[ext_resource type="Texture2D" uid="uid://db6khv878msxc" path="res://assets/textures/towers/button_close.png" id="7_close"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_title"]
+font_size = 15
+font_color = Color(1, 0.894118, 0.247059, 1)
+outline_size = 3
+outline_color = Color(0.235294, 0.0901961, 0.0352941, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_button"]
+font_size = 10
+outline_size = 2
+outline_color = Color(0.172549, 0.0705882, 0.0352941, 1)
 
 [node name="GameHUD" type="CanvasLayer" unique_id=711150710]
+process_mode = 3
 layer = 10
 script = ExtResource("1_hud")
 
-[node name="PlayerButtonsHolder" parent="." unique_id=531148795 instance=ExtResource("2_3b1cv")]
-
 [node name="LevelData" parent="." unique_id=1844176880 instance=ExtResource("3_h4ju2")]
+
+[node name="MenuButton" type="TextureButton" parent="." unique_id=1156221156]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -23.0
+offset_top = 27.0
+offset_right = -3.0
+offset_bottom = 47.0
+grow_horizontal = 0
+texture_normal = ExtResource("4_menu")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="PauseOverlay" type="Control" parent="." unique_id=258828994]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="PauseOverlay" unique_id=2102552651]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.45)
+
+[node name="Panel" type="Control" parent="PauseOverlay" unique_id=2095399273]
+anchors_preset = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -72.0
+offset_top = -66.0
+offset_right = 72.0
+offset_bottom = 66.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Table" type="TextureRect" parent="PauseOverlay/Panel" unique_id=505664738]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_table")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="PauseOverlay/Panel" unique_id=1770575242]
+layout_mode = 0
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -46.0
+offset_top = 13.0
+offset_right = 46.0
+offset_bottom = 33.0
+grow_horizontal = 2
+text = "MENU"
+label_settings = SubResource("LabelSettings_title")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" type="TextureButton" parent="PauseOverlay/Panel" unique_id=494832859]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -33.0
+offset_top = -2.0
+offset_right = -15.0
+offset_bottom = 16.0
+grow_horizontal = 0
+texture_normal = ExtResource("7_close")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Buttons" type="VBoxContainer" parent="PauseOverlay/Panel" unique_id=293532205]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -50.0
+offset_top = -24.0
+offset_right = 50.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+
+[node name="BackButton" type="TextureButton" parent="PauseOverlay/Panel/Buttons" unique_id=985298416]
+custom_minimum_size = Vector2(100, 24)
+layout_mode = 2
+texture_normal = ExtResource("6_button")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="PauseOverlay/Panel/Buttons/BackButton" unique_id=1188141011]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "BACK"
+label_settings = SubResource("LabelSettings_button")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ResumeButton" type="TextureButton" parent="PauseOverlay/Panel/Buttons" unique_id=2041511614]
+custom_minimum_size = Vector2(100, 24)
+layout_mode = 2
+texture_normal = ExtResource("6_button")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="PauseOverlay/Panel/Buttons/ResumeButton" unique_id=185641950]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "RESUME"
+label_settings = SubResource("LabelSettings_button")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="QuitButton" type="TextureButton" parent="PauseOverlay/Panel/Buttons" unique_id=1849266106]
+custom_minimum_size = Vector2(100, 24)
+layout_mode = 2
+texture_normal = ExtResource("6_button")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="PauseOverlay/Panel/Buttons/QuitButton" unique_id=1915088395]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "QUIT"
+label_settings = SubResource("LabelSettings_button")
+horizontal_alignment = 1
+vertical_alignment = 1

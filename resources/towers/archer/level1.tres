@@ -10,7 +10,6 @@ upgradeCost = 400
 damage = 22.0
 attackSpeed = 1.75
 tower_range = 260.0
-slowPercent = 0.0
 towerImage = ExtResource("2_an4oc")
 isTowerTop = true
 towerTop = ExtResource("2_wurmx")

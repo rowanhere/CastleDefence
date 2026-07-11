@@ -21,6 +21,7 @@ var attack_damage = 12.0
 var attack_speed = 1.0
 var attack_timer = 0.0
 var locked_soldier: Node2D = null
+var locked_castle: Node2D = null
 var is_boss_enemy: bool = false
 var barrack_hold_progress: float = -1.0
 
@@ -37,6 +38,7 @@ var _slow_multiplier: float = 1.0
 var _slow_timer: float = 0.0
 
 const DEPTH_SORT_DIVISOR := 4.0
+const MAX_DEPTH_Z_INDEX := 2000
 const SOLDIER_DETECT_RANGE := 150.0
 const ATTACK_SLOT_RADIUS := 42.0
 const PATH_LANE_WIDTH := 10.0
@@ -81,7 +83,7 @@ func _ready() -> void:
 
 
 func _update_depth() -> void:
-	z_index = clampi(int(round(global_position.y / DEPTH_SORT_DIVISOR)), -4096, 4096)
+	z_index = clampi(int(round(global_position.y / DEPTH_SORT_DIVISOR)), -4096, MAX_DEPTH_Z_INDEX)
 
 
 func _apply_health_bar_color() -> void:
@@ -216,11 +218,14 @@ func _detach_from_path() -> void:
 	var path_follow: PathFollow2D = get_parent() as PathFollow2D
 	if path_follow == null:
 		return
+	var detach_parent: Node = path_follow.get_parent()
+	if detach_parent == null:
+		return
 	_path_progress_hint = path_follow.progress
 	_detached = true
 	_path_lane_offset = Vector2.ZERO
 	_has_path_lane = false
-	reparent(get_tree().current_scene, true)
+	reparent(detach_parent, true)
 	path_follow.queue_free()
 
 
@@ -448,6 +453,10 @@ func _physics_process(delta: float) -> void:
 	_sanitize_lock()
 	_update_depth()
 
+	if locked_castle != null:
+		_attack_castle(delta)
+		return
+
 	var path_follow: PathFollow2D = get_parent() as PathFollow2D
 
 	if _detached:
@@ -594,7 +603,9 @@ func _start_death(reward_coins: bool) -> void:
 func _finish_death(reward_coins: bool) -> void:
 	var parent_follow := get_parent() as PathFollow2D
 	if parent_follow != null and is_instance_valid(parent_follow):
-		reparent(get_tree().current_scene, true)
+		var detach_parent: Node = parent_follow.get_parent()
+		if detach_parent != null:
+			reparent(detach_parent, true)
 		parent_follow.queue_free()
 	if reward_coins:
 		_spawn_coin_drop_number(coin_drop)
@@ -614,4 +625,37 @@ func die(reward_coins: bool = true) -> void:
 
 
 func reach_castle() -> void:
-	_start_death(false)
+	if is_dead:
+		return
+
+	var castle: Node = get_tree().current_scene.find_child("Castle", true, false)
+	if castle == null or not castle is Node2D:
+		return
+
+	locked_castle = castle as Node2D
+	_detach_from_path()
+	attack_timer = 0.0
+
+
+func _attack_castle(delta: float) -> void:
+	if locked_castle == null or not is_instance_valid(locked_castle):
+		locked_castle = null
+		return
+
+	velocity = Vector2.ZERO
+	var to_castle: Vector2 = locked_castle.global_position - global_position
+	if to_castle.length_squared() > 0.001:
+		_dir_suffix = _get_dir_suffix(to_castle.normalized())
+	_play_dir("attack")
+
+	attack_timer -= delta
+	if attack_timer > 0.0:
+		return
+
+	attack_timer = attack_speed
+	var castle_damage: int = 1
+	# Boss enemies can one-shot the castle later when real boss data is added.
+	# if is_boss_enemy:
+	# 	castle_damage = GameHandler.castle_life
+	if locked_castle.has_method("take_damage"):
+		locked_castle.take_damage(castle_damage)

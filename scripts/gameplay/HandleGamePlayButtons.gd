@@ -11,7 +11,7 @@ const TOWER_TYPE_CLICKED = {
 	"CloseButton": "CLoseIt"
 }
 
-var playHoverSound: AudioStream = preload("res://assets/audio/buttonHover.mp3")
+var playHoverSound: AudioStream = preload("res://assets/audio/sfx/buttonHover.mp3")
 var hovered_buttons = {}
 var original_positions = {}
 var current_selected_button: TextureButton = null

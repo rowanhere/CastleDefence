@@ -11,6 +11,8 @@ signal purchased
 
 const PURCHASE_SOUND: AudioStream = preload("res://assets/audio/sfx/tower_purchase.mp3")
 const SFX_VOLUME_60_PERCENT := -4.4
+const PURCHASE_ICON_OFFSET: Vector2 = Vector2(0.0, -4.0)
+const PURCHASE_ICON_SCALE: Vector2 = Vector2(0.95, 0.95)
 
 
 var insertTower = {
@@ -75,12 +77,19 @@ func insertBtns(pos: Vector2, tower_type: String) -> void:
 	new_btn.visible = true
 	new_btn.modulate = Color.WHITE
 
-	new_btn.get_node("purchaseTypeImg").texture = towerBtnsImages[tower_type]
+	_set_purchase_icon(new_btn, tower_type)
 
 	new_btn.pressed.connect(
 		func():
 			_purchase_tower(tower_type)
 	)
+
+
+func _set_purchase_icon(button: TextureButton, tower_type: String) -> void:
+	var purchase_icon := button.get_node("purchaseTypeImg") as Sprite2D
+	purchase_icon.texture = towerBtnsImages[tower_type] as Texture2D
+	purchase_icon.position = (button.size * 0.5) + PURCHASE_ICON_OFFSET
+	purchase_icon.scale = PURCHASE_ICON_SCALE
 
 
 func _purchase_tower(tower_type: String) -> void:

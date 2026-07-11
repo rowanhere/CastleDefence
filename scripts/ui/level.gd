@@ -1,6 +1,7 @@
 extends Control
 const LevelButton = preload("res://scenes/ui/level_button.tscn")
 const lockedButton = preload("res://scenes/ui/speech_bubble.tscn")
+const BUTTON_HOVER_SOUND: AudioStream = preload("res://assets/audio/sfx/buttonHover.mp3")
 var levelMap = preload("res://assets/audio/music/levelMap.ogg")
 const GameHandlerScript = preload("res://scripts/gameplay/game_handler.gd")
 var lBtn
@@ -125,6 +126,7 @@ func shake(btn:Button) -> void:
 	#kill back after tween animation ends
   
 func _on_level_button_hovered(btn: TextureButton) -> void:
+	GameSound.play(BUTTON_HOVER_SOUND, -8.0)
 	btn.modulate = Color(1.5,1.5,0.5)
 
 func _on_level_button_exited(btn:TextureButton) -> void:

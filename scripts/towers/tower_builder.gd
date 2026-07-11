@@ -1,14 +1,29 @@
 extends Node2D
 
 const TOWER_BUILDER_BUTTON = preload("res://scenes/systems/tower/tower_builder_button.tscn")
+const POPUP_OPEN_SCALE := Vector2(2, 2)
+const POPUP_SCREEN_MARGIN := 24.0
+const POPUP_EDGE_GAP := 12.0
+const BUILDER_Z_INDEX := 2500
+const POPUP_Z_INDEX := 4096
+
 var addTowerBuilder
+var _builder_center := Vector2.ZERO
+
+
 func _ready() -> void:
+	z_as_relative = false
+	z_index = BUILDER_Z_INDEX
 	var btn = $TextureButton
+	btn.z_as_relative = false
+	btn.z_index = BUILDER_Z_INDEX
+	_builder_center = btn.global_position + btn.size / 2
 	 
 	addTowerBuilder = TOWER_BUILDER_BUTTON.instantiate()
 	addTowerBuilder.coinAmt = 400
-	addTowerBuilder.towerBuilderPosition = btn.global_position + btn.size / 2
-	addTowerBuilder.z_index = 100
+	addTowerBuilder.towerBuilderPosition = _builder_center
+	addTowerBuilder.z_as_relative = false
+	addTowerBuilder.z_index = POPUP_Z_INDEX
 	addTowerBuilder.visible = false
 
 	add_child(addTowerBuilder)
@@ -27,13 +42,44 @@ func _on_texture_button_pressed() -> void:
 		close_popup()
 		return
 
-	addTowerBuilder.global_position = global_position
+	addTowerBuilder.global_position = _get_popup_position()
 	addTowerBuilder.modulate.a = 1.0
 	addTowerBuilder.scale = Vector2(0, 0)
 	addTowerBuilder.visible = true
 	
-	create_tween().tween_property(addTowerBuilder, "scale", Vector2(2, 2), 0.2) \
+	create_tween().tween_property(addTowerBuilder, "scale", POPUP_OPEN_SCALE, 0.2) \
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+
+
+func _get_popup_position() -> Vector2:
+	_builder_center = $TextureButton.global_position + $TextureButton.size / 2
+	var popup_size := _get_popup_size()
+	var visible_world_rect := _get_visible_world_rect()
+	var popup_position := _builder_center - popup_size * 0.5
+
+	if popup_position.x + popup_size.x > visible_world_rect.position.x + visible_world_rect.size.x - POPUP_SCREEN_MARGIN:
+		popup_position.x = _builder_center.x - popup_size.x - POPUP_EDGE_GAP
+	if popup_position.y + popup_size.y > visible_world_rect.position.y + visible_world_rect.size.y - POPUP_SCREEN_MARGIN:
+		popup_position.y = _builder_center.y - popup_size.y - POPUP_EDGE_GAP
+
+	popup_position.x = maxf(popup_position.x, visible_world_rect.position.x + POPUP_SCREEN_MARGIN)
+	popup_position.y = maxf(popup_position.y, visible_world_rect.position.y + POPUP_SCREEN_MARGIN)
+	return popup_position
+
+
+func _get_popup_size() -> Vector2:
+	var ring := addTowerBuilder.get_node_or_null("TowerBtnRing") as Control
+	if ring == null:
+		return Vector2(324.0, 258.0)
+	return ring.size * POPUP_OPEN_SCALE
+
+
+func _get_visible_world_rect() -> Rect2:
+	var viewport_rect := get_viewport().get_visible_rect()
+	var inverse_canvas_transform := get_viewport().get_canvas_transform().affine_inverse()
+	var top_left := inverse_canvas_transform * viewport_rect.position
+	var bottom_right := inverse_canvas_transform * (viewport_rect.position + viewport_rect.size)
+	return Rect2(top_left, bottom_right - top_left).abs()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not addTowerBuilder.visible or not event is InputEventMouseButton or not event.pressed:

@@ -14,6 +14,8 @@ const COIN_ALERT_COLOR := Color(1.0, 0.35, 0.35, 1.0)
 const COIN_NORMAL_COLOR := Color(1, 1, 1, 1)
 const COIN_SHAKE_OFFSET := 12.0
 const COIN_SHAKE_STEP := 0.045
+const MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
+
 @onready var life_label: Label = $LevelData/PanelContainer/LifeNode/CoinsAmt
 @onready var coin_label: Label = $LevelData/PanelContainer/CoinNode/CoinsAmt
 @onready var current_wave_label: Label = $LevelData/PanelContainer/WaveNode/CurrentWave
@@ -21,6 +23,12 @@ const COIN_SHAKE_STEP := 0.045
 @onready var wave_progress: TextureProgressBar = $LevelData/WaveTextureProgress
 @onready var wave_icon: Sprite2D = $LevelData/PanelContainer/WaveNode/Sprite2D
 @onready var coin_node: Node2D = $LevelData/PanelContainer/CoinNode
+@onready var menu_button: TextureButton = $MenuButton
+@onready var pause_overlay: Control = $PauseOverlay
+@onready var close_button: TextureButton = $PauseOverlay/Panel/CloseButton
+@onready var back_button: TextureButton = $PauseOverlay/Panel/Buttons/BackButton
+@onready var resume_button: TextureButton = $PauseOverlay/Panel/Buttons/ResumeButton
+@onready var quit_button: TextureButton = $PauseOverlay/Panel/Buttons/QuitButton
 
 var _label_values: Dictionary = {}
 var _label_tweens: Dictionary = {}
@@ -51,6 +59,7 @@ func _ready() -> void:
 		_coin_base_position = coin_node.position
 	if coin_label != null:
 		coin_label.modulate = COIN_NORMAL_COLOR
+	_setup_pause_menu()
 
 
 func _process(delta: float) -> void:
@@ -108,6 +117,50 @@ func play_coin_warning() -> void:
 			_coin_alert_active = false
 			_coin_alert_tween = null
 	)
+
+
+func _setup_pause_menu() -> void:
+	if pause_overlay != null:
+		pause_overlay.visible = false
+	if menu_button != null:
+		menu_button.pressed.connect(_on_menu_button_pressed)
+	if close_button != null:
+		close_button.pressed.connect(_on_resume_button_pressed)
+	if resume_button != null:
+		resume_button.pressed.connect(_on_resume_button_pressed)
+	if back_button != null:
+		back_button.pressed.connect(_on_back_button_pressed)
+	if quit_button != null:
+		quit_button.pressed.connect(_on_quit_button_pressed)
+
+
+func _on_menu_button_pressed() -> void:
+	_show_pause_menu()
+
+
+func _on_resume_button_pressed() -> void:
+	_hide_pause_menu()
+
+
+func _on_back_button_pressed() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
+
+
+func _on_quit_button_pressed() -> void:
+	get_tree().quit()
+
+
+func _show_pause_menu() -> void:
+	get_tree().paused = true
+	if pause_overlay != null:
+		pause_overlay.visible = true
+
+
+func _hide_pause_menu() -> void:
+	get_tree().paused = false
+	if pause_overlay != null:
+		pause_overlay.visible = false
 
 
 func set_current_wave(value: int, immediate: bool = false) -> void:

@@ -5,6 +5,7 @@ const DAMAGE_NUMBER_SCENE := preload("res://scenes/enemies/DamageNumber.tscn")
 
 static var queued_level: int = 1
 static var coins: int = 5000
+static var castle_life: int = 100
 static var _enemy_data_cache: Dictionary = {}
 const HEALTH_SCALE_PER_LEVEL := 0.20
 const DAMAGE_SCALE_PER_LEVEL := 0.12
@@ -26,6 +27,9 @@ const MAX_SPEED_SCALE := 1.35
 @onready var game_hud: CanvasLayer = $GameHUD
 
 func _ready() -> void:
+	if AudioController.has_method("play_random_game_music"):
+		AudioController.play_random_game_music()
+
 	var path: String = get_level_scene_path(queued_level)
 	var packed: PackedScene = load(path)
 	if packed == null:
@@ -95,6 +99,16 @@ static func add_coins(amount: int) -> void:
 		handler._update_hud()
 
 
+static func damage_castle(amount: int = 1) -> void:
+	castle_life = maxi(castle_life - maxi(amount, 0), 0)
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	var handler := tree.current_scene
+	if handler != null and handler.has_method("_update_hud"):
+		handler._update_hud()
+
+
 static func play_purchase_failed_feedback() -> void:
 	var tree := Engine.get_main_loop() as SceneTree
 	if tree == null:
@@ -129,6 +143,7 @@ static func show_floating_message(world_position: Vector2, text: String, color: 
 func _update_hud() -> void:
 	if game_hud == null:
 		return
+	game_hud.set_life(castle_life, false)
 	game_hud.set_coins(coins, false)
 
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bpnakriyiudgb"
-path="res://.godot/imported/towerBtnArrow.png-5c324079b22d341d269e2e5ce5d3a19a.ctex"
+uid="uid://dq0uebwey7p0q"
+path="res://.godot/imported/button_menu.png-e614a3f56625052e9a8dc75b1b471407.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/levels/towerBtnArrow.png"
-dest_files=["res://.godot/imported/towerBtnArrow.png-5c324079b22d341d269e2e5ce5d3a19a.ctex"]
+source_file="res://assets/textures/ui/inGameUi/button_menu.png"
+dest_files=["res://.godot/imported/button_menu.png-e614a3f56625052e9a8dc75b1b471407.ctex"]
 
 [params]
 

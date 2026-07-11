@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://dmodd0u6toy2m"]
+
+[ext_resource type="Script" uid="uid://bf6rur188dvvi" path="res://scripts/gameplay/castle.gd" id="1_castle"]
+[ext_resource type="Texture2D" uid="uid://dsb32edbam5kw" path="res://assets/textures/ui/pak1.png" id="2_castle"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_castle"]
+atlas = ExtResource("2_castle")
+region = Rect2(0, 8, 288, 280)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_castle"]
+size = Vector2(300, 260)
+
+[node name="Castle" type="Area2D" unique_id=198128178]
+z_index = 3000
+z_as_relative = false
+collision_layer = 0
+script = ExtResource("1_castle")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1242578523]
+z_index = 3000
+z_as_relative = false
+scale = Vector2(1.472222, 1.542857)
+texture = SubResource("AtlasTexture_castle")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=61107276]
+position = Vector2(0, 24)
+shape = SubResource("RectangleShape2D_castle")
