@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://bpussvomuvsix"]
+
+[ext_resource type="Texture2D" uid="uid://bwxviswi2lbla" path="res://assets/textures/ui/inGameUi/skull_arr.png" id="1_0b53r"]
+[ext_resource type="Texture2D" uid="uid://dqxvuq5b0vnov" path="res://assets/textures/ui/inGameUi/skull_bg.png" id="1_iba1r"]
+[ext_resource type="Texture2D" uid="uid://drm6xbibk601p" path="res://assets/textures/ui/Waveskull.png" id="2_d34td"]
+
+[node name="WavePointer" type="Node2D" unique_id=1351136119]
+
+[node name="waveArrow" type="Sprite2D" parent="." unique_id=507064054]
+position = Vector2(-70.991714, 50.999985)
+rotation = 2.469641
+scale = Vector2(1.0302223, 0.9617646)
+texture = ExtResource("1_0b53r")
+
+[node name="waveSkull" type="Sprite2D" parent="." unique_id=1500344832]
+texture = ExtResource("1_iba1r")
+
+[node name="Sprite2D" type="Sprite2D" parent="waveSkull" unique_id=212258398]
+position = Vector2(-0.24999993, -0.24999991)
+scale = Vector2(1.0140187, 1.0140187)
+texture = ExtResource("2_d34td")

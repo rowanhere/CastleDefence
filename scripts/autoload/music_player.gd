@@ -12,7 +12,8 @@ const MUSIC_VOLUME_DB: float = -2.0
 
 var last_music: AudioStream
 var music_enabled: bool = true
-var is_transitioning: bool = false
+var _music_operation_id: int = 0
+var _volume_tween: Tween = null
 
 
 func play_music() -> void:
@@ -25,45 +26,57 @@ func stop_music() -> void:
 
 
 func enable_music() -> void:
-	music_enabled = true
-	if last_music:
-		_set_loop_enabled(last_music)
-		bg_music.stream = last_music
-		bg_music.play()
-		fade_volume(bg_music, -40.0, MUSIC_VOLUME_DB, 1.0)
+	set_music_enabled(true)
 
 
 func disable_music() -> void:
-	music_enabled = false
-	await fade_volume(bg_music, 0.0, -40.0, 1.0)
-	bg_music.stop()
+	set_music_enabled(false)
 
 
 func toggle_music() -> void:
-	if is_transitioning:
+	set_music_enabled(not music_enabled)
+
+
+func set_music_enabled(enabled: bool) -> void:
+	var operation_id := _begin_music_operation()
+	music_enabled = enabled
+
+	if enabled:
+		if last_music == null:
+			return
+		_set_loop_enabled(last_music)
+		bg_music.stream = last_music
+		if not bg_music.playing:
+			bg_music.volume_db = -40.0
+			bg_music.play()
+		_fade_volume_to(MUSIC_VOLUME_DB, 0.28, operation_id, false)
 		return
 
-	is_transitioning = true
-	if music_enabled:
-		await disable_music()
+	if bg_music.playing:
+		_fade_volume_to(-40.0, 0.18, operation_id, true)
 	else:
-		enable_music()
-	is_transitioning = false
+		bg_music.stop()
 
 
 func change_music(audio: AudioStream) -> void:
 	if last_music == audio:
 		return
 
-	await fade_volume(bg_music, 0.0, -40.0, 1.0)
-	bg_music.stop()
+	var operation_id := _begin_music_operation()
+	if bg_music.playing:
+		await _fade_volume_to(-40.0, 0.35, operation_id)
+		if operation_id != _music_operation_id:
+			return
+		bg_music.stop()
+
 	last_music = audio
 
 	if audio and music_enabled:
 		_set_loop_enabled(audio)
 		bg_music.stream = audio
 		bg_music.play()
-		fade_volume(bg_music, -40.0, MUSIC_VOLUME_DB, 1.0)
+		bg_music.volume_db = -40.0
+		_fade_volume_to(MUSIC_VOLUME_DB, 0.5, operation_id, false)
 
 
 func play_random_game_music() -> void:
@@ -94,8 +107,30 @@ func _set_loop_enabled(audio: AudioStream) -> void:
 		(audio as AudioStreamMP3).loop = true
 
 
+func _begin_music_operation() -> int:
+	_music_operation_id += 1
+	if _volume_tween != null and _volume_tween.is_valid():
+		_volume_tween.kill()
+	_volume_tween = null
+	return _music_operation_id
+
+
+func _fade_volume_to(to_db: float, duration: float, operation_id: int, stop_after: bool = false) -> void:
+	if operation_id != _music_operation_id:
+		return
+	if _volume_tween != null and _volume_tween.is_valid():
+		_volume_tween.kill()
+	_volume_tween = create_tween()
+	_volume_tween.tween_property(bg_music, "volume_db", to_db, duration)
+	await _volume_tween.finished
+	if operation_id != _music_operation_id:
+		return
+	if stop_after and not music_enabled:
+		bg_music.stop()
+	_volume_tween = null
+
+
 func fade_volume(player: AudioStreamPlayer, from_db: float, to_db: float, duration: float) -> void:
+	var operation_id := _begin_music_operation()
 	player.volume_db = from_db
-	var tween: Tween = create_tween()
-	tween.tween_property(player, "volume_db", to_db, duration)
-	await tween.finished
+	await _fade_volume_to(to_db, duration, operation_id, false)

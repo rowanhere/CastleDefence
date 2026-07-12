@@ -207,8 +207,26 @@ func _destroy_tower() -> void:
 	var current_upgrade: UpgradeData = _get_current_upgrade()
 	var current_cost: int = current_upgrade.upgradeCost if current_upgrade != null else BASE_TOWER_COST
 	GameHandler.add_coins(int(round(current_cost * 0.8)))
+	_restore_tower_builder(tower_root)
 	_on_close_pressed()
 	tower_root.queue_free()
+
+
+func _restore_tower_builder(tower_root: Node) -> void:
+	if not tower_root.has_meta("builder_scene") or not tower_root.has_meta("builder_global_transform"):
+		return
+	var builder_scene := tower_root.get_meta("builder_scene") as PackedScene
+	var tower_parent := tower_root.get_parent()
+	if builder_scene == null or tower_parent == null:
+		return
+	var builder := builder_scene.instantiate() as Node2D
+	if builder == null:
+		return
+	var builder_transform: Transform2D = tower_root.get_meta("builder_global_transform")
+	tower_parent.add_child(builder)
+	builder.global_transform = builder_transform
+	if builder.has_method("refresh_builder_position"):
+		builder.refresh_builder_position()
 
 
 func _apply_upgrade_to_tower(tower_root: Node, next_upgrade: UpgradeData) -> void:

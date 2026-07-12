@@ -4,14 +4,11 @@ const lockedButton = preload("res://scenes/ui/speech_bubble.tscn")
 const BUTTON_HOVER_SOUND: AudioStream = preload("res://assets/audio/sfx/buttonHover.mp3")
 var levelMap = preload("res://assets/audio/music/levelMap.ogg")
 const GameHandlerScript = preload("res://scripts/gameplay/game_handler.gd")
+const SceneTransitionScript = preload("res://scripts/ui/scene_transition.gd")
+const GAME_SCENE := "res://scenes/gameplay/GameHandler.tscn"
+const TRANSITION_SCENE := "res://scenes/ui/scene_transition.tscn"
 var lBtn
 @onready var level_group: Control = $LevelGroup
-@onready var color_rect: ColorRect = $ColorRect
-@onready var level_load: ProgressBar = $levelLoad
-var loading_path: String = ""
-var fake_timer: float = 0.0
-var fake_duration: float = 2.0
-var resource_ready: bool = false
 # Called when the node enters the scene tree for the first time.
 var positions: Array[Vector2] = [
 	Vector2(19.0, 106.0),
@@ -33,8 +30,6 @@ var positions: Array[Vector2] = [
 var unlocked_levels:Array[int] = [1]
 var current_level_number: int = 1
 func _ready() -> void:
-	set_process(false)
-	level_load.visible = false
 	AudioController.change_music(levelMap)
 	lBtn = lockedButton.instantiate()
 	lBtn.scale = Vector2(0,0)
@@ -49,35 +44,6 @@ func _ready() -> void:
 		btn.pressed.connect(_on_level_button_pressed.bind(i + 1,positions[i]))
 		btn.mouse_entered.connect(_on_level_button_hovered.bind(btn))
 		btn.mouse_exited.connect(_on_level_button_exited.bind(btn))
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	if loading_path == "":
-		return
-
-	# check resource in background
-	var status = ResourceLoader.load_threaded_get_status(loading_path)
-	if status == ResourceLoader.THREAD_LOAD_LOADED:
-		resource_ready = true
-
-	# fake progress bar takes 2 seconds regardless
-	fake_timer += delta
-	level_load.value = minf(fake_timer / fake_duration, 1.0) * 100
-
-	# only switch scene when BOTH fake timer and resource are done
-	if fake_timer >= fake_duration and resource_ready:
-		loading_path = ""
-		set_process(false)
-		AudioController.stop_music()
-		GameHandlerScript.queued_level = current_level_number
-		get_tree().change_scene_to_file("res://scenes/gameplay/GameHandler.tscn")
-	elif status == ResourceLoader.THREAD_LOAD_FAILED:
-		print("Failed to load: ", loading_path)
-		loading_path = ""
-		set_process(false)
-		level_load.visible = false
-
-
-	
 
 
 func _on_back_button_pressed() -> void:
@@ -98,15 +64,10 @@ func _on_level_button_pressed(level_number: int,Locked_position:Vector2) -> void
 func handle_unlockedLevel(level_number: int) -> void:
 	print("Level ", level_number, " is unlocked")
 	current_level_number = level_number
-	loading_path = GameHandlerScript.get_level_scene_path(level_number)
-	level_load.visible = true
-	color_rect.visible = true
-
-	level_load.value = 0
-	fake_timer = 0.0
-	resource_ready = false
-	ResourceLoader.load_threaded_request(loading_path)
-	set_process(true)
+	AudioController.stop_music()
+	GameHandlerScript.queued_level = current_level_number
+	SceneTransitionScript.setup(GAME_SCENE, "Loading....")
+	get_tree().change_scene_to_file(TRANSITION_SCENE)
 
 var current_tween: Tween = null	
 func shake(btn:Button) -> void:

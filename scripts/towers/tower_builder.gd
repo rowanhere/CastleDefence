@@ -37,6 +37,12 @@ func _ready() -> void:
 	)
 	addTowerBuilder.purchased.connect(remove_builder)
 
+
+func refresh_builder_position() -> void:
+	_builder_center = $TextureButton.global_position + $TextureButton.size / 2
+	if addTowerBuilder != null:
+		addTowerBuilder.towerBuilderPosition = _builder_center
+
 func _on_texture_button_pressed() -> void:
 	if addTowerBuilder.visible:
 		close_popup()

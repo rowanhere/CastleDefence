@@ -1,37 +1,131 @@
-﻿# 🏰 Castle Defence
+# Castle Defence
 
-A 2D pixel-art **castle defence** game built with **Godot 4.6**.  
-Place towers along the enemy path, fight off waves, and protect your castle's HP from reaching zero.
+A 2D pixel-art tower-defence game built with Godot 4.6. Place and upgrade towers, earn coins from defeated enemies, hold the road with barrack soldiers, and protect the castle through every wave.
 
----
+## Current Build
 
-## 🎮 How It Works
+- Godot `4.6`, GDScript, Forward+ renderer
+- `320 x 180` base viewport, stretched to the game window
+- One playable level: `scenes/levels/level1/level_1.tscn`
+- Five scheduled waves with mixed enemy pools and a golem boss placeholder
+- Four playable tower types: Archer, Barrack, Magic, and Bomb
+- Tower purchase, upgrade, destroy, refund, range preview, and insufficient-coin feedback
+- Animated HUD counters, wave countdown, spawn-direction pointer, pause menu, win screen, and fail screen
+- Threaded loading transition for entering, restarting, and leaving a level
+- Music toggle with fades and randomized in-game music
 
-- Enemies spawn and follow a fixed **Path2D** toward your castle
-- Place towers at designated spots alongside the path to stop them
-- Each tower costs **400 coins** to place
-- Enemies now **drop coins on death**
-- Enemies that reach the end of the path **damage the castle**
-- **Game over** when the castle's HP hits zero
-- Survive all **10 waves** to complete the level
+## Gameplay Flow
 
-## 📌 Current Build
+1. Choose Level 1 from the level map.
+2. Click a tower-builder location to open its four-tower purchase popup.
+3. Buy a tower for `400` coins. The tower is placed at the builder's exact position.
+4. Click a built tower to view its current stats, next upgrade, cost, and destroy refund.
+5. Defeat enemies to earn their coin drops before they reach the castle.
+6. Complete every scheduled wave while the castle has more than `0` HP to win.
 
-- One playable level is currently set up under `scenes/levels/level1/`
-- Enemy spawning is driven by a level spawn resource: `level1_spawn.tres`
-- Waves use timed starts instead of one hardcoded enemy list
-- Mixed enemy pools are spawned in **round-robin order** until the wave multiplier total is reached
-- Enemy stats and coin rewards scale by level and wave through `GameHandler`
-- Enemy visuals now support **per-enemy health bar colors** through `EnemyData`
-- The final scheduled wave is currently a **boss placeholder** using a golem until a real boss is added
+The current development balance starts the player with `5000` coins and `100` castle HP. These values live in `scripts/gameplay/game_handler.gd`.
 
+## Economy and Tower Lifecycle
 
+- Every tower purchase currently costs `400` coins.
+- Failed purchases and upgrades flash the HUD coin value red and shake it.
+- Upgrade costs come from the next level's `UpgradeData` resource.
+- Destroying a tower refunds `80%` of its current level resource cost.
+- Destroying a tower restores its original tower builder at the same transform.
+- Destroying a barrack also removes its active soldier.
+- Successful placement and upgrades play dedicated sound effects.
 
-## Enemy Scaling
+## Towers
 
-Enemy resources store base stats. At spawn time, `GameHandler.get_scaled_enemy_data()` duplicates the enemy data and scales it using the current level number and wave number.
+### Archer Tower
 
-Formula:
+Targets enemies in range and fires homing arrows. Its level-specific base and archer textures are supplied by the upgrade resources.
+
+| Level | Damage | Attacks/sec | Range | Resource Cost |
+|---|---:|---:|---:|---:|
+| 1 | 22 | 1.75 | 260 | 400 |
+| 2 | 34 | 2.25 | 290 | 650 |
+| 3 | 52 | 2.85 | 325 | 1050 |
+
+### Barrack Tower
+
+Spawns one soldier that intercepts enemies near the path. The soldier becomes larger and tankier when the tower is upgraded.
+
+- Initial soldier spawn delay: `3` seconds
+- Soldier respawn delay: `10` seconds
+- Soldier maximum HP: `tower level * 100`
+- Soldier scale: `2.5x` at level 1 and `3.0x` at level 2
+- Spawn and respawn progress is shown above the tower
+
+| Level | Soldier Damage | Attacks/sec | Range | Resource Cost |
+|---|---:|---:|---:|---:|
+| 1 | 14 | 1.0 | 230 | 400 |
+| 2 | 20 | 1.25 | 250 | 650 |
+
+### Magic Tower
+
+Maintains a visible magic beam while enemies are in range. It can chain through up to three nearby targets; each later target receives `65%` of the previous target's damage. The beam also refreshes a short slow effect.
+
+| Level | Damage | Attacks/sec | Range | Slow | Resource Cost |
+|---|---:|---:|---:|---:|---:|
+| 1 | 14 | 0.65 | 240 | 10% | 650 |
+| 2 | 23 | 0.75 | 270 | 15% | 1050 |
+| 3 | 36 | 0.90 | 305 | 20% | 1550 |
+
+### Bomb Tower
+
+Launches three animated bomb shots, then enters a reload cooldown. Bombs rise vertically, steer toward their target while falling, rotate with their trajectory, and damage every enemy inside the impact radius.
+
+| Level | Blast Damage | Attack Rate | Range | Resource Cost |
+|---|---:|---:|---:|---:|
+| 1 | 55 | 1.25 | 240 | 800 |
+| 2 | 90 | 1.45 | 270 | 1200 |
+| 3 | 140 | 2.00 | 310 | 1800 |
+
+`Resource Cost` is the value stored on that level resource. Tower placement still uses the shared `400` purchase price; upgrades charge the next level's resource cost.
+
+## Enemies
+
+Enemy base stats live in `resources/enemies/<enemy>.tres`. Each resource also provides directional animation frames, path spacing, visual scale, coin reward, and a custom health-bar color.
+
+| Enemy | Role | HP | Speed | Attack Delay | Damage | Coins | Path Spacing |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Goblin | Fast swarm | 70 | 120 | 1.10 | 8 | 12 | 26 |
+| Gnoll | Early bruiser | 130 | 95 | 0.90 | 16 | 18 | 80 |
+| Imp | Fast pressure | 95 | 104 | 0.75 | 14 | 16 | 42 |
+| Mushroom | Early tank | 180 | 76 | 1.05 | 18 | 24 | 52 |
+| Demon | Elite pressure | 220 | 82 | 0.80 | 24 | 28 | 52 |
+| Zombie | Slow durable unit | 230 | 54 | 1.25 | 22 | 28 | 65 |
+| Predator | Mid-late bruiser | 260 | 58 | 1.15 | 27 | 34 | 70 |
+| Lizardman | Heavy fighter | 280 | 72 | 0.90 | 28 | 34 | 62 |
+| Beholder | Late heavy threat | 310 | 48 | 1.35 | 34 | 42 | 76 |
+| Golem | Boss placeholder | 360 | 45 | 1.60 | 32 | 38 | 68 |
+
+Directional enemy sheets use the row order `down`, `up`, `left`, `right`. Their SpriteFrames expose matching walk, attack, hurt, and death animations.
+
+## Enemy Movement and Barrack Combat
+
+- Enemies travel through `Path2D` using `PathFollow2D` nodes.
+- Normal waves spawn in groups of two with temporary spawn lanes.
+- Crowd speed adjustment and lateral path lanes reduce visual overlap in large groups.
+- Enemies near a soldier leave path movement and reserve positions around that soldier.
+- Multiple enemies can surround and attack the same soldier instead of waiting in one strict queue.
+- When combat ends, enemies return to the path and reclaim a lane.
+- Enemies that reach the path end damage the castle and are removed.
+
+## Waves and Scaling
+
+Level 1 uses `scenes/levels/level1/level1_spawn.tres`:
+
+| Wave | Start | Enemy Pool | Count |
+|---|---:|---|---:|
+| 1 | 0s | Imp, Goblin | 14 |
+| 2 | 45s | Goblin, Gnoll, Imp | 15 |
+| 3 | 75s | Gnoll, Zombie, Predator | 10 |
+| 4 | 105s | Gnoll, Demon, Lizardman, Zombie, Beholder, Predator | 10 |
+| 5 | 135s | Golem boss placeholder | 1 |
+
+Non-boss enemies are duplicated and scaled at spawn time:
 
 ```gdscript
 level_offset = max(level_number - 1, 0)
@@ -43,213 +137,94 @@ speed_scale = min(1.0 + level_offset * 0.03 + wave_offset * 0.015, 1.35)
 coin_scale = 1.0 + level_offset * 0.15 + wave_offset * 0.08
 ```
 
-Level 2 example:
+Boss scaling is intentionally left as a placeholder until dedicated boss resources and encounters are implemented.
 
-| Wave | HP Scale | Damage Scale | Speed Scale | Coin Scale |
-|---|---:|---:|---:|---:|
-| 1 | 120% | 112% | 103.0% | 115% |
-| 2 | 132% | 120% | 104.5% | 123% |
-| 3 | 144% | 128% | 106.0% | 131% |
-| 4 | 156% | 136% | 107.5% | 139% |
-| 5 | 168% | 144% | 109.0% | 147% |
+## HUD, Win, and Fail States
 
-Speed scaling is capped at `135%` so later waves get stronger without becoming unreadably fast.
+- HUD displays castle HP, coins, current wave, total waves, and time until the next wave.
+- A pulsing pointer appears five seconds before a wave and points toward its spawn direction.
+- The level ends only after all waves are queued and every living enemy is gone.
+- Castle HP `75-100`: 3 stars
+- Castle HP `40-74`: 2 stars
+- Castle HP `1-39`: 1 star
+- Completing a level currently adds a fixed `50` coins.
+- Pause, restart, back-to-level-select, win, and fail actions use the loading transition where appropriate.
 
-## 🗼 Towers
+## Audio
 
-### 🏹 Archer Tower
-- Fires homing arrows at the first enemy in range
-- Uses `archer.tres` with 3 upgrade levels
-- Upgrade stats:
-
-| Level | Damage | Attack Rate | Range | Upgrade Cost |
-|---|---:|---:|---:|---:|
-| 1 | 22 | 1.75/sec | 260 | 400 |
-| 2 | 34 | 2.25/sec | 290 | 650 |
-| 3 | 52 | 2.85/sec | 325 | 1050 |
-
-- Arrow speed scales from the active upgrade's attack rate
-- Plays `arrowHit.mp3` on impact
-
-### 🪖 Barrack Tower
-- Spawns **1 soldier** that intercepts enemies in melee
-- First soldier spawn has a **3-second** delay after placement
-- If the soldier dies, the tower respawns a new soldier after **10 seconds**
-- Progress bar on tower shows initial spawn and respawn countdowns
-- Soldier walks out from the tower door with a short tween + fade-in
-- Soldier HP is `tower level * 100`
-- Soldier scale grows by level: `2.5x` at level 1, `3.0x` at level 2
-- Current upgrade stats:
-
-| Level | Soldier Damage | Attack Rate | Range | Upgrade Cost |
-|---|---:|---:|---:|---:|
-| 1 | 14 | 1.0/sec | 230 | 400 |
-| 2 | 20 | 1.25/sec | 250 | 650 |
-
-- Frees its active soldier when the tower is destroyed
-- Plays `soldierSpawn.mp3` when the soldier marches out
-
-### 🔮 Magic Tower
-- Fires focused magic beams from the tower top
-- Uses `magic.tres` with 3 upgrade levels
-- Strong range-focused damage option
-- Plays `magicLaser.mp3` when firing
-
-### 💣 Bomb Tower
-- Launches arcing bomb projectiles at enemies in range
-- Attacks in short burst patterns with reload downtime
-- Uses separate base, launcher, and projectile visuals
-- Uses `bomb.tres` with 3 upgrade levels
-- Plays launcher and impact SFX for clearer hit feedback
-
----
-
-## 👹 Enemies
-
-Enemies use a **3-state system** powered by dynamic reparenting:
-
-| State | Behaviour |
+| Asset | Use |
 |---|---|
-| **On path** | Walks via `PathFollow2D`, detects soldiers within 150px |
-| **In combat** | Reparented to scene root — moves freely, claims a unique angle slot around the soldier, attacks when at slot |
-| **Returning** | Walks `move_toward` the nearest point on the path curve, reparents back once it physically arrives |
+| `tower_purchase.mp3` | Successful tower placement |
+| `tower-upgrade.mp3` | Successful tower upgrade |
+| `arrowHit.mp3` | Arrow impact |
+| `swordHit.mp3` | Soldier melee hit |
+| `soldierSpawn.mp3` | Barrack soldier spawn |
+| `magicLaser.mp3` | Active magic beam |
+| `BombTowerLauncher.mp3` | Bomb launch |
+| `bombImpact.mp3` | Bomb explosion |
+| `Forest Day.ogg` | Main menu music |
+| `levelMap.ogg` | Level-select music |
+| `GameMusic/music1-4.mp3` | Randomized gameplay music |
 
-**Key details:**
-- Each enemy claims one of 8 evenly-spaced angle slots around the soldier so they physically surround it
-- Combat uses direct position movement (no physics collision) so enemies don't push each other
-- When a soldier dies, enemies walk back to the path smoothly — no teleporting
-- If a new soldier appears while returning, the enemy immediately re-enters combat
-- Show **floating red damage numbers** when hit
-- Play a death animation before being freed
-- Reaching the castle end → damages castle HP
+## Project Structure
 
-### Enemy Types
-| Enemy | Role | HP | Speed | Attack Speed | Damage | Coin Drop | Path Spacing | Scale | Health Bar Color |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---|
-| Goblin | Fast swarm | 70 | 120 | 1.1 | 8 | 12 | 26 | 2.0 | `#1ABC9C` |
-| Gnoll | Mid bruiser | 130 | 95 | 0.9 | 16 | 18 | 80 | 2.0 | `#F39C12` |
-| Imp | Fast pressure | 95 | 104 | 0.75 | 14 | 16 | 42 | 2.5 | `#ED301F` |
-| Mushroom | Sturdy early tank | 180 | 76 | 1.05 | 18 | 24 | 52 | 2.0 | `#D64B40` |
-| Demon | Elite pressure | 220 | 82 | 0.8 | 24 | 28 | 52 | 2.0 | `#8E44AD` |
-| Zombie | Slow durable walker | 230 | 54 | 1.25 | 22 | 28 | 65 | 2.6 | `#6AA641` |
-| Predator | Durable mid-late bruiser | 260 | 58 | 1.15 | 27 | 34 | 70 | 2.65 | `#9CCA3F` |
-| Lizardman | Heavy melee fighter | 280 | 72 | 0.9 | 28 | 34 | 62 | 2.3 | `#3FA954` |
-| Beholder | Late heavy threat | 310 | 48 | 1.35 | 34 | 42 | 76 | 2.8 | `#B951EA` |
-| Golem | Boss placeholder tank | 360 | 45 | 1.6 | 32 | 38 | 68 | 2.2 | `#3498DB` |
-
-**Balance notes:**
-- Goblins and imps create early speed pressure before the player has a full defence online
-- Gnolls and mushrooms fill the middle of the roster with moderate durability and predictable melee pressure
-- Zombies, predators, and lizardmen are sturdier mid-to-late enemies that test whether the player has enough sustained damage
-- Demons and beholders are higher-threat enemies with stronger attacks and better rewards
-- The golem is currently used as the final boss placeholder until a dedicated boss enemy is added
-
-### Enemy Art Resources
-| Enemy | Data Resource | SpriteFrames Resource |
-|---|---|---|
-| Goblin | `resources/enemies/goblin.tres` | `resources/enemies/goblin/GoblinFrames.tres` |
-| Gnoll | `resources/enemies/gnoll.tres` | `resources/enemies/gnoll/GnollFrames.tres` |
-| Imp | `resources/enemies/imp.tres` | `resources/enemies/imp/ImpFrames.tres` |
-| Mushroom | `resources/enemies/mushroom.tres` | `resources/enemies/mushroom/MushroomFrames.tres` |
-| Demon | `resources/enemies/demon.tres` | `resources/enemies/demon/DemonFrames.tres` |
-| Zombie | `resources/enemies/zombie.tres` | `resources/enemies/zombie/ZombieFrames.tres` |
-| Predator | `resources/enemies/predator.tres` | `resources/enemies/predator/PredatorFrames.tres` |
-| Lizardman | `resources/enemies/lizardman.tres` | `resources/enemies/Lizardman/LizardmanFrames.tres` |
-| Beholder | `resources/enemies/beholder.tres` | `resources/enemies/beholder/BeholderFrames.tres` |
-| Golem | `resources/enemies/golem.tres` | `resources/enemies/golem/GolemFrames.tres` |
-
-Directional sheets for the newer enemies use row order `down`, `up`, `left`, `right`. Their generated SpriteFrames resources expose the animation names expected by `enemy.gd`: `walkDown`, `walkUp`, `walkLeft`, `walkRight`, plus matching `attack`, `hurt`, and `die` variants.
-
----
-
-## ⚔️ Soldier Behaviour
-
-| State | Action |
-|---|---|
-| No enemies in tower area | Walk to wait position near the path, idle |
-| Enemy enters valid combat window | Assigned as the soldier target by the tower |
-| Target assigned | Chase enemy and move into melee range |
-| In attack range | Stop, swing continuously, deal damage |
-| Enemy dead | Stop attacking, return to wait position |
-| Soldier dead | Tower starts 10s respawn countdown |
-
----
-
-## 🔊 Audio
-
-| File | Trigger |
-|---|---|
-| `soldierSpawn.mp3` | Barrack soldier marching out |
-| `swordHit.mp3` | Soldier landing a hit on an enemy |
-| `arrowHit.mp3` | Arrow hitting an enemy |
-| `Forest Day.ogg` | Main menu background music |
-| `levelMap.ogg` | Level select screen music |
-
----
-
-## 🗂️ Project Structure
-
-```
+```text
 defence/
-├── assets/
-│   ├── audio/
-│   │   ├── music/       # Forest Day.ogg, levelMap.ogg
-│   │   └── sfx/         # arrowHit, swordHit, soldierSpawn
-│   ├── fonts/           # JosefinSans, WinkySans
-│   └── textures/
-│       ├── enemies/     # Walk, Attack, Hurt, Dead sprites
-│       ├── levels/      # Grass tiles, tower slot buttons
-│       ├── towers/      # Archer, Barrack sprite sheets
-│       └── ui/          # Buttons, backgrounds, icons
-├── resources/
-│   └── towers/          # TowerData + UpgradeData (.tres)
-├── scenes/
-│   ├── autoload/        # AudioController, GameSound singletons
-│   ├── enemies/         # enemy.tscn, DamageNumber.tscn
-│   ├── levels/          # level1/level_1.tscn, level1/level1_path.tscn
-│   ├── projectiles/     # arrow.tscn
-│   ├── systems/tower/   # Tower builder UI popup
-│   ├── towers/
-│   │   ├── archer/      # archerTower.tscn
-│   │   ├── barrack/     # barrackTower.tscn, BarrackSoldier.tscn
-│   │   ├── bomb/        # BombTower.tscn
-│   │   └── magic/       # magicTower.tscn
-│   └── ui/              # main_menu, level select, HUD, buttons
-└── scripts/
-    ├── autoload/        # music_player.gd
-    ├── gameplay/        # enemy.gd, level_path_handler.gd, damage_number.gd
-    │                    # game_handler.gd, enemy_spawn_schedule.gd, enemy_spawn_wave.gd
-    ├── systems/         # tower_builder.gd, tower_builder_button.gd
-    ├── towers/          # barrackTower.gd, barrackSoldierHandler.gd
-    │                    # archer_tower_attack.gd, arrow.gd, game_sound.gd
-    └── ui/              # main_menu.gd, level.gd, level_button.gd
+|-- assets/                 # Fonts, music, SFX, and textures
+|-- resources/
+|   |-- enemies/            # EnemyData and SpriteFrames resources
+|   `-- towers/             # TowerData and per-level UpgradeData
+|-- scenes/
+|   |-- gameplay/           # GameHandler and wave pointer
+|   |-- levels/             # Castle and level content
+|   |-- projectiles/        # Arrow and bomb projectiles
+|   |-- systems/tower/      # Builder and upgrade interfaces
+|   |-- towers/             # Archer, barrack, bomb, and magic scenes
+|   `-- ui/                 # Menus, HUD, and scene transition
+|-- scripts/
+|   |-- autoload/           # Music state and transitions
+|   |-- gameplay/           # Waves, enemies, castle, and rewards
+|   |-- systems/            # Tower purchase popup
+|   |-- towers/             # Tower attacks, soldiers, and upgrades
+|   `-- ui/                 # Menus, HUD, levels, and loading
+`-- project.godot
 ```
 
----
+## Running the Project
 
-## 🛠️ Built With
+1. Install Godot `4.6.x`.
+2. Clone this repository.
+3. Import `project.godot` in the Godot Project Manager.
+4. Allow the initial asset import to finish.
+5. Press `F5` to start from `scenes/ui/menu.tscn`.
 
-- [Godot 4.6](https://godotengine.org/)
-- GDScript
-- Pixel art assets — 320×180 base resolution
+The optional GDScript Formatter editor plugin expects the external `gdformat` command from `gdtoolkit`. The game can run without that formatter command, but the editor prints a plugin warning when it is unavailable.
 
----
+## Known Gaps and Next Work
 
-## 🚀 Running the Project
+- [ ] Replace the golem placeholder with a dedicated boss and boss scaling.
+- [ ] Add playable scenes and spawn schedules for Levels 2-15; only Level 1 is unlocked now.
+- [ ] Persist unlocked levels, star ratings, settings, and economy between sessions.
+- [ ] Connect win-screen reward text to the actual coin reward; gameplay currently grants a fixed `50` coins.
+- [ ] Rebalance the temporary development starting balance of `5000` coins.
+- [ ] Continue stress-testing crowd lanes and barrack combat with very large waves and builders near spawn points.
+- [ ] Add automated smoke tests for scene loading, purchases, upgrades, win/fail transitions, and resource validity.
+- [ ] Remove obsolete temporary level scene files after confirming they are not needed.
 
-1. Clone the repo
-2. Open **Godot 4.6**
-3. Import the project by selecting `project.godot`
-4. Press **F5** to run
+## Adding Content
 
----
+### Add an enemy
 
-## 🛣️ Roadmap
+1. Add its directional sprite sheets and imports under `resources/enemies/<id>/`.
+2. Create a SpriteFrames resource with the animation names expected by `enemy.gd`.
+3. Create `resources/enemies/<id>.tres` using `EnemyData`.
+4. Add the lowercase resource ID to a wave's `enemy_pool`.
+5. Test path spacing, directional facing, death cleanup, coin drops, and barrack combat.
 
-- [ ] Castle HP bar + proper game over screen
-- [ ] Better wave presentation / countdown UI
-- [ ] Tower upgrade system
-- [ ] Real boss enemy and boss encounter flow
-- [ ] Level unlock progression
+### Add a tower level
 
-
+1. Create the next `levelN.tres` using `UpgradeData`.
+2. Add it to the tower's ordered `upgrades` array.
+3. Supply all required level textures, including tower-top or bomb-launcher parts where relevant.
+4. Confirm the tower applies damage, attack speed, range, slow, and visuals through `handle_upgrade_applied()`.
+5. Verify the upgrade preview, payment, max-level state, refund, and restored builder.

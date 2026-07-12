@@ -5,12 +5,16 @@ const DEFAULT_SPAWN_INTERVAL := 0.3
 const MIN_SPAWN_INTERVAL := 0.18
 const SPAWN_RETRY_INTERVAL := 0.08
 const SPAWN_GROUP_SIZE := 2
+const WAVE_POINTER_LEAD_TIME := 5.0
+
 var spawn_schedule: Resource
 
 @onready var timer: Timer = $Timer
 var spawn_queue: Array[Dictionary] = []
 var elapsed_time: float = 0.0
 var next_entry_index: int = 0
+var active_pointer_wave_index: int = -1
+var level_complete_checked: bool = false
 
 
 func _ready() -> void:
@@ -40,6 +44,7 @@ func _process(delta: float) -> void:
 		next_entry_index += 1
 
 	_ensure_spawn_timer()
+	_check_level_complete()
 
 
 func _on_timer_timeout() -> void:
@@ -137,6 +142,34 @@ func _path_follow_has_live_enemy(path_follow: PathFollow2D) -> bool:
 	return false
 
 
+func _has_live_enemies() -> bool:
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if enemy != null and is_instance_valid(enemy) and not enemy.is_dead:
+			return true
+	for child in get_children():
+		var follow := child as PathFollow2D
+		if follow != null and _path_follow_has_live_enemy(follow):
+			return true
+	return false
+
+
+func _check_level_complete() -> void:
+	if level_complete_checked or spawn_schedule == null:
+		return
+	if next_entry_index < spawn_schedule.waves.size():
+		return
+	if not spawn_queue.is_empty():
+		return
+	if timer != null and not timer.is_stopped():
+		return
+	if _has_live_enemies():
+		return
+	if GameHandler.castle_life <= 0:
+		return
+	level_complete_checked = true
+	GameHandler.complete_level()
+
+
 func _ensure_spawn_timer() -> void:
 	if timer == null or not timer.is_stopped() or spawn_queue.is_empty():
 		return
@@ -213,6 +246,48 @@ func _update_wave_status_ui() -> void:
 		progress_ratio = clampf(elapsed_time / wave_end_time, 0.0, 1.0)
 
 	handler.update_wave_status(current_wave, total_waves, progress_ratio)
+	_update_wave_pointer(handler, started_waves, total_waves)
+
+
+func _update_wave_pointer(handler: Node, started_waves: int, total_waves: int) -> void:
+	if handler == null or not handler.has_method("show_wave_pointer"):
+		return
+	if started_waves >= total_waves:
+		if handler.has_method("hide_wave_pointer"):
+			handler.hide_wave_pointer()
+		active_pointer_wave_index = -1
+		return
+
+	var next_wave_index: int = clampi(started_waves, 0, total_waves - 1)
+	var next_wave: Resource = spawn_schedule.waves[next_wave_index]
+	var time_until_wave: float = next_wave.start_time - elapsed_time
+	if time_until_wave <= WAVE_POINTER_LEAD_TIME and time_until_wave > 0.0:
+		if active_pointer_wave_index != next_wave_index:
+			active_pointer_wave_index = next_wave_index
+			handler.show_wave_pointer(_get_spawn_pointer_position(), _get_spawn_direction())
+	elif active_pointer_wave_index != -1 and handler.has_method("hide_wave_pointer"):
+		handler.hide_wave_pointer()
+		active_pointer_wave_index = -1
+
+
+func _get_spawn_pointer_position() -> Vector2:
+	if curve == null or curve.get_point_count() <= 0:
+		return global_position
+	return to_global(curve.sample_baked(0.0))
+
+
+func _get_spawn_direction() -> Vector2:
+	if curve == null:
+		return Vector2.RIGHT
+	var path_length: float = curve.get_baked_length()
+	if path_length <= 0.0:
+		return Vector2.RIGHT
+	var start_pos: Vector2 = curve.sample_baked(0.0)
+	var next_pos: Vector2 = curve.sample_baked(minf(24.0, path_length))
+	var direction: Vector2 = next_pos - start_pos
+	if direction.length_squared() <= 0.001:
+		return Vector2.RIGHT
+	return direction.normalized()
 
 
 func _apply_spawn_facing(enemy_instance: Node) -> void:

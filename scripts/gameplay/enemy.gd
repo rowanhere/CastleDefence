@@ -36,6 +36,7 @@ var _spawn_lane_index: int = 0
 var _has_spawn_lane: bool = false
 var _slow_multiplier: float = 1.0
 var _slow_timer: float = 0.0
+var _slow_visual_active: bool = false
 
 const DEPTH_SORT_DIVISOR := 4.0
 const MAX_DEPTH_Z_INDEX := 2000
@@ -549,15 +550,25 @@ func take_damage(amount: float) -> void:
 func apply_slow(multiplier: float, duration: float) -> void:
 	_slow_multiplier = min(_slow_multiplier, clampf(multiplier, 0.05, 1.0))
 	_slow_timer = max(_slow_timer, duration)
+	_set_slow_visual(true)
 
 
 func _update_slow(delta: float) -> void:
 	if _slow_timer <= 0.0:
 		_slow_multiplier = 1.0
+		_set_slow_visual(false)
 		return
 	_slow_timer -= delta
 	if _slow_timer <= 0.0:
 		_slow_multiplier = 1.0
+		_set_slow_visual(false)
+
+
+func _set_slow_visual(active: bool) -> void:
+	if _slow_visual_active == active or anim == null:
+		return
+	_slow_visual_active = active
+	anim.self_modulate = Color(0.62, 0.86, 1.0) if active else Color.WHITE
 
 
 func _get_current_speed() -> float:

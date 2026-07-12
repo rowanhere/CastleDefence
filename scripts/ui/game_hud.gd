@@ -14,7 +14,17 @@ const COIN_ALERT_COLOR := Color(1.0, 0.35, 0.35, 1.0)
 const COIN_NORMAL_COLOR := Color(1, 1, 1, 1)
 const COIN_SHAKE_OFFSET := 12.0
 const COIN_SHAKE_STEP := 0.045
-const MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
+const LEVEL_SELECTOR_SCENE := "res://scenes/ui/level.tscn"
+const GAME_SCENE := "res://scenes/gameplay/GameHandler.tscn"
+const TRANSITION_SCENE := "res://scenes/ui/scene_transition.tscn"
+const SceneTransitionScript = preload("res://scripts/ui/scene_transition.gd")
+const WIN_STAR_TEXTURES: Dictionary = {
+	1: preload("res://assets/textures/levelWin/star_1.png"),
+	2: preload("res://assets/textures/levelWin/star_2.png"),
+	3: preload("res://assets/textures/levelWin/star_3.png")
+}
+const THREE_STAR_LIFE_THRESHOLD := 75
+const TWO_STAR_LIFE_THRESHOLD := 40
 
 @onready var life_label: Label = $LevelData/PanelContainer/LifeNode/CoinsAmt
 @onready var coin_label: Label = $LevelData/PanelContainer/CoinNode/CoinsAmt
@@ -28,7 +38,15 @@ const MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
 @onready var close_button: TextureButton = $PauseOverlay/Panel/CloseButton
 @onready var back_button: TextureButton = $PauseOverlay/Panel/Buttons/BackButton
 @onready var resume_button: TextureButton = $PauseOverlay/Panel/Buttons/ResumeButton
+@onready var pause_restart_button: TextureButton = $PauseOverlay/Panel/Buttons/RestartButton
 @onready var quit_button: TextureButton = $PauseOverlay/Panel/Buttons/QuitButton
+@onready var level_failed_overlay: Control = $LevelFailedOverlay
+@onready var failed_back_button: TextureButton = $LevelFailedOverlay/Panel/BackButton
+@onready var failed_restart_button: TextureButton = $LevelFailedOverlay/Panel/RestartButton
+@onready var level_win_overlay: Control = $LevelWinOverlay
+@onready var win_next_button: TextureButton = $LevelWinOverlay/Panel/NextButton
+@onready var win_star_rating: TextureRect = $LevelWinOverlay/Panel/StarRating
+@onready var win_reward_label: Label = $LevelWinOverlay/Panel/RewardLabel
 
 var _label_values: Dictionary = {}
 var _label_tweens: Dictionary = {}
@@ -60,6 +78,8 @@ func _ready() -> void:
 	if coin_label != null:
 		coin_label.modulate = COIN_NORMAL_COLOR
 	_setup_pause_menu()
+	_setup_level_failed_menu()
+	_setup_level_win_menu()
 
 
 func _process(delta: float) -> void:
@@ -128,10 +148,99 @@ func _setup_pause_menu() -> void:
 		close_button.pressed.connect(_on_resume_button_pressed)
 	if resume_button != null:
 		resume_button.pressed.connect(_on_resume_button_pressed)
+	if pause_restart_button != null:
+		pause_restart_button.pressed.connect(_on_restart_button_pressed)
 	if back_button != null:
 		back_button.pressed.connect(_on_back_button_pressed)
 	if quit_button != null:
 		quit_button.pressed.connect(_on_quit_button_pressed)
+
+
+func _setup_level_failed_menu() -> void:
+	if level_failed_overlay != null:
+		level_failed_overlay.visible = false
+	if failed_back_button != null:
+		failed_back_button.pressed.connect(_on_failed_back_button_pressed)
+	if failed_restart_button != null:
+		failed_restart_button.pressed.connect(_on_failed_restart_button_pressed)
+
+
+func _setup_level_win_menu() -> void:
+	if level_win_overlay != null:
+		level_win_overlay.visible = false
+	if win_next_button != null:
+		win_next_button.pressed.connect(_on_win_next_button_pressed)
+
+
+func show_level_failed() -> void:
+	get_tree().paused = true
+	if pause_overlay != null:
+		pause_overlay.visible = false
+	if level_win_overlay != null:
+		level_win_overlay.visible = false
+	if level_failed_overlay != null:
+		level_failed_overlay.visible = true
+
+
+func show_level_won(star_count: int = 3) -> void:
+	set_life(GameHandler.castle_life, true)
+	star_count = _get_star_count_from_life(GameHandler.castle_life)
+	var clamped_star_count: int = clampi(star_count, 1, 3)
+	get_tree().paused = true
+	if pause_overlay != null:
+		pause_overlay.visible = false
+	if level_failed_overlay != null:
+		level_failed_overlay.visible = false
+	if win_star_rating != null:
+		match clamped_star_count:
+			1:
+				win_star_rating.texture = WIN_STAR_TEXTURES[1]
+			2:
+				win_star_rating.texture = WIN_STAR_TEXTURES[2]
+			_:
+				win_star_rating.texture = WIN_STAR_TEXTURES[3]
+	if win_reward_label != null:
+		win_reward_label.text = "+%d" % clamped_star_count
+	if level_win_overlay != null:
+		level_win_overlay.visible = true
+
+
+func _get_star_count_from_life(castle_life: int) -> int:
+	if castle_life >= THREE_STAR_LIFE_THRESHOLD:
+		return 3
+	if castle_life >= TWO_STAR_LIFE_THRESHOLD:
+		return 2
+	return 1
+
+
+func _on_failed_back_button_pressed() -> void:
+	_go_to_level_selector()
+
+
+func _on_failed_restart_button_pressed() -> void:
+	_restart_level()
+
+
+func _on_win_next_button_pressed() -> void:
+	_go_to_level_selector()
+
+
+func _on_restart_button_pressed() -> void:
+	_restart_level()
+
+
+func _restart_level() -> void:
+	_transition_to(GAME_SCENE, "Restarting....")
+
+
+func _go_to_level_selector() -> void:
+	_transition_to(LEVEL_SELECTOR_SCENE, "Please wait....")
+
+
+func _transition_to(scene_path: String, transition_message: String) -> void:
+	get_tree().paused = false
+	SceneTransitionScript.setup(scene_path, transition_message)
+	get_tree().change_scene_to_file(TRANSITION_SCENE)
 
 
 func _on_menu_button_pressed() -> void:
@@ -143,8 +252,7 @@ func _on_resume_button_pressed() -> void:
 
 
 func _on_back_button_pressed() -> void:
-	get_tree().paused = false
-	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
+	_go_to_level_selector()
 
 
 func _on_quit_button_pressed() -> void:

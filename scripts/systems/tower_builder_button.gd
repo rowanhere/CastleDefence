@@ -108,6 +108,10 @@ func _purchase_tower(tower_type: String) -> void:
 
 	var tower_scene: PackedScene = insertTower[tower_type]
 	var tower_instance = tower_scene.instantiate()
+	var builder := get_parent() as Node2D
+	if builder != null:
+		tower_instance.set_meta("builder_scene", load("res://scenes/systems/tower/tower_builder.tscn"))
+		tower_instance.set_meta("builder_global_transform", builder.global_transform)
 
 	get_parent().get_parent().add_child(tower_instance)
 

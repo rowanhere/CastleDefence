@@ -6,17 +6,57 @@
 [ext_resource type="Texture2D" uid="uid://dn1wyy85s5457" path="res://assets/textures/ui/inGameUi/table.png" id="5_table"]
 [ext_resource type="Texture2D" uid="uid://cbhvy2rfiniox" path="res://assets/textures/ui/inGameUi/button_empty_2.png" id="6_button"]
 [ext_resource type="Texture2D" uid="uid://db6khv878msxc" path="res://assets/textures/towers/button_close.png" id="7_close"]
+[ext_resource type="FontFile" uid="uid://c26krysvv4u6l" path="res://assets/fonts/WinkySans-Italic-VariableFont_wght.ttf" id="9_ciwyq"]
+[ext_resource type="Texture2D" uid="uid://dqyoyb6vkx7gq" path="res://assets/textures/levelFailed/wondow.png" id="9_failed_window"]
+[ext_resource type="Texture2D" uid="uid://i2w88e4ddhm5" path="res://assets/textures/levelFailed/header_failed.png" id="10_failed_header"]
+[ext_resource type="FontFile" uid="uid://bo3ydllk5q4ql" path="res://assets/fonts/Utroligt.otf" id="10_m71dj"]
+[ext_resource type="Texture2D" uid="uid://dr0mbvpaemu1v" path="res://assets/textures/levelFailed/button_left.png" id="11_failed_left"]
+[ext_resource type="Texture2D" uid="uid://cw62kf1grm58m" path="res://assets/textures/levelFailed/button_restart.png" id="12_failed_restart"]
+[ext_resource type="Texture2D" uid="uid://8igmrntj6nr" path="res://assets/textures/levelWin/window.png" id="13_win_window"]
+[ext_resource type="Texture2D" uid="uid://m7a68wcn10q6" path="res://assets/textures/levelWin/header_win.png" id="14_win_header"]
+[ext_resource type="Texture2D" uid="uid://exnpuwmqrbu7" path="res://assets/textures/levelWin/star_3.png" id="17_win_stars"]
+[ext_resource type="Texture2D" uid="uid://cky0xlj8e64x4" path="res://assets/textures/levelWin/button_right.png" id="18_win_right"]
+[ext_resource type="Texture2D" uid="uid://b14ybr1sx0x6i" path="res://assets/textures/levelWin/zip.png" id="19_win_zip"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_title"]
-font_size = 15
+font = ExtResource("10_m71dj")
+font_size = 14
 font_color = Color(1, 0.894118, 0.247059, 1)
 outline_size = 3
 outline_color = Color(0.235294, 0.0901961, 0.0352941, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_button"]
-font_size = 10
-outline_size = 2
+font = ExtResource("10_m71dj")
+font_size = 8
+outline_size = 1
 outline_color = Color(0.172549, 0.0705882, 0.0352941, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_failed_sorry"]
+font = ExtResource("10_m71dj")
+font_size = 10
+font_color = Color(0.85882354, 0.78431374, 0.6, 1)
+outline_size = 2
+outline_color = Color(0.235294, 0.0901961, 0.0352941, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_ciwyq"]
+font = ExtResource("10_m71dj")
+font_size = 8
+font_color = Color(0.85882354, 0.78431374, 0.6, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_win_title"]
+font = ExtResource("10_m71dj")
+font_size = 8
+font_color = Color(0.85882354, 0.78431374, 0.6, 1)
+outline_size = 2
+outline_color = Color(0.235294, 0.0901961, 0.0352941, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_win_reward"]
+font = ExtResource("10_m71dj")
+font_size = 11
+font_color = Color(0.85882354, 0.78431374, 0.6, 1)
+outline_size = 3
+outline_color = Color(0.235294, 0.0901961, 0.0352941, 1)
+shadow_size = 2
 
 [node name="GameHUD" type="CanvasLayer" unique_id=711150710]
 process_mode = 3
@@ -98,10 +138,10 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -33.0
-offset_top = -2.0
-offset_right = -15.0
-offset_bottom = 16.0
+offset_left = -34.0
+offset_top = -4.0
+offset_right = -16.0
+offset_bottom = 14.0
 grow_horizontal = 0
 texture_normal = ExtResource("7_close")
 ignore_texture_size = true
@@ -114,24 +154,26 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -50.0
-offset_top = -24.0
+offset_top = -30.0
 offset_right = 50.0
-offset_bottom = 50.0
+offset_bottom = 58.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
 
 [node name="BackButton" type="TextureButton" parent="PauseOverlay/Panel/Buttons" unique_id=985298416]
-custom_minimum_size = Vector2(100, 24)
+custom_minimum_size = Vector2(100, 19)
 layout_mode = 2
 texture_normal = ExtResource("6_button")
 ignore_texture_size = true
 stretch_mode = 5
 
 [node name="Label" type="Label" parent="PauseOverlay/Panel/Buttons/BackButton" unique_id=1188141011]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -1.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "BACK"
@@ -140,16 +182,18 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ResumeButton" type="TextureButton" parent="PauseOverlay/Panel/Buttons" unique_id=2041511614]
-custom_minimum_size = Vector2(100, 24)
+custom_minimum_size = Vector2(100, 19)
 layout_mode = 2
 texture_normal = ExtResource("6_button")
 ignore_texture_size = true
 stretch_mode = 5
 
 [node name="Label" type="Label" parent="PauseOverlay/Panel/Buttons/ResumeButton" unique_id=185641950]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -1.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "RESUME"
@@ -157,20 +201,327 @@ label_settings = SubResource("LabelSettings_button")
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="RestartButton" type="TextureButton" parent="PauseOverlay/Panel/Buttons" unique_id=1030138923]
+custom_minimum_size = Vector2(100, 19)
+layout_mode = 2
+texture_normal = ExtResource("6_button")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="PauseOverlay/Panel/Buttons/RestartButton" unique_id=553677410]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "RESTART"
+label_settings = SubResource("LabelSettings_button")
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="QuitButton" type="TextureButton" parent="PauseOverlay/Panel/Buttons" unique_id=1849266106]
-custom_minimum_size = Vector2(100, 24)
+custom_minimum_size = Vector2(100, 19)
 layout_mode = 2
 texture_normal = ExtResource("6_button")
 ignore_texture_size = true
 stretch_mode = 5
 
 [node name="Label" type="Label" parent="PauseOverlay/Panel/Buttons/QuitButton" unique_id=1915088395]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -1.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "QUIT"
 label_settings = SubResource("LabelSettings_button")
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="LevelFailedOverlay" type="Control" parent="." unique_id=544914972]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="LevelFailedOverlay" unique_id=12299699]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.58)
+
+[node name="Panel" type="Control" parent="LevelFailedOverlay" unique_id=22284288]
+anchors_preset = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -82.0
+offset_top = -63.0
+offset_right = 82.0
+offset_bottom = 63.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Table" type="TextureRect" parent="LevelFailedOverlay/Panel" unique_id=255489894]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_table")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Window" type="TextureRect" parent="LevelFailedOverlay/Panel" unique_id=1388423180]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -73.0
+offset_top = 32.0
+offset_right = 72.0
+offset_bottom = 114.0
+grow_horizontal = 2
+texture = ExtResource("9_failed_window")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Header" type="TextureRect" parent="LevelFailedOverlay/Panel" unique_id=105269942]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -54.0
+offset_top = -4.0
+offset_right = 54.0
+offset_bottom = 33.0
+grow_horizontal = 2
+texture = ExtResource("10_failed_header")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SorryLabel" type="Label" parent="LevelFailedOverlay/Panel" unique_id=1128210499]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -31.0
+offset_top = 75.0
+offset_right = 30.0
+offset_bottom = 88.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("9_ciwyq")
+theme_override_font_sizes/font_size = 11
+text = "SORRY"
+label_settings = SubResource("LabelSettings_failed_sorry")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FailedLabel" type="Label" parent="LevelFailedOverlay/Panel" unique_id=394017676]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -46.0
+offset_top = 88.0
+offset_right = 45.0
+offset_bottom = 104.0
+grow_horizontal = 2
+text = "LEVEL FAILED"
+label_settings = SubResource("LabelSettings_ciwyq")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackButton" type="TextureButton" parent="LevelFailedOverlay/Panel" unique_id=231625134]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -34.0
+offset_top = 101.0
+offset_right = 1.0
+offset_bottom = 136.0
+grow_horizontal = 2
+texture_normal = ExtResource("11_failed_left")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="RestartButton" type="TextureButton" parent="LevelFailedOverlay/Panel" unique_id=602928930]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 2.0
+offset_top = 101.0
+offset_right = 37.0
+offset_bottom = 136.0
+grow_horizontal = 2
+texture_normal = ExtResource("12_failed_restart")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="LevelWinOverlay" type="Control" parent="." unique_id=66559576]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="LevelWinOverlay" unique_id=1372278093]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.35)
+
+[node name="Panel" type="Control" parent="LevelWinOverlay" unique_id=539370630]
+anchors_preset = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -72.0
+offset_top = -58.0
+offset_right = 72.0
+offset_bottom = 58.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Table" type="TextureRect" parent="LevelWinOverlay/Panel" unique_id=1581599004]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_table")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Header" type="TextureRect" parent="LevelWinOverlay/Panel" unique_id=962301053]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -58.0
+offset_top = -11.0
+offset_right = 58.0
+offset_bottom = 27.0
+grow_horizontal = 2
+texture = ExtResource("14_win_header")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Window" type="TextureRect" parent="LevelWinOverlay/Panel" unique_id=2090803391]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -46.0
+offset_top = 28.0
+offset_right = 46.0
+offset_bottom = 103.0
+grow_horizontal = 2
+texture = ExtResource("13_win_window")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StarRating" type="TextureRect" parent="LevelWinOverlay/Panel" unique_id=1982212191]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -44.0
+offset_top = 31.0
+offset_right = 44.0
+offset_bottom = 66.0
+grow_horizontal = 2
+texture = ExtResource("17_win_stars")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CongratsLabel" type="Label" parent="LevelWinOverlay/Panel" unique_id=542507855]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -40.0
+offset_top = 67.0
+offset_right = 40.0
+offset_bottom = 80.0
+grow_horizontal = 2
+text = "CONGRATULATIONS!"
+label_settings = SubResource("LabelSettings_win_title")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CompleteLabel" type="Label" parent="LevelWinOverlay/Panel" unique_id=1710343656]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -50.0
+offset_top = 80.0
+offset_right = 50.0
+offset_bottom = 93.0
+grow_horizontal = 2
+text = "LEVEL COMPLETE"
+label_settings = SubResource("LabelSettings_ciwyq")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RewardLabel" type="Label" parent="LevelWinOverlay/Panel" unique_id=515508128]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -14.0
+offset_top = 85.0
+offset_right = 5.0
+offset_bottom = 106.0
+grow_horizontal = 2
+text = "+1"
+label_settings = SubResource("LabelSettings_win_reward")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ZipIcon" type="TextureRect" parent="LevelWinOverlay/Panel" unique_id=2059627883]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -1.0
+offset_top = 92.0
+offset_right = 14.0
+offset_bottom = 101.0
+grow_horizontal = 2
+texture = ExtResource("19_win_zip")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NextButton" type="TextureButton" parent="LevelWinOverlay/Panel" unique_id=853133121]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -14.0
+offset_top = 102.0
+offset_right = 21.0
+offset_bottom = 137.0
+grow_horizontal = 2
+texture_normal = ExtResource("18_win_right")
+ignore_texture_size = true
+stretch_mode = 5

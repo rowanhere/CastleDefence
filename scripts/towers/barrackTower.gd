@@ -13,7 +13,8 @@ const RESPAWN_TIME := 10.0
 const INITIAL_SPAWN_DELAY := 3.0
 const BASE_SOLDIER_SCALE := 2.5
 const SCALE_PER_LEVEL := 0.5
-const HP_PER_LEVEL := 100.0
+const BASE_SOLDIER_HP := 200.0
+const HP_PER_UPGRADE_LEVEL := 250.0
 const MIN_COMBAT_PROGRESS_FROM_SPAWN := 160.0
 const COMBAT_PROGRESS_BEHIND := 0.0
 const COMBAT_PROGRESS_AHEAD := 96.0
@@ -76,7 +77,7 @@ func _get_soldier_hp() -> float:
 	var level: int = 1
 	if active_upgrade != null:
 		level = max(active_upgrade.level, 1)
-	return float(level) * HP_PER_LEVEL
+	return BASE_SOLDIER_HP + float(level - 1) * HP_PER_UPGRADE_LEVEL
 
 
 func _create_soldier(spawn_from: Vector2) -> Node2D:

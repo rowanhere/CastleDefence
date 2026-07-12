@@ -60,32 +60,4 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="levelLoad" type="ProgressBar" parent="." unique_id=679774705]
-clip_contents = true
-custom_minimum_size = Vector2(200, 0)
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -100.0
-offset_top = -19.0
-offset_right = 100.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 15
-
-[node name="ColorRect" type="ColorRect" parent="." unique_id=1198356216]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 0.5019608)
-
 [connection signal="pressed" from="BackButton" to="." method="_on_back_button_pressed"]
