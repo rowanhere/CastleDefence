@@ -1,0 +1,307 @@
+[gd_scene format=3 uid="uid://b21mn52nk6rr"]
+
+[ext_resource type="Script" uid="uid://bjhlt466r7lmt" path="res://scripts/ui/special_abilities_ui.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://dly6et86u6erc" path="res://assets/textures/specialAbilities/table_down.png" id="2_dock"]
+[ext_resource type="Texture2D" uid="uid://brnhxc88j6x1j" path="res://assets/textures/specialAbilities/specialFire.png" id="3_fire"]
+[ext_resource type="Texture2D" uid="uid://jg0d168mu4yu" path="res://assets/textures/specialAbilities/specialTimeFreeze.png" id="4_freeze"]
+[ext_resource type="Texture2D" uid="uid://2ephql3ltnj3" path="res://assets/textures/specialAbilities/specialThunder.png" id="5_thunder"]
+[ext_resource type="Texture2D" uid="uid://ck5lc6kmr0hhr" path="res://assets/textures/specialAbilities/specialRock.png" id="6_rock"]
+[ext_resource type="FontFile" uid="uid://bo3ydllk5q4ql" path="res://assets/fonts/Utroligt.otf" id="7_font"]
+[ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialFireDisabled.png" id="8_fire_disabled"]
+[ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialTimeFreezeDisabled.png" id="9_freeze_disabled"]
+[ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialThunderDisabled.png" id="10_thunder_disabled"]
+[ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialRockDisabled.png" id="11_rock_disabled"]
+
+[node name="SpecialAbilitiesUI" type="Control" unique_id=1467062854]
+layout_mode = 3
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -31.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="Dock" type="TextureRect" parent="." unique_id=1210075687]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -72.0
+offset_top = 24.0
+offset_right = 72.0
+offset_bottom = 38.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = ExtResource("2_dock")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="AbilityCaption" type="Label" parent="." unique_id=1615218562]
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -45.0
+offset_top = -5.0
+offset_right = 45.0
+offset_bottom = 5.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.78, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.06, 0.025, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("7_font")
+theme_override_font_sizes/font_size = 7
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="." unique_id=1299185837]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -47.5
+offset_top = 7.0
+offset_right = 47.5
+offset_bottom = 31.0
+grow_horizontal = 2
+theme_override_constants/separation = 1
+
+[node name="Fire" type="TextureButton" parent="Buttons" unique_id=1105752831]
+clip_contents = true
+custom_minimum_size = Vector2(23, 23)
+layout_mode = 2
+texture_normal = ExtResource("3_fire")
+texture_disabled = ExtResource("8_fire_disabled")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="CooldownOverlay" type="ColorRect" parent="Buttons/Fire" unique_id=1656143288]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.04, 0.05, 0.07, 0.72)
+
+[node name="CooldownLabel" type="Label" parent="Buttons/Fire" unique_id=8583398]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("7_font")
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CountLabel" type="Label" parent="Buttons/Fire" unique_id=1398963783]
+z_index = 2
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -10.0
+offset_top = -9.0
+offset_right = -1.0
+offset_bottom = -1.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("7_font")
+theme_override_font_sizes/font_size = 6
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Freeze" type="TextureButton" parent="Buttons" unique_id=1227852509]
+clip_contents = true
+custom_minimum_size = Vector2(23, 23)
+layout_mode = 2
+texture_normal = ExtResource("4_freeze")
+texture_disabled = ExtResource("9_freeze_disabled")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="CooldownOverlay" type="ColorRect" parent="Buttons/Freeze" unique_id=969227591]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.04, 0.05, 0.07, 0.72)
+
+[node name="CooldownLabel" type="Label" parent="Buttons/Freeze" unique_id=947930631]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("7_font")
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CountLabel" type="Label" parent="Buttons/Freeze" unique_id=1599095126]
+z_index = 2
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -10.0
+offset_top = -9.0
+offset_right = -1.0
+offset_bottom = -1.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("7_font")
+theme_override_font_sizes/font_size = 6
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Thunder" type="TextureButton" parent="Buttons" unique_id=972320509]
+clip_contents = true
+custom_minimum_size = Vector2(23, 23)
+layout_mode = 2
+texture_normal = ExtResource("5_thunder")
+texture_disabled = ExtResource("10_thunder_disabled")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="CooldownOverlay" type="ColorRect" parent="Buttons/Thunder" unique_id=670703097]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.04, 0.05, 0.07, 0.72)
+
+[node name="CooldownLabel" type="Label" parent="Buttons/Thunder" unique_id=1166202143]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("7_font")
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CountLabel" type="Label" parent="Buttons/Thunder" unique_id=1203306296]
+z_index = 2
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -10.0
+offset_top = -9.0
+offset_right = -1.0
+offset_bottom = -1.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("7_font")
+theme_override_font_sizes/font_size = 6
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Rock" type="TextureButton" parent="Buttons" unique_id=1923427126]
+clip_contents = true
+custom_minimum_size = Vector2(23, 23)
+layout_mode = 2
+texture_normal = ExtResource("6_rock")
+texture_disabled = ExtResource("11_rock_disabled")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="CooldownOverlay" type="ColorRect" parent="Buttons/Rock" unique_id=1048789024]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.04, 0.05, 0.07, 0.72)
+
+[node name="CooldownLabel" type="Label" parent="Buttons/Rock" unique_id=1151549665]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("7_font")
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CountLabel" type="Label" parent="Buttons/Rock" unique_id=1398371304]
+z_index = 2
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -10.0
+offset_top = -9.0
+offset_right = -1.0
+offset_bottom = -1.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("7_font")
+theme_override_font_sizes/font_size = 6
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1

@@ -665,8 +665,7 @@ func _attack_castle(delta: float) -> void:
 
 	attack_timer = attack_speed
 	var castle_damage: int = 1
-	# Boss enemies can one-shot the castle later when real boss data is added.
-	# if is_boss_enemy:
-	# 	castle_damage = GameHandler.castle_life
+	if is_boss_enemy:
+		castle_damage = GameHandler.castle_life
 	if locked_castle.has_method("take_damage"):
 		locked_castle.take_damage(castle_damage)

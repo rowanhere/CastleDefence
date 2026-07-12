@@ -16,6 +16,10 @@ var _music_operation_id: int = 0
 var _volume_tween: Tween = null
 
 
+func _ready() -> void:
+	music_enabled = SaveManager.music_enabled
+
+
 func play_music() -> void:
 	if not bg_music.playing and music_enabled:
 		bg_music.play()
@@ -40,6 +44,7 @@ func toggle_music() -> void:
 func set_music_enabled(enabled: bool) -> void:
 	var operation_id := _begin_music_operation()
 	music_enabled = enabled
+	SaveManager.set_music_enabled(enabled)
 
 	if enabled:
 		if last_music == null:

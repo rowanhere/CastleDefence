@@ -3,10 +3,19 @@
 [ext_resource type="Texture2D" uid="uid://clnksvo1uubnd" path="res://assets/textures/ui/Level.jpg" id="1_2q6dc"]
 [ext_resource type="Script" uid="uid://bisb1mtgamgk3" path="res://scripts/ui/level.gd" id="1_w8frs"]
 [ext_resource type="Texture2D" uid="uid://dsb32edbam5kw" path="res://assets/textures/ui/pak1.png" id="2_w7c3h"]
+[ext_resource type="Texture2D" uid="uid://b14ybr1sx0x6i" path="res://assets/textures/levelWin/zip.png" id="3_reward_icon"]
+[ext_resource type="FontFile" uid="uid://bo3ydllk5q4ql" path="res://assets/fonts/Utroligt.otf" id="4_reward_font"]
+[ext_resource type="Texture2D" uid="uid://dcc2rsx7rvpjf" path="res://assets/textures/ui/inGameUi/EmptyButton.png" id="5_shop_button"]
+[ext_resource type="Texture2D" uid="uid://c5lshft1j1gj3" path="res://assets/textures/ui/inGameUi/shopIcon.png" id="6_shop_icon"]
+[ext_resource type="PackedScene" path="res://scenes/ui/shop_ui.tscn" id="7_shop_ui"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_w7c3h"]
 atlas = ExtResource("2_w7c3h")
 region = Rect2(944, 336, 64, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_shop_icon"]
+atlas = ExtResource("6_shop_icon")
+region = Rect2(96, 128, 320, 272)
 
 [node name="Level" type="Control" unique_id=136685980]
 clip_contents = true
@@ -47,6 +56,78 @@ icon = SubResource("AtlasTexture_w7c3h")
 flat = true
 expand_icon = true
 
+[node name="ShopButton" type="TextureButton" parent="." unique_id=1387202236]
+unique_name_in_owner = true
+z_index = 100
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 25.0
+offset_top = -24.0
+offset_right = 45.0
+offset_bottom = -3.0
+grow_vertical = 0
+texture_normal = ExtResource("5_shop_button")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="ShopIcon" type="TextureRect" parent="ShopButton" unique_id=91410195]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("AtlasTexture_shop_icon")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="RewardBalance" type="Control" parent="." unique_id=209345886]
+z_index = 100
+layout_mode = 1
+anchors_preset = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 48.0
+offset_bottom = 16.0
+mouse_filter = 2
+
+[node name="Content" type="HBoxContainer" parent="RewardBalance" unique_id=1611108534]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="RewardIcon" type="TextureRect" parent="RewardBalance/Content" unique_id=1720922540]
+custom_minimum_size = Vector2(5, 8)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("3_reward_icon")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Amount" type="Label" parent="RewardBalance/Content" unique_id=1252624982]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.96, 0.82, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.07, 0.04, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("4_reward_font")
+theme_override_font_sizes/font_size = 9
+text = "0"
+vertical_alignment = 1
+
 [node name="LevelGroup" type="Control" parent="." unique_id=562674999]
 layout_mode = 1
 anchors_preset = 15
@@ -60,4 +141,10 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
+[node name="ShopUI" parent="." instance=ExtResource("7_shop_ui")]
+
 [connection signal="pressed" from="BackButton" to="." method="_on_back_button_pressed"]
+[connection signal="mouse_entered" from="ShopButton" to="." method="_on_shop_button_mouse_entered"]
+[connection signal="mouse_exited" from="ShopButton" to="." method="_on_shop_button_mouse_exited"]
+[connection signal="pressed" from="ShopButton" to="." method="_on_shop_button_pressed"]
+[connection signal="balance_changed" from="ShopUI" to="." method="_on_shop_balance_changed"]

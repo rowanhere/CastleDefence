@@ -1,0 +1,58 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://resources/enemies/boss/BossFrames.tres" id="1_frames"]
+[ext_resource type="Script" path="res://scripts/gameplay/boss/boss_enemy.gd" id="2_enemy_script"]
+
+[sub_resource type="CapsuleShape2D" id="BossCollision"]
+radius = 9.0
+height = 24.0
+
+[sub_resource type="StyleBoxFlat" id="HealthBackground"]
+bg_color = Color(0.12, 0.03, 0.06, 0.9)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="HealthFill"]
+bg_color = Color(0.78, 0.05, 0.22, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="CircleShape2D" id="BossAttackArea"]
+radius = 14.0
+
+[node name="Boss" type="CharacterBody2D"]
+scale = Vector2(2, 2)
+collision_layer = 1
+collision_mask = 2
+script = ExtResource("2_enemy_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, 0)
+sprite_frames = ExtResource("1_frames")
+animation = &"runDown"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -10)
+shape = SubResource("BossCollision")
+
+[node name="HealthBar" type="ProgressBar" parent="."]
+offset_left = -12.0
+offset_top = -36.0
+offset_right = 12.0
+offset_bottom = -33.0
+theme_override_styles/background = SubResource("HealthBackground")
+theme_override_styles/fill = SubResource("HealthFill")
+value = 100.0
+show_percentage = false
+
+[node name="AttackArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="attackCollision" type="CollisionShape2D" parent="AttackArea"]
+position = Vector2(0, -10)
+shape = SubResource("BossAttackArea")

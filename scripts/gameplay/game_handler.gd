@@ -10,7 +10,9 @@ const WAVE_POINTER_BASE_SCALE := Vector2(0.62, 0.62)
 const WAVE_POINTER_PULSE_SCALE := Vector2(0.70, 0.70)
 
 static var queued_level: int = 1
-static var coins: int = 5000
+const LEVEL_STARTING_COINS := 5000
+
+static var coins: int = LEVEL_STARTING_COINS
 static var castle_life: int = 100
 static var level_failed: bool = false
 static var level_won: bool = false
@@ -27,11 +29,9 @@ const MAX_SPEED_SCALE := 1.35
 const THREE_STAR_LIFE_THRESHOLD := 75
 const TWO_STAR_LIFE_THRESHOLD := 40
 
-# Boss formulas can live here later once boss data/resources are added.
-# const BOSS_HEALTH_SCALE_PER_LEVEL := 0.35
-# const BOSS_DAMAGE_SCALE_PER_LEVEL := 0.18
-# const BOSS_SPEED_SCALE_PER_LEVEL := 0.04
-# const BOSS_COIN_SCALE_PER_LEVEL := 0.30
+const BOSS_HEALTH_SCALE_PER_LEVEL := 0.35
+const BOSS_DAMAGE_SCALE_PER_LEVEL := 0.18
+const BOSS_SPEED_SCALE_PER_LEVEL := 0.04
 
 @onready var level_container: Node2D = $LevelContainer
 @onready var game_hud: CanvasLayer = $GameHUD
@@ -40,6 +40,7 @@ var _wave_pointer: Node2D = null
 var _wave_pointer_tween: Tween = null
 
 func _ready() -> void:
+	coins = LEVEL_STARTING_COINS
 	castle_life = 100
 	level_failed = false
 	level_won = false
@@ -87,11 +88,13 @@ static func get_scaled_enemy_data(base_data: EnemyData, level_number: int, wave_
 	var wave_offset: int = max(wave_number - 1, 0)
 
 	if is_boss:
-		# Uncomment and tune once boss enemies are added.
-		# scaled_data.health = int(round(base_data.health * (1.0 + level_offset * BOSS_HEALTH_SCALE_PER_LEVEL)))
-		# scaled_data.attack_damage = base_data.attack_damage * (1.0 + level_offset * BOSS_DAMAGE_SCALE_PER_LEVEL)
-		# scaled_data.speed = base_data.speed * min(1.0 + level_offset * BOSS_SPEED_SCALE_PER_LEVEL, MAX_SPEED_SCALE)
-		# scaled_data.coin_drop = int(round(base_data.coin_drop * (1.0 + level_offset * BOSS_COIN_SCALE_PER_LEVEL)))
+		var boss_health_scale: float = 1.0 + level_offset * BOSS_HEALTH_SCALE_PER_LEVEL
+		var boss_damage_scale: float = 1.0 + level_offset * BOSS_DAMAGE_SCALE_PER_LEVEL
+		var boss_speed_scale: float = minf(1.0 + level_offset * BOSS_SPEED_SCALE_PER_LEVEL, MAX_SPEED_SCALE)
+		scaled_data.health = int(round(base_data.health * boss_health_scale))
+		scaled_data.attack_damage = base_data.attack_damage * boss_damage_scale
+		scaled_data.speed = base_data.speed * boss_speed_scale
+		scaled_data.coin_drop = 0
 		return scaled_data
 
 	var health_scale: float = 1.0 + level_offset * HEALTH_SCALE_PER_LEVEL + wave_offset * HEALTH_SCALE_PER_WAVE
@@ -136,13 +139,24 @@ static func complete_level() -> void:
 	if level_failed or level_won or castle_life <= 0:
 		return
 	level_won = true
-	add_coins(50)
 	var tree := Engine.get_main_loop() as SceneTree
 	if tree == null:
 		return
+	var star_count: int = _get_star_count_for_life(castle_life)
+	var save_manager: Node = tree.root.get_node_or_null("SaveManager")
+	if save_manager != null and save_manager.has_method("complete_level"):
+		save_manager.call("complete_level", queued_level, star_count, star_count)
 	var handler := tree.current_scene
 	if handler != null and handler.has_method("_show_level_won"):
 		handler._show_level_won()
+
+
+static func _get_star_count_for_life(life: int) -> int:
+	if life >= THREE_STAR_LIFE_THRESHOLD:
+		return 3
+	if life >= TWO_STAR_LIFE_THRESHOLD:
+		return 2
+	return 1
 
 
 static func play_purchase_failed_feedback() -> void:

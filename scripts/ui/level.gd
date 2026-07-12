@@ -1,4 +1,7 @@
 extends Control
+
+signal shop_requested
+
 const LevelButton = preload("res://scenes/ui/level_button.tscn")
 const lockedButton = preload("res://scenes/ui/speech_bubble.tscn")
 const BUTTON_HOVER_SOUND: AudioStream = preload("res://assets/audio/sfx/buttonHover.mp3")
@@ -9,6 +12,9 @@ const GAME_SCENE := "res://scenes/gameplay/GameHandler.tscn"
 const TRANSITION_SCENE := "res://scenes/ui/scene_transition.tscn"
 var lBtn
 @onready var level_group: Control = $LevelGroup
+@onready var reward_amount: Label = %Amount
+@onready var shop_button: TextureButton = %ShopButton
+@onready var shop_ui: Node = $ShopUI
 # Called when the node enters the scene tree for the first time.
 var positions: Array[Vector2] = [
 	Vector2(19.0, 106.0),
@@ -27,9 +33,16 @@ var positions: Array[Vector2] = [
 	Vector2(169.0, 29.0),
 	Vector2(281.0, 4.0)
 ]
-var unlocked_levels:Array[int] = [1]
+var unlocked_levels: Array[int] = []
 var current_level_number: int = 1
+var shop_button_tween: Tween = null
 func _ready() -> void:
+	shop_button.pivot_offset = shop_button.size * 0.5
+	var save_manager: Node = get_node_or_null("/root/SaveManager")
+	if save_manager != null:
+		var saved_unlocked_levels: Array = save_manager.get("unlocked_levels")
+		unlocked_levels.assign(saved_unlocked_levels)
+		reward_amount.text = str(int(save_manager.get("total_rewards")))
 	AudioController.change_music(levelMap)
 	lBtn = lockedButton.instantiate()
 	lBtn.scale = Vector2(0,0)
@@ -37,7 +50,7 @@ func _ready() -> void:
 	for i in range(positions.size()):
 		var btn = LevelButton.instantiate()
 		btn.level_number = i+1
-		if i+1 not in unlocked_levels:
+		if i + 1 not in unlocked_levels or not _level_scene_exists(i + 1):
 			btn.texture_normal = btn.texture_disabled
 		btn.position = positions[i]
 		$LevelGroup.add_child(btn)
@@ -48,9 +61,38 @@ func _ready() -> void:
 
 func _on_back_button_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
+
+
+func _on_shop_button_pressed() -> void:
+	shop_requested.emit()
+	shop_ui.call("open_shop")
+	_animate_shop_button(Vector2(0.92, 0.92), 0.06)
+	var tween: Tween = create_tween()
+	tween.tween_interval(0.06)
+	tween.tween_callback(_animate_shop_button.bind(Vector2.ONE, 0.1))
+
+
+func _on_shop_balance_changed(new_balance: int) -> void:
+	reward_amount.text = str(new_balance)
+
+
+func _on_shop_button_mouse_entered() -> void:
+	GameSound.play(BUTTON_HOVER_SOUND, -8.0)
+	_animate_shop_button(Vector2(1.08, 1.08), 0.1)
+
+
+func _on_shop_button_mouse_exited() -> void:
+	_animate_shop_button(Vector2.ONE, 0.1)
+
+
+func _animate_shop_button(target_scale: Vector2, duration: float) -> void:
+	if shop_button_tween != null and shop_button_tween.is_valid():
+		shop_button_tween.kill()
+	shop_button_tween = create_tween()
+	shop_button_tween.tween_property(shop_button, "scale", target_scale, duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	
 func _on_level_button_pressed(level_number: int,Locked_position:Vector2) -> void:
-	if level_number in unlocked_levels:
+	if level_number in unlocked_levels and _level_scene_exists(level_number):
 		handle_unlockedLevel(level_number)
 		return
 	var x= Locked_position.x - 12
@@ -59,6 +101,11 @@ func _on_level_button_pressed(level_number: int,Locked_position:Vector2) -> void
 	lBtn.position = Vector2(x,y)
 	lBtn.scale= Vector2(1,1)
 	shake(lBtn)
+
+
+func _level_scene_exists(level_number: int) -> bool:
+	return ResourceLoader.exists(GameHandlerScript.get_level_scene_path(level_number)) \
+		and ResourceLoader.exists(GameHandlerScript.get_level_spawn_schedule_path(level_number))
 
 #shake animation
 func handle_unlockedLevel(level_number: int) -> void:

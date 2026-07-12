@@ -1,11 +1,15 @@
 extends Path2D
 
 const ENEMY_SCENE = preload("res://scenes/enemies/enemy.tscn")
+const BOSS_SCENE = preload("res://scenes/enemies/boss/boss.tscn")
 const DEFAULT_SPAWN_INTERVAL := 0.3
 const MIN_SPAWN_INTERVAL := 0.18
 const SPAWN_RETRY_INTERVAL := 0.08
 const SPAWN_GROUP_SIZE := 2
 const WAVE_POINTER_LEAD_TIME := 5.0
+const BOSS_SHAKE_STEPS := 8
+const BOSS_SHAKE_INTERVAL := 0.055
+const BOSS_SHAKE_STRENGTH := 7.0
 
 var spawn_schedule: Resource
 
@@ -15,6 +19,7 @@ var elapsed_time: float = 0.0
 var next_entry_index: int = 0
 var active_pointer_wave_index: int = -1
 var level_complete_checked: bool = false
+var _boss_shake_tween: Tween = null
 
 
 func _ready() -> void:
@@ -98,16 +103,35 @@ func _spawn_enemy(scaled_data: EnemyData, is_boss_wave: bool, spawn_lane_index: 
 	follow.rotates = false
 	follow.loop = false
 	add_child(follow)
-	var enemy_instance = ENEMY_SCENE.instantiate()
+	var enemy_instance = BOSS_SCENE.instantiate() if is_boss_wave else ENEMY_SCENE.instantiate()
 	follow.add_child(enemy_instance)     # _ready() runs here first
-	if is_boss_wave:
-		scaled_data.coin_drop = 0
 	enemy_instance.is_boss_enemy = is_boss_wave
-	enemy_instance.data = scaled_data  # set AFTER so _ready+@onready vars are ready
+	enemy_instance.data = scaled_data
 	_apply_spawn_facing(enemy_instance)
 	if enemy_instance.has_method("set_spawn_lane_index"):
 		enemy_instance.set_spawn_lane_index(spawn_lane_index)
+	if is_boss_wave:
+		_shake_camera_for_boss()
 	return enemy_instance
+
+
+func _shake_camera_for_boss() -> void:
+	var camera: Camera2D = get_viewport().get_camera_2d()
+	if camera == null:
+		return
+	if _boss_shake_tween != null and _boss_shake_tween.is_valid():
+		_boss_shake_tween.kill()
+	var resting_offset: Vector2 = camera.offset
+	_boss_shake_tween = create_tween()
+	for step in range(BOSS_SHAKE_STEPS):
+		var falloff: float = 1.0 - float(step) / float(BOSS_SHAKE_STEPS)
+		var strength: float = BOSS_SHAKE_STRENGTH * falloff
+		var shake_offset := resting_offset + Vector2(
+			randf_range(-strength, strength),
+			randf_range(-strength, strength)
+		)
+		_boss_shake_tween.tween_property(camera, "offset", shake_offset, BOSS_SHAKE_INTERVAL)
+	_boss_shake_tween.tween_property(camera, "offset", resting_offset, BOSS_SHAKE_INTERVAL * 1.5)
 
 
 func _get_spawn_interval(enemy_data: EnemyData) -> float:

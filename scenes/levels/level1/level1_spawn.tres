@@ -27,7 +27,7 @@ enemy_pool = Array[String](["gnoll", "demon", "lizardman", "zombie", "beholder",
 [sub_resource type="Resource" id="EnemySpawnWave_4"]
 script = ExtResource("2_wave")
 start_time = 135.0
-enemy_pool = Array[String](["golem"])
+enemy_pool = Array[String](["boss"])
 total_multiplier = 1
 is_boss_wave = true
 

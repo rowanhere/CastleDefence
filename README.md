@@ -6,8 +6,8 @@ A 2D pixel-art tower-defence game built with Godot 4.6. Place and upgrade towers
 
 - Godot `4.6`, GDScript, Forward+ renderer
 - `320 x 180` base viewport, stretched to the game window
-- One playable level: `scenes/levels/level1/level_1.tscn`
-- Five scheduled waves with mixed enemy pools and a golem boss placeholder
+- Two playable levels; Level 2 temporarily reuses the Level 1 map with its own scaled wave schedule
+- Five scheduled waves with mixed enemy pools and a dedicated Vampire Lord boss
 - Four playable tower types: Archer, Barrack, Magic, and Bomb
 - Tower purchase, upgrade, destroy, refund, range preview, and insufficient-coin feedback
 - Animated HUD counters, wave countdown, spawn-direction pointer, pause menu, win screen, and fail screen
@@ -23,7 +23,7 @@ A 2D pixel-art tower-defence game built with Godot 4.6. Place and upgrade towers
 5. Defeat enemies to earn their coin drops before they reach the castle.
 6. Complete every scheduled wave while the castle has more than `0` HP to win.
 
-The current development balance starts the player with `5000` coins and `100` castle HP. These values live in `scripts/gameplay/game_handler.gd`.
+Each level starts with `800` coins and `100` castle HP. Coins are battle-only currency and reset whenever a level starts.
 
 ## Economy and Tower Lifecycle
 
@@ -99,7 +99,8 @@ Enemy base stats live in `resources/enemies/<enemy>.tres`. Each resource also pr
 | Predator | Mid-late bruiser | 260 | 58 | 1.15 | 27 | 34 | 70 |
 | Lizardman | Heavy fighter | 280 | 72 | 0.90 | 28 | 34 | 62 |
 | Beholder | Late heavy threat | 310 | 48 | 1.35 | 34 | 42 | 76 |
-| Golem | Boss placeholder | 360 | 45 | 1.60 | 32 | 38 | 68 |
+| Golem | Heavy tank | 360 | 45 | 1.60 | 32 | 38 | 68 |
+| Vampire Lord | Final boss | 1800 | 30 | 1.80 | 170 | 0 | 125 |
 
 Directional enemy sheets use the row order `down`, `up`, `left`, `right`. Their SpriteFrames expose matching walk, attack, hurt, and death animations.
 
@@ -123,7 +124,7 @@ Level 1 uses `scenes/levels/level1/level1_spawn.tres`:
 | 2 | 45s | Goblin, Gnoll, Imp | 15 |
 | 3 | 75s | Gnoll, Zombie, Predator | 10 |
 | 4 | 105s | Gnoll, Demon, Lizardman, Zombie, Beholder, Predator | 10 |
-| 5 | 135s | Golem boss placeholder | 1 |
+| 5 | 135s | Vampire Lord boss | 1 |
 
 Non-boss enemies are duplicated and scaled at spawn time:
 
@@ -137,7 +138,15 @@ speed_scale = min(1.0 + level_offset * 0.03 + wave_offset * 0.015, 1.35)
 coin_scale = 1.0 + level_offset * 0.15 + wave_offset * 0.08
 ```
 
-Boss scaling is intentionally left as a placeholder until dedicated boss resources and encounters are implemented.
+Bosses scale separately by level only:
+
+```gdscript
+boss_health_scale = 1.0 + level_offset * 0.35
+boss_damage_scale = 1.0 + level_offset * 0.18
+boss_speed_scale = min(1.0 + level_offset * 0.04, 1.35)
+```
+
+The Vampire Lord is the only boss and appears as the final threat on every level with level-scaled HP, damage, and speed. It uses its own scene and top-down SpriteFrames resource while sharing the established enemy combat contract. Its arrival triggers a short camera shake. It is `3.3x` scale, flies along the path using its run animation, descends to attack, and always drops zero coins. Reaching the castle is an immediate loss because its first castle strike consumes all remaining castle health.
 
 ## HUD, Win, and Fail States
 
@@ -147,8 +156,25 @@ Boss scaling is intentionally left as a placeholder until dedicated boss resourc
 - Castle HP `75-100`: 3 stars
 - Castle HP `40-74`: 2 stars
 - Castle HP `1-39`: 1 star
-- Completing a level currently adds a fixed `50` coins.
 - Pause, restart, back-to-level-select, win, and fail actions use the loading transition where appropriate.
+
+## Local Save Data
+
+Persistent progress is managed by the `SaveManager` autoload and written to `user://save.cfg`. The save currently contains:
+
+- Total reward currency earned from level wins
+- Unlocked level numbers
+- Best star rating for each completed level
+- Highest completed level
+- Owned Fire, Time Freeze, Thunder, and Rock ability counts
+- Music enabled/disabled state
+- Sound-effect enabled/disabled state
+
+Level coins are intentionally not saved. Every level starts with `800` coins, and enemy coin drops are used only during that battle. A win awards `1`, `2`, or `3` persistent reward currency based on the result shown by `RewardLabel`.
+
+Special-ability inventory is stored under `inventory/special_abilities`. New saves begin with zero of each ability, so empty ability buttons are disabled. `SaveManager.add_ability()`, `get_ability_count()`, and `consume_ability()` provide the inventory API for the future reward-currency shop and gameplay effects.
+
+The level selector includes a persistent special-ability shop. Fire costs `3`, Time Freeze costs `4`, Thunder costs `5`, and Rock costs `4` reward currency. Plus/minus controls build a temporary cart without allowing its total to exceed the saved balance. `DONE` commits all selected quantities in one atomic save through `SaveManager.purchase_abilities()`; closing the shop discards the unconfirmed cart.
 
 ## Audio
 
@@ -202,11 +228,9 @@ The optional GDScript Formatter editor plugin expects the external `gdformat` co
 
 ## Known Gaps and Next Work
 
-- [ ] Replace the golem placeholder with a dedicated boss and boss scaling.
-- [ ] Add playable scenes and spawn schedules for Levels 2-15; only Level 1 is unlocked now.
+- [ ] Add boss-specific abilities, telegraphs, and HUD presentation.
+- [ ] Replace the temporary Level 2 map and add playable scenes and schedules for Levels 3-15.
 - [ ] Persist unlocked levels, star ratings, settings, and economy between sessions.
-- [ ] Connect win-screen reward text to the actual coin reward; gameplay currently grants a fixed `50` coins.
-- [ ] Rebalance the temporary development starting balance of `5000` coins.
 - [ ] Continue stress-testing crowd lanes and barrack combat with very large waves and builders near spawn points.
 - [ ] Add automated smoke tests for scene loading, purchases, upgrades, win/fail transitions, and resource validity.
 - [ ] Remove obsolete temporary level scene files after confirming they are not needed.

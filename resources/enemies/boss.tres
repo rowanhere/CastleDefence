@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/EnemeyData.gd" id="1_data"]
+[ext_resource type="SpriteFrames" path="res://resources/enemies/boss/BossFrames.tres" id="2_frames"]
+
+[resource]
+script = ExtResource("1_data")
+enemy_name = "Vampire Lord"
+health = 1800
+speed = 30.0
+attack_damage = 170.0
+attack_speed = 1.8
+coin_drop = 0
+path_spacing = 125.0
+health_bar_color = Color(0.78, 0.05, 0.22, 1)
+sprite_frames = ExtResource("2_frames")
+scale = Vector2(3.3, 3.3)
