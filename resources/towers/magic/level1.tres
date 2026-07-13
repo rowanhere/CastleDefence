@@ -7,7 +7,7 @@
 [resource]
 script = ExtResource("1_fegx0")
 upgradeCost = 650
-damage = 14.0
+damage = 17.0
 attackSpeed = 0.65
 tower_range = 240.0
 slowPercent = 10.0

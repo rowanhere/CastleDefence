@@ -1301,7 +1301,7 @@ position = Vector2(934, 371)
 position = Vector2(532, 277)
 
 [node name="TowerBuilder5" parent="PathNode" unique_id=880220694 instance=ExtResource("14_mkypq")]
-position = Vector2(1098, 12)
+position = Vector2(975, 628)
 
 [node name="TowerBuilder6" parent="PathNode" unique_id=329656921 instance=ExtResource("14_mkypq")]
 position = Vector2(1338, 393)

@@ -7,7 +7,7 @@
 [resource]
 script = ExtResource("1_3s7ak")
 upgradeCost = 1050
-damage = 52.0
+damage = 60.0
 attackSpeed = 2.85
 tower_range = 325.0
 towerImage = ExtResource("2_3s7ak")

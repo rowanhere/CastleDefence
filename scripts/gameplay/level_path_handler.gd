@@ -107,6 +107,8 @@ func _spawn_enemy(scaled_data: EnemyData, is_boss_wave: bool, spawn_lane_index: 
 	follow.add_child(enemy_instance)     # _ready() runs here first
 	enemy_instance.is_boss_enemy = is_boss_wave
 	enemy_instance.data = scaled_data
+	if enemy_instance.has_method("set_level_visual_scale"):
+		enemy_instance.set_level_visual_scale(GameHandler.get_enemy_visual_scale_multiplier(GameHandler.queued_level))
 	_apply_spawn_facing(enemy_instance)
 	if enemy_instance.has_method("set_spawn_lane_index"):
 		enemy_instance.set_spawn_lane_index(spawn_lane_index)

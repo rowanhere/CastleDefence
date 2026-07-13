@@ -10,9 +10,18 @@ extends Control
 signal purchased
 
 const PURCHASE_SOUND: AudioStream = preload("res://assets/audio/sfx/tower_purchase.mp3")
+const CAPTION_FONT: FontFile = preload("res://assets/fonts/Utroligt.otf")
 const SFX_VOLUME_60_PERCENT := -4.4
 const PURCHASE_ICON_OFFSET: Vector2 = Vector2(0.0, -4.0)
 const PURCHASE_ICON_SCALE: Vector2 = Vector2(0.95, 0.95)
+const CAPTION_SIZE := Vector2(156.0, 24.0)
+const CAPTION_OFFSET := Vector2(-60.0, -26.0)
+const TOWER_CAPTIONS := {
+	"archer": "Archer Tower",
+	"barrack": "Barrack Tower",
+	"magic": "Magic Tower",
+	"bomb": "Bomb Tower",
+}
 
 
 var insertTower = {
@@ -30,10 +39,13 @@ const towerBtnsImages = {
 	"bomb": preload("res://assets/textures/levels/towerBtnBomb.png")
 }
 
+var caption_label: Label = null
+
 
 func _ready() -> void:
 	coin.text = str(coinAmt)
 	cost_and_type_button.visible = false
+	_ensure_caption_label()
 
 
 func insertFour() -> void:
@@ -83,6 +95,39 @@ func insertBtns(pos: Vector2, tower_type: String) -> void:
 		func():
 			_purchase_tower(tower_type)
 	)
+	new_btn.mouse_entered.connect(_show_tower_caption.bind(new_btn, tower_type))
+	new_btn.mouse_exited.connect(_hide_tower_caption)
+
+
+func _ensure_caption_label() -> void:
+	if caption_label != null:
+		return
+	caption_label = Label.new()
+	caption_label.name = "TowerCaption"
+	caption_label.visible = false
+	caption_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	caption_label.z_index = 20
+	caption_label.size = CAPTION_SIZE
+	caption_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	caption_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	caption_label.add_theme_color_override("font_color", Color(1, 0.94, 0.78, 1))
+	caption_label.add_theme_color_override("font_outline_color", Color(0.12, 0.06, 0.025, 1))
+	caption_label.add_theme_constant_override("outline_size", 2)
+	caption_label.add_theme_font_override("font", CAPTION_FONT)
+	caption_label.add_theme_font_size_override("font_size", 12)
+	add_child(caption_label)
+
+
+func _show_tower_caption(button: TextureButton, tower_type: String) -> void:
+	_ensure_caption_label()
+	caption_label.text = str(TOWER_CAPTIONS.get(tower_type, tower_type.capitalize()))
+	caption_label.position = tower_btn_ring.position + button.position + Vector2(button.size.x * 0.5, 0.0) + CAPTION_OFFSET
+	caption_label.visible = true
+
+
+func _hide_tower_caption() -> void:
+	if caption_label != null:
+		caption_label.hide()
 
 
 func _set_purchase_icon(button: TextureButton, tower_type: String) -> void:

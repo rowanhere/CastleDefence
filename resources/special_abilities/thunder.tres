@@ -10,7 +10,6 @@ ability_id = &"thunder"
 damage = 220.0
 sprite_frames = ExtResource("2_frames")
 sync_animation_to_effect_duration = false
-effect_offset = Vector2(0, -70)
 visual_instances = 3
 visual_spread = 60.0
 visual_stagger = 0.2

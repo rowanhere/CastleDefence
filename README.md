@@ -6,7 +6,7 @@ A 2D pixel-art tower-defence game built with Godot 4.6. Place and upgrade towers
 
 - Godot `4.6`, GDScript, Forward+ renderer
 - `320 x 180` base viewport, stretched to the game window
-- Two playable levels; Level 2 temporarily reuses the Level 1 map with its own scaled wave schedule
+- Three playable levels with separate wave schedules
 - Five scheduled waves with mixed enemy pools and a dedicated Vampire Lord boss
 - Four playable tower types: Archer, Barrack, Magic, and Bomb
 - Tower purchase, upgrade, destroy, refund, range preview, and insufficient-coin feedback
@@ -23,11 +23,11 @@ A 2D pixel-art tower-defence game built with Godot 4.6. Place and upgrade towers
 5. Defeat enemies to earn their coin drops before they reach the castle.
 6. Complete every scheduled wave while the castle has more than `0` HP to win.
 
-Each level starts with `800` coins and `100` castle HP. Coins are battle-only currency and reset whenever a level starts.
+Level 1 starts with `1200` coins, and each later level adds `400` more starting coins using `1200 + (level - 1) * 400`. Every level starts with `100` castle HP. Coins are battle-only currency and reset whenever a level starts.
 
 ## Economy and Tower Lifecycle
 
-- Every tower purchase currently costs `400` coins.
+- Every tower purchase currently costs `400` coins. Level 1 can open with three basic towers, and each later level starts with enough extra coins for one more basic tower.
 - Failed purchases and upgrades flash the HUD coin value red and shake it.
 - Upgrade costs come from the next level's `UpgradeData` resource.
 - Destroying a tower refunds `80%` of its current level resource cost.
@@ -43,9 +43,9 @@ Targets enemies in range and fires homing arrows. Its level-specific base and ar
 
 | Level | Damage | Attacks/sec | Range | Resource Cost |
 |---|---:|---:|---:|---:|
-| 1 | 22 | 1.75 | 260 | 400 |
-| 2 | 34 | 2.25 | 290 | 650 |
-| 3 | 52 | 2.85 | 325 | 1050 |
+| 1 | 26 | 1.75 | 260 | 400 |
+| 2 | 40 | 2.25 | 290 | 650 |
+| 3 | 60 | 2.85 | 325 | 1050 |
 
 ### Barrack Tower
 
@@ -59,8 +59,8 @@ Spawns one soldier that intercepts enemies near the path. The soldier becomes la
 
 | Level | Soldier Damage | Attacks/sec | Range | Resource Cost |
 |---|---:|---:|---:|---:|
-| 1 | 14 | 1.0 | 230 | 400 |
-| 2 | 20 | 1.25 | 250 | 650 |
+| 1 | 17 | 1.0 | 230 | 400 |
+| 2 | 24 | 1.25 | 250 | 650 |
 
 ### Magic Tower
 
@@ -68,9 +68,9 @@ Maintains a visible magic beam while enemies are in range. It can chain through 
 
 | Level | Damage | Attacks/sec | Range | Slow | Resource Cost |
 |---|---:|---:|---:|---:|---:|
-| 1 | 14 | 0.65 | 240 | 10% | 650 |
-| 2 | 23 | 0.75 | 270 | 15% | 1050 |
-| 3 | 36 | 0.90 | 305 | 20% | 1550 |
+| 1 | 17 | 0.65 | 240 | 10% | 650 |
+| 2 | 27 | 0.75 | 270 | 15% | 1050 |
+| 3 | 42 | 0.90 | 305 | 20% | 1550 |
 
 ### Bomb Tower
 
@@ -78,9 +78,9 @@ Launches three animated bomb shots, then enters a reload cooldown. Bombs rise ve
 
 | Level | Blast Damage | Attack Rate | Range | Resource Cost |
 |---|---:|---:|---:|---:|
-| 1 | 55 | 1.25 | 240 | 800 |
-| 2 | 90 | 1.45 | 270 | 1200 |
-| 3 | 140 | 2.00 | 310 | 1800 |
+| 1 | 65 | 1.25 | 240 | 800 |
+| 2 | 105 | 1.45 | 270 | 1200 |
+| 3 | 160 | 2.00 | 310 | 1800 |
 
 `Resource Cost` is the value stored on that level resource. Tower placement still uses the shared `400` purchase price; upgrades charge the next level's resource cost.
 
@@ -90,16 +90,16 @@ Enemy base stats live in `resources/enemies/<enemy>.tres`. Each resource also pr
 
 | Enemy | Role | HP | Speed | Attack Delay | Damage | Coins | Path Spacing |
 |---|---|---:|---:|---:|---:|---:|---:|
-| Goblin | Fast swarm | 70 | 120 | 1.10 | 8 | 12 | 26 |
-| Gnoll | Early bruiser | 130 | 95 | 0.90 | 16 | 18 | 80 |
-| Imp | Fast pressure | 95 | 104 | 0.75 | 14 | 16 | 42 |
-| Mushroom | Early tank | 180 | 76 | 1.05 | 18 | 24 | 52 |
-| Demon | Elite pressure | 220 | 82 | 0.80 | 24 | 28 | 52 |
-| Zombie | Slow durable unit | 230 | 54 | 1.25 | 22 | 28 | 65 |
-| Predator | Mid-late bruiser | 260 | 58 | 1.15 | 27 | 34 | 70 |
-| Lizardman | Heavy fighter | 280 | 72 | 0.90 | 28 | 34 | 62 |
-| Beholder | Late heavy threat | 310 | 48 | 1.35 | 34 | 42 | 76 |
-| Golem | Heavy tank | 360 | 45 | 1.60 | 32 | 38 | 68 |
+| Goblin | Fast swarm | 70 | 120 | 1.10 | 8 | 16 | 26 |
+| Gnoll | Early bruiser | 130 | 95 | 0.90 | 16 | 24 | 80 |
+| Imp | Fast pressure | 95 | 104 | 0.75 | 14 | 22 | 42 |
+| Mushroom | Early tank | 180 | 76 | 1.05 | 18 | 32 | 52 |
+| Demon | Elite pressure | 220 | 82 | 0.80 | 24 | 38 | 52 |
+| Zombie | Slow durable unit | 230 | 54 | 1.25 | 22 | 36 | 65 |
+| Predator | Mid-late bruiser | 260 | 58 | 1.15 | 27 | 44 | 70 |
+| Lizardman | Heavy fighter | 280 | 72 | 0.90 | 28 | 46 | 62 |
+| Beholder | Late heavy threat | 310 | 48 | 1.35 | 34 | 56 | 76 |
+| Golem | Heavy tank | 360 | 45 | 1.60 | 32 | 50 | 68 |
 | Vampire Lord | Final boss | 1800 | 30 | 1.80 | 170 | 0 | 125 |
 
 Directional enemy sheets use the row order `down`, `up`, `left`, `right`. Their SpriteFrames expose matching walk, attack, hurt, and death animations.
@@ -120,10 +120,10 @@ Level 1 uses `scenes/levels/level1/level1_spawn.tres`:
 
 | Wave | Start | Enemy Pool | Count |
 |---|---:|---|---:|
-| 1 | 0s | Imp, Goblin | 14 |
-| 2 | 45s | Goblin, Gnoll, Imp | 15 |
-| 3 | 75s | Gnoll, Zombie, Predator | 10 |
-| 4 | 105s | Gnoll, Demon, Lizardman, Zombie, Beholder, Predator | 10 |
+| 1 | 0s | Goblin, Imp, Mushroom | 8 |
+| 2 | 45s | Goblin, Gnoll, Zombie | 9 |
+| 3 | 75s | Imp, Gnoll, Zombie, Predator | 8 |
+| 4 | 105s | Demon, Lizardman, Predator, Beholder, Golem | 9 |
 | 5 | 135s | Vampire Lord boss | 1 |
 
 Non-boss enemies are duplicated and scaled at spawn time:
@@ -170,7 +170,7 @@ Persistent progress is managed by the `SaveManager` autoload and written to `use
 - Music enabled/disabled state
 - Sound-effect enabled/disabled state
 
-Level coins are intentionally not saved. Every level starts with `800` coins, and enemy coin drops are used only during that battle. A win awards `1`, `2`, or `3` persistent reward currency based on the result shown by `RewardLabel`.
+Level coins are intentionally not saved. Level starting coins use `1200 + (level - 1) * 400`, and enemy coin drops are used only during that battle. A win awards `1`, `2`, or `3` persistent reward currency based on the result shown by `RewardLabel`.
 
 Special-ability inventory is stored under `inventory/special_abilities`. A new save begins with one Fire, one Thunder, and one Rock ability in the global inventory. These are one-time starting items, not a refill for every level. Used abilities remain consumed across scene changes, while shop purchases add permanently saved charges. Empty ability buttons are disabled. `SaveManager.add_ability()`, `get_ability_count()`, and `consume_ability()` provide the inventory API.
 

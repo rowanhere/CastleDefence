@@ -127,7 +127,10 @@ func _fight_enemy(enemy: Node2D, delta: float) -> void:
 		enemy.reserve_soldier(self)
 	var dist_to_enemy: float = _dist_to(enemy)
 	_face(enemy.global_position)
-	if dist_to_enemy <= _engage_range(enemy) or _enemy_in_attack_area() == enemy:
+	var can_attack: bool = dist_to_enemy <= _engage_range(enemy) \
+		or _enemy_in_attack_area() == enemy \
+		or (_is_attacking() and dist_to_enemy <= _disengage_range(enemy))
+	if can_attack:
 		velocity = Vector2.ZERO
 		_play_attack_anim()
 		attack_timer -= delta
@@ -141,8 +144,7 @@ func _fight_enemy(enemy: Node2D, delta: float) -> void:
 	last_direction = dir
 	velocity = Vector2.ZERO
 	_step_toward(move_target, delta)
-	if not _is_attacking():
-		_play_walk_anim(dir)
+	_play_walk_anim(dir)
 
 
 func take_damage(amount: float) -> void:
@@ -205,8 +207,7 @@ func _physics_process(delta: float) -> void:
 		var dir: Vector2 = (wait_position - global_position).normalized()
 		last_direction = dir
 		_step_toward(wait_position, delta)
-		if not _is_attacking():
-			_play_walk_anim(dir)
+		_play_walk_anim(dir)
 	else:
 		_play_idle_anim()
 
@@ -232,8 +233,6 @@ func _play_attack_anim() -> void:
 
 
 func _play_walk_anim(dir: Vector2) -> void:
-	if _is_attacking():
-		return
 	var name: String
 	if abs(dir.x) > abs(dir.y):
 		name = "walkRight" if dir.x > 0 else "walkLeft"

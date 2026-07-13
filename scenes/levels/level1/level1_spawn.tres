@@ -5,24 +5,26 @@
 
 [sub_resource type="Resource" id="Resource_8ko3h"]
 script = ExtResource("2_wave")
-enemy_pool = Array[String](["imp", "goblin"])
-total_multiplier = 14
+enemy_pool = Array[String](["goblin", "imp", "mushroom"])
+total_multiplier = 8
 
 [sub_resource type="Resource" id="EnemySpawnWave_1"]
 script = ExtResource("2_wave")
 start_time = 45.0
-enemy_pool = Array[String](["goblin", "gnoll", "imp"])
-total_multiplier = 15
+enemy_pool = Array[String](["goblin", "gnoll", "zombie"])
+total_multiplier = 9
 
 [sub_resource type="Resource" id="EnemySpawnWave_2"]
 script = ExtResource("2_wave")
 start_time = 75.0
-enemy_pool = Array[String](["gnoll", "zombie", "predator"])
+enemy_pool = Array[String](["imp", "gnoll", "zombie", "predator"])
+total_multiplier = 8
 
 [sub_resource type="Resource" id="EnemySpawnWave_3"]
 script = ExtResource("2_wave")
 start_time = 105.0
-enemy_pool = Array[String](["gnoll", "demon", "lizardman", "zombie", "beholder", "predator"])
+enemy_pool = Array[String](["demon", "lizardman", "predator", "beholder", "golem"])
+total_multiplier = 9
 
 [sub_resource type="Resource" id="EnemySpawnWave_4"]
 script = ExtResource("2_wave")

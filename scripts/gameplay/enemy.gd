@@ -29,6 +29,7 @@ var _dir_suffix: String = "Down"
 var _path_progress_hint: float = 0.0
 var _detached: bool = false
 var _attack_slot_angle: float = -1.0
+var _attack_slot_radius: float = 42.0
 var _path_lane_offset: Vector2 = Vector2.ZERO
 var _path_lane_index: int = 0
 var _has_path_lane: bool = false
@@ -37,21 +38,31 @@ var _has_spawn_lane: bool = false
 var _slow_multiplier: float = 1.0
 var _slow_timer: float = 0.0
 var _slow_visual_active: bool = false
+var _level_visual_scale: float = 1.0
+var _base_anim_scale: Vector2 = Vector2.ONE
+var _base_health_bar_scale: Vector2 = Vector2.ONE
+var _base_health_bar_position: Vector2 = Vector2.ZERO
+var _depth_initialized: bool = false
+var _crowd_speed_timer: float = 0.0
+var _cached_crowd_speed_scale: float = 1.0
 
 const DEPTH_SORT_DIVISOR := 4.0
 const MIN_GROUND_ACTOR_Z_INDEX := 2
 const MAX_DEPTH_Z_INDEX := 2000
 const SOLDIER_DETECT_RANGE := 150.0
 const ATTACK_SLOT_RADIUS := 42.0
-const PATH_LANE_WIDTH := 10.0
-const PATH_ROW_DEPTH := 5.0
-const PATH_LANE_PROGRESS_RANGE := 18.0
+const ATTACK_SLOT_RADII: Array[float] = [42.0, 58.0, 74.0]
+const ATTACK_SLOT_ANGLE_PADDING := 0.34
+const PATH_LANE_WIDTH := 14.0
+const PATH_ROW_DEPTH := 7.0
+const PATH_LANE_PROGRESS_RANGE := 30.0
 const PATH_LANE_SMOOTH := 10.0
 const SPAWN_LANE_PROGRESS := 96.0
-const CROWD_SPACING_RANGE := 34.0
-const CROWD_MIN_SPEED_SCALE := 0.82
-const CROWD_MAX_SPEED_SCALE := 1.16
-const CROWD_SPACE_PUSH := 0.18
+const CROWD_SPACING_RANGE := 48.0
+const CROWD_MIN_SPEED_SCALE := 0.68
+const CROWD_MAX_SPEED_SCALE := 1.24
+const CROWD_SPACE_PUSH := 0.30
+const CROWD_SPEED_UPDATE_INTERVAL := 0.12
 
 
 func _apply_data() -> void:
@@ -74,18 +85,50 @@ func _apply_data() -> void:
 		anim.play("walkDown")
 	else:
 		print("[Enemy] WARNING: ", data.enemy_name, " has no sprite_frames in .tres!")
+	_apply_level_visual_scale()
 
 
 func _ready() -> void:
 	add_to_group("enemies")
 	z_as_relative = false
+	if anim != null:
+		_base_anim_scale = anim.scale
+	if health_bar != null:
+		_base_health_bar_scale = health_bar.scale
+		_base_health_bar_position = health_bar.position
 	health_bar.max_value = hp
 	health_bar.value = hp
 	_update_depth()
 
 
+func set_level_visual_scale(multiplier: float) -> void:
+	_level_visual_scale = maxf(multiplier, 0.1)
+	_apply_level_visual_scale()
+
+
+func _apply_level_visual_scale() -> void:
+	if not is_node_ready():
+		return
+	if anim != null:
+		anim.scale = _base_anim_scale * _level_visual_scale
+	if health_bar != null:
+		var health_bar_scale_multiplier: float = lerpf(1.0, _level_visual_scale, 0.5)
+		health_bar.scale = _base_health_bar_scale * health_bar_scale_multiplier
+		health_bar.position = _base_health_bar_position + Vector2(0.0, -24.0 * (_level_visual_scale - 1.0))
+
+
 func _update_depth() -> void:
-	z_index = clampi(int(round(global_position.y / DEPTH_SORT_DIVISOR)), MIN_GROUND_ACTOR_Z_INDEX, MAX_DEPTH_Z_INDEX)
+	var path_follow: PathFollow2D = get_parent() as PathFollow2D
+	if path_follow != null:
+		z_index = clampi(int(floor(path_follow.progress)), MIN_GROUND_ACTOR_Z_INDEX, MAX_DEPTH_Z_INDEX)
+		return
+	var target_z: int = clampi(int(floor(global_position.y / DEPTH_SORT_DIVISOR)), MIN_GROUND_ACTOR_Z_INDEX, MAX_DEPTH_Z_INDEX)
+	if not _depth_initialized:
+		z_index = target_z
+		_depth_initialized = true
+		return
+	if abs(target_z - z_index) >= 2:
+		z_index = target_z
 
 
 func _apply_health_bar_color() -> void:
@@ -159,6 +202,8 @@ func reserve_soldier(soldier: Node2D) -> bool:
 func release_soldier(soldier: Node2D = null) -> void:
 	if soldier == null or locked_soldier == soldier:
 		locked_soldier = null
+		_attack_slot_angle = -1.0
+		_attack_slot_radius = ATTACK_SLOT_RADIUS
 		attack_timer = attack_speed
 
 
@@ -195,23 +240,38 @@ func _try_lock_soldier(soldier: Node2D) -> bool:
 
 
 func _claim_attack_slot(soldier: Node2D) -> float:
-	var taken: Array[float] = []
+	var taken: Array[Dictionary] = []
 	for other in get_tree().get_nodes_in_group("enemies"):
 		if other == self or not is_instance_valid(other):
 			continue
 		if other.locked_soldier == soldier and other._attack_slot_angle >= 0.0:
-			taken.append(other._attack_slot_angle)
+			taken.append({
+				"angle": float(other.get("_attack_slot_angle")),
+				"radius": float(other.get("_attack_slot_radius"))
+			})
 
-	for i in range(8):
-		var angle: float = (TAU / 8.0) * float(i)
-		var available := true
-		for taken_angle in taken:
-			if abs(wrapf(angle - taken_angle, -PI, PI)) < 0.35:
-				available = false
-				break
-		if available:
-			return angle
+	for ring_index in range(ATTACK_SLOT_RADII.size()):
+		var ring_radius: float = ATTACK_SLOT_RADII[ring_index]
+		var slot_count: int = 8 + ring_index * 4
+		var ring_offset: float = (TAU / float(slot_count)) * 0.5 * float(ring_index % 2)
+		for i in range(slot_count):
+			var angle: float = ring_offset + (TAU / float(slot_count)) * float(i)
+			if _attack_slot_available(taken, angle, ring_radius):
+				_attack_slot_radius = ring_radius
+				return angle
+	_attack_slot_radius = ATTACK_SLOT_RADII[ATTACK_SLOT_RADII.size() - 1]
 	return randf() * TAU
+
+
+func _attack_slot_available(taken: Array[Dictionary], angle: float, radius: float) -> bool:
+	for slot in taken:
+		var taken_radius: float = float(slot.get("radius", ATTACK_SLOT_RADIUS))
+		if abs(taken_radius - radius) > 8.0:
+			continue
+		var taken_angle: float = float(slot.get("angle", -1.0))
+		if abs(wrapf(angle - taken_angle, -PI, PI)) < ATTACK_SLOT_ANGLE_PADDING:
+			return false
+	return true
 
 
 func _detach_from_path() -> void:
@@ -247,6 +307,7 @@ func _rejoin_path() -> void:
 	_path_progress_hint = follow.progress
 	_detached = false
 	_attack_slot_angle = -1.0
+	_attack_slot_radius = ATTACK_SLOT_RADIUS
 	reparent(follow, false)
 	position = Vector2.ZERO
 	_path_lane_offset = Vector2.ZERO
@@ -262,12 +323,32 @@ func _sanitize_lock() -> void:
 		locked_soldier = null
 	if locked_soldier == null:
 		_attack_slot_angle = -1.0
+		_attack_slot_radius = ATTACK_SLOT_RADIUS
 
 
 func _get_dir_suffix(dir: Vector2) -> String:
 	if abs(dir.x) >= abs(dir.y):
 		return "Right" if dir.x >= 0 else "Left"
 	return "Down" if dir.y >= 0 else "Up"
+
+
+func _set_dir_suffix_stable(dir: Vector2) -> void:
+	if dir.length_squared() <= 0.001:
+		return
+	dir = dir.normalized()
+	var next_suffix: String = _get_dir_suffix(dir)
+	if next_suffix == _dir_suffix:
+		return
+	var current_is_horizontal: bool = _dir_suffix == "Left" or _dir_suffix == "Right"
+	var next_is_horizontal: bool = next_suffix == "Left" or next_suffix == "Right"
+	if current_is_horizontal != next_is_horizontal:
+		var horizontal: float = abs(dir.x)
+		var vertical: float = abs(dir.y)
+		if next_is_horizontal and horizontal < vertical * 1.25:
+			return
+		if not next_is_horizontal and vertical < horizontal * 1.25:
+			return
+	_dir_suffix = next_suffix
 
 
 func _anim_name(base: String) -> String:
@@ -289,7 +370,7 @@ func _play_dir(base: String, force: bool = false) -> void:
 func set_initial_path_direction(direction: Vector2) -> void:
 	if direction.length_squared() <= 0.001:
 		return
-	_dir_suffix = _get_dir_suffix(direction.normalized())
+	_set_dir_suffix_stable(direction)
 	_play_dir("walk", true)
 
 
@@ -382,14 +463,24 @@ func _get_crowd_speed_scale(path2d: Path2D, path_follow: PathFollow2D) -> float:
 		elif gap < 0.0:
 			nearest_behind_gap = min(nearest_behind_gap, abs(gap))
 
+	var desired_spacing: float = maxf(CROWD_SPACING_RANGE, path_spacing * 0.9)
 	var speed_scale := 1.0
-	if nearest_ahead_gap < CROWD_SPACING_RANGE:
-		var ahead_crowd_amount: float = 1.0 - nearest_ahead_gap / CROWD_SPACING_RANGE
+	if nearest_ahead_gap < desired_spacing:
+		var ahead_crowd_amount: float = 1.0 - nearest_ahead_gap / desired_spacing
 		speed_scale -= ahead_crowd_amount * CROWD_SPACE_PUSH
-	if nearest_behind_gap < CROWD_SPACING_RANGE:
-		var behind_crowd_amount: float = 1.0 - nearest_behind_gap / CROWD_SPACING_RANGE
+	if nearest_behind_gap < desired_spacing:
+		var behind_crowd_amount: float = 1.0 - nearest_behind_gap / desired_spacing
 		speed_scale += behind_crowd_amount * CROWD_SPACE_PUSH
 	return clampf(speed_scale, CROWD_MIN_SPEED_SCALE, CROWD_MAX_SPEED_SCALE)
+
+
+func _get_cached_crowd_speed_scale(path2d: Path2D, path_follow: PathFollow2D, delta: float) -> float:
+	_crowd_speed_timer -= delta
+	if _crowd_speed_timer <= 0.0:
+		_cached_crowd_speed_scale = _get_crowd_speed_scale(path2d, path_follow)
+		var stagger: float = float(get_instance_id() % 5) * 0.015
+		_crowd_speed_timer = CROWD_SPEED_UPDATE_INTERVAL + stagger
+	return _cached_crowd_speed_scale
 
 
 func _get_path_normal(path2d: Path2D, progress: float) -> Vector2:
@@ -470,7 +561,7 @@ func _physics_process(delta: float) -> void:
 		if locked_soldier != null:
 			if _attack_slot_angle < 0.0:
 				_attack_slot_angle = _claim_attack_slot(locked_soldier)
-			var slot_pos: Vector2 = locked_soldier.global_position + Vector2(cos(_attack_slot_angle), sin(_attack_slot_angle)) * ATTACK_SLOT_RADIUS
+			var slot_pos: Vector2 = locked_soldier.global_position + Vector2(cos(_attack_slot_angle), sin(_attack_slot_angle)) * _attack_slot_radius
 			var dist_to_slot: float = global_position.distance_to(slot_pos)
 			var dist_to_soldier: float = _distance_to(locked_soldier)
 			if dist_to_slot > 6.0 and dist_to_soldier > _engage_range(locked_soldier):
@@ -523,14 +614,18 @@ func _physics_process(delta: float) -> void:
 	_path_progress_hint = path_follow.progress
 	var prev_pos: Vector2 = global_position
 	var path2d := path_follow.get_parent() as Path2D
-	var next_progress: float = path_follow.progress + _get_current_speed() * _get_crowd_speed_scale(path2d, path_follow) * delta
+	var next_progress: float = path_follow.progress + _get_current_speed() * _get_cached_crowd_speed_scale(path2d, path_follow, delta) * delta
 	if barrack_hold_progress >= 0.0:
 		next_progress = min(next_progress, barrack_hold_progress)
 	path_follow.progress = next_progress
 	_update_path_lane_offset(path2d, path_follow, delta)
-	var move_delta: Vector2 = global_position - prev_pos
-	if move_delta.length() > 0.1:
-		_dir_suffix = _get_dir_suffix(move_delta)
+	var path_direction: Vector2 = _get_path_tangent(path2d, path_follow.progress)
+	if path_direction.length_squared() > 0.001:
+		_set_dir_suffix_stable(path_direction)
+	else:
+		var move_delta: Vector2 = global_position - prev_pos
+		if move_delta.length() > 0.1:
+			_set_dir_suffix_stable(move_delta)
 	_play_dir("walk")
 
 	if path_follow.progress_ratio >= 1.0:

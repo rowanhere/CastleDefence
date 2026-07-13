@@ -10,9 +10,10 @@ const WAVE_POINTER_BASE_SCALE := Vector2(0.62, 0.62)
 const WAVE_POINTER_PULSE_SCALE := Vector2(0.70, 0.70)
 
 static var queued_level: int = 1
-const LEVEL_STARTING_COINS := 800
+const BASE_LEVEL_STARTING_COINS := 1200
+const STARTING_COINS_PER_LEVEL := 400
 
-static var coins: int = LEVEL_STARTING_COINS
+static var coins: int = BASE_LEVEL_STARTING_COINS
 static var castle_life: int = 100
 static var level_failed: bool = false
 static var level_won: bool = false
@@ -32,6 +33,7 @@ const TWO_STAR_LIFE_THRESHOLD := 40
 const BOSS_HEALTH_SCALE_PER_LEVEL := 0.35
 const BOSS_DAMAGE_SCALE_PER_LEVEL := 0.18
 const BOSS_SPEED_SCALE_PER_LEVEL := 0.04
+const ZOOMED_OUT_ENEMY_VISUAL_SCALE := 1.3
 
 @onready var level_container: Node2D = $LevelContainer
 @onready var game_hud: CanvasLayer = $GameHUD
@@ -40,7 +42,7 @@ var _wave_pointer: Node2D = null
 var _wave_pointer_tween: Tween = null
 
 func _ready() -> void:
-	coins = LEVEL_STARTING_COINS
+	coins = get_level_starting_coins(queued_level)
 	castle_life = 100
 	level_failed = false
 	level_won = false
@@ -63,6 +65,16 @@ static func get_level_scene_path(level_number: int) -> String:
 
 static func get_level_spawn_schedule_path(level_number: int) -> String:
 	return "res://scenes/levels/level%d/level%d_spawn.tres" % [level_number, level_number]
+
+
+static func get_level_starting_coins(level_number: int) -> int:
+	return BASE_LEVEL_STARTING_COINS + max(level_number - 1, 0) * STARTING_COINS_PER_LEVEL
+
+
+static func get_enemy_visual_scale_multiplier(level_number: int) -> float:
+	if level_number >= 2:
+		return ZOOMED_OUT_ENEMY_VISUAL_SCALE
+	return 1.0
 
 
 static func get_enemy_data_by_id(enemy_id: String) -> EnemyData:

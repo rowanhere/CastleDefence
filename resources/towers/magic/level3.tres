@@ -7,7 +7,7 @@
 [resource]
 script = ExtResource("1_magic_l3")
 upgradeCost = 1550
-damage = 36.0
+damage = 42.0
 attackSpeed = 0.9
 tower_range = 305.0
 slowPercent = 20.0

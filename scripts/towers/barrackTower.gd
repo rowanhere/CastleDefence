@@ -146,6 +146,16 @@ func _tower_path_progress() -> float:
 	return path2d.curve.get_closest_offset(local_pos)
 
 
+func _get_soldier_current_enemy() -> Node2D:
+	if not is_instance_valid(soldier):
+		return null
+	if "locked_enemy" in soldier and _is_valid_enemy(soldier.locked_enemy):
+		return soldier.locked_enemy
+	if "target" in soldier and _is_valid_enemy(soldier.target):
+		return soldier.target
+	return null
+
+
 func _enemy_is_in_combat_window(enemy: Node2D, tower_progress: float) -> bool:
 	if not _is_valid_enemy(enemy):
 		return false
@@ -167,6 +177,13 @@ func _assign_target() -> void:
 		return
 
 	var tower_progress: float = _tower_path_progress()
+	var current_enemy: Node2D = _get_soldier_current_enemy()
+	if current_enemy != null:
+		if current_enemy in enemies_in_range and _enemy_is_in_combat_window(current_enemy, tower_progress):
+			return
+		if soldier.has_method("release_enemy"):
+			soldier.release_enemy(current_enemy)
+
 	var best_enemy: Node2D = null
 	var best_line_distance: float = INF
 	var best_progress: float = -INF
