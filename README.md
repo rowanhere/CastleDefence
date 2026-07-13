@@ -182,6 +182,22 @@ Special abilities share the same effect scene, `100px` radius, AOE targeting, `1
 
 The level selector includes a persistent special-ability shop. Fire costs `3`, Thunder costs `5`, and Rock costs `4` reward currency. Plus/minus controls build a temporary cart without allowing its total to exceed the saved balance. `DONE` commits all selected quantities in one atomic save through `SaveManager.purchase_abilities()`; closing the shop discards the unconfirmed cart.
 
+### Temporary ability visibility flags
+
+Special abilities are currently hidden from the in-game HUD and from the level-selector shop without deleting their scenes, resources, inventory data, or save support.
+
+To turn them back on:
+
+```gdscript
+// scripts/ui/game_hud.gd
+const SPECIAL_ABILITIES_ENABLED := true
+
+// scripts/ui/level.gd
+const SPECIAL_ABILITY_SHOP_ENABLED := true
+```
+
+Set both constants back to `false` to hide them again.
+
 ## Audio
 
 | Asset | Use |

@@ -23,6 +23,7 @@ const WIN_STAR_TEXTURES: Dictionary = {
 	2: preload("res://assets/textures/levelWin/star_2.png"),
 	3: preload("res://assets/textures/levelWin/star_3.png")
 }
+const SPECIAL_ABILITIES_ENABLED := false # Turn true to show in-game special abilities again.
 const THREE_STAR_LIFE_THRESHOLD := 75
 const TWO_STAR_LIFE_THRESHOLD := 40
 
@@ -47,6 +48,8 @@ const TWO_STAR_LIFE_THRESHOLD := 40
 @onready var win_next_button: TextureButton = $LevelWinOverlay/Panel/NextButton
 @onready var win_star_rating: TextureRect = $LevelWinOverlay/Panel/StarRating
 @onready var win_reward_label: Label = $LevelWinOverlay/Panel/RewardLabel
+@onready var special_abilities_ui: Control = $SpecialAbilitiesUI
+@onready var ability_target_blocker: Control = $AbilityTargetBlocker
 
 var _label_values: Dictionary = {}
 var _label_tweens: Dictionary = {}
@@ -77,9 +80,19 @@ func _ready() -> void:
 		_coin_base_position = coin_node.position
 	if coin_label != null:
 		coin_label.modulate = COIN_NORMAL_COLOR
+	_apply_special_ability_visibility()
 	_setup_pause_menu()
 	_setup_level_failed_menu()
 	_setup_level_win_menu()
+
+
+func _apply_special_ability_visibility() -> void:
+	if special_abilities_ui != null:
+		special_abilities_ui.visible = SPECIAL_ABILITIES_ENABLED
+		special_abilities_ui.process_mode = Node.PROCESS_MODE_INHERIT if SPECIAL_ABILITIES_ENABLED else Node.PROCESS_MODE_DISABLED
+	if ability_target_blocker != null:
+		ability_target_blocker.hide()
+		ability_target_blocker.process_mode = Node.PROCESS_MODE_INHERIT if SPECIAL_ABILITIES_ENABLED else Node.PROCESS_MODE_DISABLED
 
 
 func _process(delta: float) -> void:
