@@ -6,6 +6,13 @@ const POPUP_SCREEN_MARGIN := 24.0
 const POPUP_EDGE_GAP := 12.0
 const BUILDER_Z_INDEX := 2500
 const POPUP_Z_INDEX := 4096
+const DEFAULT_HOVER_MODULATE := Color(0.72, 0.72, 0.72, 1.0)
+
+@export var button_texture_normal: Texture2D
+@export var button_texture_hover: Texture2D
+@export var button_texture_pressed: Texture2D
+
+@onready var button: TextureButton = $TextureButton
 
 var addTowerBuilder
 var _builder_center := Vector2.ZERO
@@ -14,10 +21,12 @@ var _builder_center := Vector2.ZERO
 func _ready() -> void:
 	z_as_relative = false
 	z_index = BUILDER_Z_INDEX
-	var btn = $TextureButton
-	btn.z_as_relative = false
-	btn.z_index = BUILDER_Z_INDEX
-	_builder_center = btn.global_position + btn.size / 2
+	_apply_button_textures()
+	button.mouse_entered.connect(_on_button_mouse_entered)
+	button.mouse_exited.connect(_on_button_mouse_exited)
+	button.z_as_relative = false
+	button.z_index = BUILDER_Z_INDEX
+	_builder_center = button.global_position + button.size / 2
 	 
 	addTowerBuilder = TOWER_BUILDER_BUTTON.instantiate()
 	addTowerBuilder.coinAmt = 400
@@ -39,9 +48,37 @@ func _ready() -> void:
 
 
 func refresh_builder_position() -> void:
-	_builder_center = $TextureButton.global_position + $TextureButton.size / 2
+	_builder_center = button.global_position + button.size / 2
 	if addTowerBuilder != null:
 		addTowerBuilder.towerBuilderPosition = _builder_center
+
+
+func _apply_button_textures() -> void:
+	if button_texture_normal != null:
+		button.texture_normal = button_texture_normal
+	if button_texture_hover != null:
+		button.texture_hover = button_texture_hover
+	else:
+		button.texture_hover = button.texture_normal
+	if button_texture_pressed != null:
+		button.texture_pressed = button_texture_pressed
+
+
+func _on_button_mouse_entered() -> void:
+	if button_texture_hover == null:
+		button.self_modulate = DEFAULT_HOVER_MODULATE
+
+
+func _on_button_mouse_exited() -> void:
+	button.self_modulate = Color.WHITE
+
+
+func get_button_texture_config() -> Dictionary:
+	return {
+		"normal": button_texture_normal,
+		"hover": button_texture_hover,
+		"pressed": button_texture_pressed,
+	}
 
 func _on_texture_button_pressed() -> void:
 	if addTowerBuilder.visible:
@@ -58,7 +95,7 @@ func _on_texture_button_pressed() -> void:
 
 
 func _get_popup_position() -> Vector2:
-	_builder_center = $TextureButton.global_position + $TextureButton.size / 2
+	_builder_center = button.global_position + button.size / 2
 	var popup_size := _get_popup_size()
 	var visible_world_rect := _get_visible_world_rect()
 	var popup_position := _builder_center - popup_size * 0.5

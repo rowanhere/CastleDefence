@@ -24,6 +24,7 @@ var is_dead: bool = false
 
 const COMBAT_OFFSET_DISTANCE := 34.0
 const DEPTH_SORT_DIVISOR := 4.0
+const MIN_GROUND_ACTOR_Z_INDEX := 2
 
 
 func _ready() -> void:
@@ -35,7 +36,7 @@ func _ready() -> void:
 
 
 func _update_depth() -> void:
-	z_index = clampi(int(round(global_position.y / DEPTH_SORT_DIVISOR)), -4096, 4096)
+	z_index = clampi(int(round(global_position.y / DEPTH_SORT_DIVISOR)), MIN_GROUND_ACTOR_Z_INDEX, 4096)
 
 
 func _step_toward(target_pos: Vector2, delta: float) -> void:

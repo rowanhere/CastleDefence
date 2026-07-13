@@ -222,6 +222,11 @@ func _restore_tower_builder(tower_root: Node) -> void:
 	var builder := builder_scene.instantiate() as Node2D
 	if builder == null:
 		return
+	if tower_root.has_meta("builder_button_textures"):
+		var texture_config: Dictionary = tower_root.get_meta("builder_button_textures")
+		builder.set("button_texture_normal", texture_config.get("normal"))
+		builder.set("button_texture_hover", texture_config.get("hover"))
+		builder.set("button_texture_pressed", texture_config.get("pressed"))
 	var builder_transform: Transform2D = tower_root.get_meta("builder_global_transform")
 	tower_parent.add_child(builder)
 	builder.global_transform = builder_transform

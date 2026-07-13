@@ -257,6 +257,7 @@ vertical_alignment = 1
 
 [node name="LevelFailedOverlay" type="Control" parent="." unique_id=544914972]
 process_mode = 3
+z_index = 100
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -386,6 +387,7 @@ stretch_mode = 5
 
 [node name="LevelWinOverlay" type="Control" parent="." unique_id=66559576]
 process_mode = 3
+z_index = 100
 visible = false
 layout_mode = 3
 anchors_preset = 15

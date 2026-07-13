@@ -112,6 +112,8 @@ func _purchase_tower(tower_type: String) -> void:
 	if builder != null:
 		tower_instance.set_meta("builder_scene", load("res://scenes/systems/tower/tower_builder.tscn"))
 		tower_instance.set_meta("builder_global_transform", builder.global_transform)
+		if builder.has_method("get_button_texture_config"):
+			tower_instance.set_meta("builder_button_textures", builder.call("get_button_texture_config"))
 
 	get_parent().get_parent().add_child(tower_instance)
 

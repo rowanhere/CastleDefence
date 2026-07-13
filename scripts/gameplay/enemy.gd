@@ -39,6 +39,7 @@ var _slow_timer: float = 0.0
 var _slow_visual_active: bool = false
 
 const DEPTH_SORT_DIVISOR := 4.0
+const MIN_GROUND_ACTOR_Z_INDEX := 2
 const MAX_DEPTH_Z_INDEX := 2000
 const SOLDIER_DETECT_RANGE := 150.0
 const ATTACK_SLOT_RADIUS := 42.0
@@ -84,7 +85,7 @@ func _ready() -> void:
 
 
 func _update_depth() -> void:
-	z_index = clampi(int(round(global_position.y / DEPTH_SORT_DIVISOR)), -4096, MAX_DEPTH_Z_INDEX)
+	z_index = clampi(int(round(global_position.y / DEPTH_SORT_DIVISOR)), MIN_GROUND_ACTOR_Z_INDEX, MAX_DEPTH_Z_INDEX)
 
 
 func _apply_health_bar_color() -> void:
