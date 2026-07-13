@@ -1,6 +1,7 @@
 extends Control
 
 signal ability_selected(ability_id: StringName)
+signal ability_targeted(ability_id: StringName, world_position: Vector2)
 
 const ABILITY_IDS: Array[StringName] = [&"fire", &"freeze", &"thunder", &"rock"]
 const ABILITY_CAPTIONS: Dictionary = {
@@ -10,6 +11,17 @@ const ABILITY_CAPTIONS: Dictionary = {
 	&"rock": "Meteor Rocks",
 }
 const HOVER_SCALE := Vector2(1.06, 1.06)
+const TARGET_INDICATOR_SCENE: PackedScene = preload("res://scenes/gameplay/ability_target_indicator.tscn")
+const ABILITY_EFFECT_SCENE: PackedScene = preload("res://scenes/gameplay/special_ability_effect.tscn")
+const FIRE_DATA: Resource = preload("res://resources/special_abilities/fire.tres")
+const ROCK_DATA: Resource = preload("res://resources/special_abilities/rock.tres")
+const TARGET_RADIUS := 100.0
+const EFFECT_DURATION := 1.25
+const ABILITY_COOLDOWN := 20.0
+const ABILITY_DATA: Dictionary = {
+	&"fire": FIRE_DATA,
+	&"rock": ROCK_DATA,
+}
 
 @onready var _buttons: Array[TextureButton] = [
 	$Buttons/Fire,
@@ -18,15 +30,20 @@ const HOVER_SCALE := Vector2(1.06, 1.06)
 	$Buttons/Rock,
 ]
 @onready var _caption: Label = $AbilityCaption
+@onready var _input_blocker: Control = get_node_or_null("../AbilityTargetBlocker") as Control
 
 var _cooldown_remaining: Dictionary = {}
 var _cooldown_duration: Dictionary = {}
 var _button_tweens: Dictionary = {}
 var _save_manager: Node = null
+var _selected_ability: StringName = StringName()
+var _target_indicator: Node2D = null
 
 
 func _ready() -> void:
 	_save_manager = get_node_or_null("/root/SaveManager")
+	if _input_blocker != null:
+		_input_blocker.gui_input.connect(_on_target_blocker_input)
 	for index in range(_buttons.size()):
 		var button: TextureButton = _buttons[index]
 		var ability_id: StringName = ABILITY_IDS[index]
@@ -77,6 +94,8 @@ func refresh_inventory() -> void:
 		count_label.text = str(count)
 		count_label.visible = true
 		button.disabled = count <= 0 or float(_cooldown_remaining.get(ability_id, 0.0)) > 0.0
+	if not _selected_ability.is_empty() and _get_inventory_count(_selected_ability) <= 0:
+		clear_selection()
 
 
 func consume_ability(ability_id: StringName) -> bool:
@@ -90,7 +109,86 @@ func consume_ability(ability_id: StringName) -> bool:
 func _on_ability_pressed(ability_id: StringName) -> void:
 	if float(_cooldown_remaining.get(ability_id, 0.0)) > 0.0:
 		return
+	if _selected_ability == ability_id:
+		clear_selection()
+		return
+	_select_ability(ability_id)
 	ability_selected.emit(ability_id)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _selected_ability.is_empty():
+		return
+	if event.is_action_pressed("ui_cancel"):
+		clear_selection()
+		get_viewport().set_input_as_handled()
+
+
+func _on_target_blocker_input(event: InputEvent) -> void:
+	if _selected_ability.is_empty() or not event is InputEventMouseButton:
+		return
+	var mouse_event: InputEventMouseButton = event as InputEventMouseButton
+	if not mouse_event.pressed:
+		return
+	if mouse_event.button_index == MOUSE_BUTTON_RIGHT:
+		clear_selection()
+		return
+	if mouse_event.button_index == MOUSE_BUTTON_LEFT and _target_indicator != null and is_instance_valid(_target_indicator):
+		var target_position: Vector2 = _target_indicator.get_global_mouse_position()
+		_target_indicator.global_position = target_position
+		_use_selected_ability(target_position)
+
+
+func _use_selected_ability(world_position: Vector2) -> void:
+	if not ABILITY_DATA.has(_selected_ability):
+		return
+	var ability_id: StringName = _selected_ability
+	if not consume_ability(ability_id):
+		clear_selection()
+		return
+	var data: Resource = ABILITY_DATA[ability_id] as Resource
+	var effect: Node2D = ABILITY_EFFECT_SCENE.instantiate() as Node2D
+	if effect == null:
+		return
+	effect.call("configure", data, TARGET_RADIUS, EFFECT_DURATION)
+	effect.global_position = world_position
+	var current_scene: Node = get_tree().current_scene
+	if current_scene == null:
+		effect.queue_free()
+		return
+	current_scene.add_child(effect)
+	effect.call("activate")
+	start_cooldown(ability_id, ABILITY_COOLDOWN)
+	ability_targeted.emit(ability_id, world_position)
+	clear_selection()
+
+
+func clear_selection() -> void:
+	_selected_ability = StringName()
+	_update_selection_glows()
+	if _input_blocker != null:
+		_input_blocker.hide()
+	if _target_indicator != null and is_instance_valid(_target_indicator):
+		_target_indicator.queue_free()
+	_target_indicator = null
+
+
+func _select_ability(ability_id: StringName) -> void:
+	_selected_ability = ability_id
+	_update_selection_glows()
+	if _input_blocker != null:
+		_input_blocker.show()
+	if _target_indicator == null or not is_instance_valid(_target_indicator):
+		_target_indicator = TARGET_INDICATOR_SCENE.instantiate() as Node2D
+		var current_scene: Node = get_tree().current_scene
+		if current_scene != null:
+			current_scene.add_child(_target_indicator)
+
+
+func _update_selection_glows() -> void:
+	for index in range(_buttons.size()):
+		var glow: Panel = _buttons[index].get_node("SelectionGlow") as Panel
+		glow.visible = ABILITY_IDS[index] == _selected_ability
 
 
 func _get_button(ability_id: StringName) -> TextureButton:
@@ -106,19 +204,17 @@ func _get_inventory_count(ability_id: StringName) -> int:
 	return maxi(int(_save_manager.call("get_ability_count", ability_id)), 0)
 
 
-func _update_button_cooldown(button: TextureButton, remaining: float, duration: float) -> void:
-	var overlay: ColorRect = button.get_node("CooldownOverlay") as ColorRect
+func _update_button_cooldown(button: TextureButton, remaining: float, _duration: float) -> void:
 	var label: Label = button.get_node("CooldownLabel") as Label
+	var count_label: Label = button.get_node("CountLabel") as Label
 	var active: bool = remaining > 0.0
-	overlay.visible = active
 	label.visible = active
+	count_label.visible = not active
 	var index: int = _buttons.find(button)
 	var ability_id: StringName = ABILITY_IDS[index] if index >= 0 else StringName()
 	button.disabled = active or _get_inventory_count(ability_id) <= 0
 	if not active:
 		return
-	var ratio: float = clampf(remaining / duration, 0.0, 1.0)
-	overlay.anchor_top = 1.0 - ratio
 	label.text = str(ceili(remaining))
 
 

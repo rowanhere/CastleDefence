@@ -12,6 +12,20 @@
 [ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialThunderDisabled.png" id="10_thunder_disabled"]
 [ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialRockDisabled.png" id="11_rock_disabled"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBox_selection_glow"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.86, 0.22, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+shadow_color = Color(0, 0, 0, 0)
+shadow_size = 0
+
 [node name="SpecialAbilitiesUI" type="Control" unique_id=1467062854]
 layout_mode = 3
 anchors_preset = 12
@@ -71,7 +85,7 @@ grow_horizontal = 2
 theme_override_constants/separation = 1
 
 [node name="Fire" type="TextureButton" parent="Buttons" unique_id=1105752831]
-clip_contents = true
+clip_contents = false
 custom_minimum_size = Vector2(23, 23)
 layout_mode = 2
 texture_normal = ExtResource("3_fire")
@@ -79,18 +93,8 @@ texture_disabled = ExtResource("8_fire_disabled")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="CooldownOverlay" type="ColorRect" parent="Buttons/Fire" unique_id=1656143288]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.04, 0.05, 0.07, 0.72)
-
 [node name="CooldownLabel" type="Label" parent="Buttons/Fire" unique_id=8583398]
+z_index = 4
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -129,8 +133,24 @@ text = "0"
 horizontal_alignment = 2
 vertical_alignment = 1
 
+[node name="SelectionGlow" type="Panel" parent="Buttons/Fire"]
+z_index = 3
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_selection_glow")
+
 [node name="Freeze" type="TextureButton" parent="Buttons" unique_id=1227852509]
-clip_contents = true
+clip_contents = false
 custom_minimum_size = Vector2(23, 23)
 layout_mode = 2
 texture_normal = ExtResource("4_freeze")
@@ -138,18 +158,8 @@ texture_disabled = ExtResource("9_freeze_disabled")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="CooldownOverlay" type="ColorRect" parent="Buttons/Freeze" unique_id=969227591]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.04, 0.05, 0.07, 0.72)
-
 [node name="CooldownLabel" type="Label" parent="Buttons/Freeze" unique_id=947930631]
+z_index = 4
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -188,8 +198,24 @@ text = "0"
 horizontal_alignment = 2
 vertical_alignment = 1
 
+[node name="SelectionGlow" type="Panel" parent="Buttons/Freeze"]
+z_index = 3
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_selection_glow")
+
 [node name="Thunder" type="TextureButton" parent="Buttons" unique_id=972320509]
-clip_contents = true
+clip_contents = false
 custom_minimum_size = Vector2(23, 23)
 layout_mode = 2
 texture_normal = ExtResource("5_thunder")
@@ -197,18 +223,8 @@ texture_disabled = ExtResource("10_thunder_disabled")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="CooldownOverlay" type="ColorRect" parent="Buttons/Thunder" unique_id=670703097]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.04, 0.05, 0.07, 0.72)
-
 [node name="CooldownLabel" type="Label" parent="Buttons/Thunder" unique_id=1166202143]
+z_index = 4
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -247,8 +263,24 @@ text = "0"
 horizontal_alignment = 2
 vertical_alignment = 1
 
+[node name="SelectionGlow" type="Panel" parent="Buttons/Thunder"]
+z_index = 3
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_selection_glow")
+
 [node name="Rock" type="TextureButton" parent="Buttons" unique_id=1923427126]
-clip_contents = true
+clip_contents = false
 custom_minimum_size = Vector2(23, 23)
 layout_mode = 2
 texture_normal = ExtResource("6_rock")
@@ -256,18 +288,8 @@ texture_disabled = ExtResource("11_rock_disabled")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="CooldownOverlay" type="ColorRect" parent="Buttons/Rock" unique_id=1048789024]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.04, 0.05, 0.07, 0.72)
-
 [node name="CooldownLabel" type="Label" parent="Buttons/Rock" unique_id=1151549665]
+z_index = 4
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -305,3 +327,19 @@ theme_override_font_sizes/font_size = 6
 text = "0"
 horizontal_alignment = 2
 vertical_alignment = 1
+
+[node name="SelectionGlow" type="Panel" parent="Buttons/Rock"]
+z_index = 3
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_selection_glow")

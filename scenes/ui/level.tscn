@@ -141,7 +141,8 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="ShopUI" parent="." instance=ExtResource("7_shop_ui")]
+[node name="ShopUI" parent="." unique_id=69383766 instance=ExtResource("7_shop_ui")]
+layout_mode = 1
 
 [connection signal="pressed" from="BackButton" to="." method="_on_back_button_pressed"]
 [connection signal="mouse_entered" from="ShopButton" to="." method="_on_shop_button_mouse_entered"]

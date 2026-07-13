@@ -172,7 +172,13 @@ Persistent progress is managed by the `SaveManager` autoload and written to `use
 
 Level coins are intentionally not saved. Every level starts with `800` coins, and enemy coin drops are used only during that battle. A win awards `1`, `2`, or `3` persistent reward currency based on the result shown by `RewardLabel`.
 
-Special-ability inventory is stored under `inventory/special_abilities`. New saves begin with zero of each ability, so empty ability buttons are disabled. `SaveManager.add_ability()`, `get_ability_count()`, and `consume_ability()` provide the inventory API for the future reward-currency shop and gameplay effects.
+Special-ability inventory is stored under `inventory/special_abilities`. A new save begins with one Fire, one Time Freeze, one Thunder, and one Rock ability in the global inventory. These are one-time starting items, not a refill for every level. Used abilities remain consumed across scene changes, while shop purchases add permanently saved charges. Empty ability buttons are disabled. `SaveManager.add_ability()`, `get_ability_count()`, and `consume_ability()` provide the inventory API.
+
+Selecting an owned in-game ability adds a gold outline to its button and displays a `100px` green world-space targeting radius at the mouse. Selecting it again, right-clicking, or pressing Escape cancels targeting. Fire deals `120` AOE damage and shows three spread, staggered seven-frame vertical flame impacts with its own sound. Rock deals `180` AOE damage and shows three slightly spread, staggered 18-frame impacts with `bombImpact.mp3`; each ability applies gameplay damage only once regardless of its visual instance count. Both consume one global inventory charge on placement and start a `20s` per-ability cooldown. Freeze and Thunder remain inventory/UI entries until their visual and sound assets are configured.
+
+While ability targeting is active, a transparent HUD input layer blocks tower selection, tower upgrades, builders, and other underlying controls. The ability dock remains interactive for switching or cancelling the selected ability, and the overlay forwards the world placement click to the active effect.
+
+Special abilities share the same effect scene, `100px` radius, AOE targeting, `1.25s` duration, and `20s` cooldown. Each `SpecialAbilityData` resource supplies its own damage, `SpriteFrames`, animation name, `effect_scale`, `effect_offset`, visual instance count, spread, stagger, and optional sound. Scale and offset adjust only the visual; they do not move or resize the gameplay AOE. Ability animations use the non-looping `special` animation and are played through `AnimatedSprite2D.play()`.
 
 The level selector includes a persistent special-ability shop. Fire costs `3`, Time Freeze costs `4`, Thunder costs `5`, and Rock costs `4` reward currency. Plus/minus controls build a temporary cart without allowing its total to exceed the saved balance. `DONE` commits all selected quantities in one atomic save through `SaveManager.purchase_abilities()`; closing the shop discards the unconfirmed cart.
 
@@ -230,12 +236,68 @@ The optional GDScript Formatter editor plugin expects the external `gdformat` co
 
 - [ ] Add boss-specific abilities, telegraphs, and HUD presentation.
 - [ ] Replace the temporary Level 2 map and add playable scenes and schedules for Levels 3-15.
-- [ ] Persist unlocked levels, star ratings, settings, and economy between sessions.
+- [x] Persist unlocked levels, star ratings, settings, reward currency, and ability inventory between sessions.
 - [ ] Continue stress-testing crowd lanes and barrack combat with very large waves and builders near spawn points.
 - [ ] Add automated smoke tests for scene loading, purchases, upgrades, win/fail transitions, and resource validity.
 - [ ] Remove obsolete temporary level scene files after confirming they are not needed.
 
 ## Adding Content
+
+### Add a playable level
+
+The level loader is convention-based. For level number `N`, it looks for both of these exact paths:
+
+```text
+scenes/levels/levelN/level_N.tscn
+scenes/levels/levelN/levelN_spawn.tres
+```
+
+For example, Level 3 must be stored as `scenes/levels/level3/level_3.tscn` with `scenes/levels/level3/level3_spawn.tres`. A level button remains locked-looking if either file is missing, even when that number exists in the saved unlocked-level list.
+
+Recommended workflow:
+
+1. Duplicate `scenes/levels/level1/` and rename the folder and two numbered files for the new level.
+2. Open `level_N.tscn`, rename its root to something clear such as `Level3`, and replace the map art or TileMap layers.
+3. Keep or add one `Camera2D` that frames the playable map. The boss arrival shake uses the viewport's active camera when one exists.
+4. Add a `Path2D` for the enemy route. Attach `scripts/gameplay/level_path_handler.gd` and give it a direct child `Timer` named `Timer`.
+5. Draw the path curve from the enemy entrance to the castle. The first curve point is the spawn location and its initial direction controls the incoming-wave pointer orientation.
+6. Add the path anywhere under the level scene. The path script automatically joins the `level_path` group, which enemies and barrack soldiers use to find it.
+7. Instance `scenes/levels/castle.tscn` and keep the instantiated node named `Castle`. Enemy castle detection searches recursively by that exact name.
+8. Instance `scenes/systems/tower/tower_builder.tscn` at every allowed tower location. Builders are optional for loading, but the player needs them to purchase towers.
+9. Keep road visuals, terrain, decorations, and obstacle layers separate for editing clarity. Nodes named `PathNode` and `Obstacle` are useful organization in the current maps but are not required by the runtime loader.
+10. Create the matching `levelN_spawn.tres`, assign `EnemySpawnSchedule`, and add ordered `EnemySpawnWave` resources to its `waves` array.
+11. Test the level from the selector, not only by running its scene directly. `GameHandler.queued_level` determines which map, schedule, enemy scaling, completion record, and next-level unlock are used.
+
+Required runtime nodes:
+
+| Node | Requirement | Purpose |
+|---|---|---|
+| Level root | `Node2D` recommended | Container instantiated under `GameHandler/LevelContainer` |
+| Enemy route | `Path2D` with `level_path_handler.gd` | Spawning, path movement, wave state, and completion detection |
+| Path timer | Direct child `Timer` named `Timer` | Controls spacing between enemy spawns |
+| Castle | Instance named `Castle` | Receives enemies and castle damage |
+| Camera | Active `Camera2D` recommended | Frames the map and supports boss arrival shake |
+| Builders | Any number of `tower_builder.tscn` instances | Fixed legal tower purchase locations |
+
+Each wave resource provides:
+
+- `start_time`: seconds after the level begins when the wave is queued. Keep waves ordered by ascending time.
+- `enemy_pool`: lowercase IDs that resolve to `resources/enemies/<id>.tres`.
+- `total_multiplier`: total number of enemies, not the number of repetitions per pool member. IDs are selected round-robin from the pool.
+- `is_boss_wave`: when enabled, the wave uses `scenes/enemies/boss/boss.tscn`, boss-only stat scaling, a single spawn lane, and the arrival shake. Use `enemy_pool = ["boss"]` and `total_multiplier = 1` for the final boss.
+
+Level completion happens only after every scheduled wave has started, the spawn queue and timer are empty, all enemies are dead, and castle HP is above zero. Completing Level `N` saves the best star result and unlocks `N + 1`; the next button becomes playable only after its correctly named scene and schedule files also exist.
+
+Before considering a new level complete, verify:
+
+- Enemies spawn at the first path point facing along the route and reach the castle at the final point.
+- The path is centered on the visible road and does not cut through tower-builder locations.
+- The wave pointer remains inside the viewport and points toward the entrance.
+- Every enemy ID loads without resource warnings.
+- Barrack soldiers can locate the `level_path` group and reach nearby combat positions.
+- Tower builders place and restore towers at their own exact positions.
+- The final enemy death triggers the win overlay, stars, reward save, and next-level unlock.
+- Castle destruction triggers the fail overlay and never records completion.
 
 ### Add an enemy
 

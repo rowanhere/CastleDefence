@@ -10,7 +10,7 @@ const WAVE_POINTER_BASE_SCALE := Vector2(0.62, 0.62)
 const WAVE_POINTER_PULSE_SCALE := Vector2(0.70, 0.70)
 
 static var queued_level: int = 1
-const LEVEL_STARTING_COINS := 5000
+const LEVEL_STARTING_COINS := 800
 
 static var coins: int = LEVEL_STARTING_COINS
 static var castle_life: int = 100

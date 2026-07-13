@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpecialAbilityData" format=3 uid="uid://cevvbexn8yrrf"]
+
+[ext_resource type="Script" uid="uid://c2hs8d7d3to4q" path="res://scripts/gameplay/special_ability_data.gd" id="1_data"]
+[ext_resource type="SpriteFrames" path="res://resources/special_abilities/rock_frames.tres" id="2_frames"]
+[ext_resource type="AudioStream" uid="uid://bch33uuxrfa34" path="res://assets/audio/sfx/bombImpact.mp3" id="3_sound"]
+
+[resource]
+script = ExtResource("1_data")
+ability_id = &"rock"
+damage = 180.0
+sprite_frames = ExtResource("2_frames")
+effect_scale = Vector2(1.5, 1.5)
+effect_offset = Vector2(0, -35)
+visual_instances = 3
+visual_spread = 55.0
+visual_stagger = 0.12
+sound = ExtResource("3_sound")

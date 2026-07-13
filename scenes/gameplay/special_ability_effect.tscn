@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/special_ability_effect.gd" id="1_script"]
+
+[node name="SpecialAbilityEffect" type="Node2D"]
+z_as_relative = false
+z_index = 4093
+script = ExtResource("1_script")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]

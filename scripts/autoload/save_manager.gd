@@ -3,10 +3,10 @@ extends Node
 const SAVE_PATH := "user://save.cfg"
 const SAVE_VERSION := 2
 const DEFAULT_ABILITY_COUNTS: Dictionary = {
-	"fire": 0,
-	"freeze": 0,
-	"thunder": 0,
-	"rock": 0,
+	"fire": 1,
+	"freeze": 1,
+	"thunder": 1,
+	"rock": 1,
 }
 
 var total_rewards: int = 0
@@ -35,7 +35,8 @@ func load_game() -> void:
 	ability_counts = DEFAULT_ABILITY_COUNTS.duplicate()
 	var saved_abilities: Dictionary = config.get_value("inventory", "special_abilities", {})
 	for ability_id in DEFAULT_ABILITY_COUNTS:
-		ability_counts[ability_id] = maxi(int(saved_abilities.get(ability_id, 0)), 0)
+		var default_count: int = int(DEFAULT_ABILITY_COUNTS[ability_id])
+		ability_counts[ability_id] = maxi(int(saved_abilities.get(ability_id, default_count)), 0)
 
 	unlocked_levels.clear()
 	var saved_levels: Array = config.get_value("progress", "unlocked_levels", [1])

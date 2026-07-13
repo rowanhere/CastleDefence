@@ -1,0 +1,17 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/fire/1.png" id="1_f01"]
+[ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/fire/2.png" id="2_f02"]
+[ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/fire/3.png" id="3_f03"]
+[ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/fire/4.png" id="4_f04"]
+[ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/fire/5.png" id="5_f05"]
+[ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/fire/6.png" id="6_f06"]
+[ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/fire/7.png" id="7_f07"]
+
+[resource]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("1_f01")}, {"duration": 1.0, "texture": ExtResource("2_f02")}, {"duration": 1.0, "texture": ExtResource("3_f03")}, {"duration": 1.0, "texture": ExtResource("4_f04")}, {"duration": 1.0, "texture": ExtResource("5_f05")}, {"duration": 1.0, "texture": ExtResource("6_f06")}, {"duration": 1.0, "texture": ExtResource("7_f07")}],
+"loop": false,
+"name": &"special",
+"speed": 5.6
+}]
