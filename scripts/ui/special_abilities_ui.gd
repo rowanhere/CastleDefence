@@ -3,10 +3,9 @@ extends Control
 signal ability_selected(ability_id: StringName)
 signal ability_targeted(ability_id: StringName, world_position: Vector2)
 
-const ABILITY_IDS: Array[StringName] = [&"fire", &"freeze", &"thunder", &"rock"]
+const ABILITY_IDS: Array[StringName] = [&"fire", &"thunder", &"rock"]
 const ABILITY_CAPTIONS: Dictionary = {
 	&"fire": "Fire Storm",
-	&"freeze": "Time Freeze",
 	&"thunder": "Thunder Strike",
 	&"rock": "Meteor Rocks",
 }
@@ -14,18 +13,19 @@ const HOVER_SCALE := Vector2(1.06, 1.06)
 const TARGET_INDICATOR_SCENE: PackedScene = preload("res://scenes/gameplay/ability_target_indicator.tscn")
 const ABILITY_EFFECT_SCENE: PackedScene = preload("res://scenes/gameplay/special_ability_effect.tscn")
 const FIRE_DATA: Resource = preload("res://resources/special_abilities/fire.tres")
+const THUNDER_DATA: Resource = preload("res://resources/special_abilities/thunder.tres")
 const ROCK_DATA: Resource = preload("res://resources/special_abilities/rock.tres")
 const TARGET_RADIUS := 100.0
 const EFFECT_DURATION := 1.25
 const ABILITY_COOLDOWN := 20.0
 const ABILITY_DATA: Dictionary = {
 	&"fire": FIRE_DATA,
+	&"thunder": THUNDER_DATA,
 	&"rock": ROCK_DATA,
 }
 
 @onready var _buttons: Array[TextureButton] = [
 	$Buttons/Fire,
-	$Buttons/Freeze,
 	$Buttons/Thunder,
 	$Buttons/Rock,
 ]

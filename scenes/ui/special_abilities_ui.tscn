@@ -3,12 +3,10 @@
 [ext_resource type="Script" uid="uid://bjhlt466r7lmt" path="res://scripts/ui/special_abilities_ui.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://dly6et86u6erc" path="res://assets/textures/specialAbilities/table_down.png" id="2_dock"]
 [ext_resource type="Texture2D" uid="uid://brnhxc88j6x1j" path="res://assets/textures/specialAbilities/specialFire.png" id="3_fire"]
-[ext_resource type="Texture2D" uid="uid://jg0d168mu4yu" path="res://assets/textures/specialAbilities/specialTimeFreeze.png" id="4_freeze"]
 [ext_resource type="Texture2D" uid="uid://2ephql3ltnj3" path="res://assets/textures/specialAbilities/specialThunder.png" id="5_thunder"]
 [ext_resource type="Texture2D" uid="uid://ck5lc6kmr0hhr" path="res://assets/textures/specialAbilities/specialRock.png" id="6_rock"]
 [ext_resource type="FontFile" uid="uid://bo3ydllk5q4ql" path="res://assets/fonts/Utroligt.otf" id="7_font"]
 [ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialFireDisabled.png" id="8_fire_disabled"]
-[ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialTimeFreezeDisabled.png" id="9_freeze_disabled"]
 [ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialThunderDisabled.png" id="10_thunder_disabled"]
 [ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialRockDisabled.png" id="11_rock_disabled"]
 
@@ -43,9 +41,9 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -72.0
+offset_left = -56.0
 offset_top = 24.0
-offset_right = 72.0
+offset_right = 56.0
 offset_bottom = 38.0
 grow_horizontal = 2
 mouse_filter = 2
@@ -77,9 +75,9 @@ layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -47.5
+offset_left = -35.5
 offset_top = 7.0
-offset_right = 47.5
+offset_right = 35.5
 offset_bottom = 31.0
 grow_horizontal = 2
 theme_override_constants/separation = 1
@@ -134,71 +132,6 @@ horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="SelectionGlow" type="Panel" parent="Buttons/Fire"]
-z_index = 3
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBox_selection_glow")
-
-[node name="Freeze" type="TextureButton" parent="Buttons" unique_id=1227852509]
-clip_contents = false
-custom_minimum_size = Vector2(23, 23)
-layout_mode = 2
-texture_normal = ExtResource("4_freeze")
-texture_disabled = ExtResource("9_freeze_disabled")
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="CooldownLabel" type="Label" parent="Buttons/Freeze" unique_id=947930631]
-z_index = 4
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("7_font")
-theme_override_font_sizes/font_size = 8
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="CountLabel" type="Label" parent="Buttons/Freeze" unique_id=1599095126]
-z_index = 2
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -10.0
-offset_top = -9.0
-offset_right = -1.0
-offset_bottom = -1.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("7_font")
-theme_override_font_sizes/font_size = 6
-text = "0"
-horizontal_alignment = 2
-vertical_alignment = 1
-
-[node name="SelectionGlow" type="Panel" parent="Buttons/Freeze"]
 z_index = 3
 visible = false
 layout_mode = 1

@@ -166,21 +166,21 @@ Persistent progress is managed by the `SaveManager` autoload and written to `use
 - Unlocked level numbers
 - Best star rating for each completed level
 - Highest completed level
-- Owned Fire, Time Freeze, Thunder, and Rock ability counts
+- Owned Fire, Thunder, and Rock ability counts
 - Music enabled/disabled state
 - Sound-effect enabled/disabled state
 
 Level coins are intentionally not saved. Every level starts with `800` coins, and enemy coin drops are used only during that battle. A win awards `1`, `2`, or `3` persistent reward currency based on the result shown by `RewardLabel`.
 
-Special-ability inventory is stored under `inventory/special_abilities`. A new save begins with one Fire, one Time Freeze, one Thunder, and one Rock ability in the global inventory. These are one-time starting items, not a refill for every level. Used abilities remain consumed across scene changes, while shop purchases add permanently saved charges. Empty ability buttons are disabled. `SaveManager.add_ability()`, `get_ability_count()`, and `consume_ability()` provide the inventory API.
+Special-ability inventory is stored under `inventory/special_abilities`. A new save begins with one Fire, one Thunder, and one Rock ability in the global inventory. These are one-time starting items, not a refill for every level. Used abilities remain consumed across scene changes, while shop purchases add permanently saved charges. Empty ability buttons are disabled. `SaveManager.add_ability()`, `get_ability_count()`, and `consume_ability()` provide the inventory API.
 
-Selecting an owned in-game ability adds a gold outline to its button and displays a `100px` green world-space targeting radius at the mouse. Selecting it again, right-clicking, or pressing Escape cancels targeting. Fire deals `120` AOE damage and shows three spread, staggered seven-frame vertical flame impacts with its own sound. Rock deals `180` AOE damage and shows three slightly spread, staggered 18-frame impacts with `bombImpact.mp3`; each ability applies gameplay damage only once regardless of its visual instance count. Both consume one global inventory charge on placement and start a `20s` per-ability cooldown. Freeze and Thunder remain inventory/UI entries until their visual and sound assets are configured.
+Selecting an owned in-game ability adds a gold outline to its button and displays a `100px` green world-space targeting radius at the mouse. Selecting it again, right-clicking, or pressing Escape cancels targeting. Fire deals `120` AOE damage, Thunder deals `220`, and Rock deals `180`; each ability applies gameplay damage only once regardless of its visual instance count. All three consume one global inventory charge on placement and start a `20s` per-ability cooldown.
 
 While ability targeting is active, a transparent HUD input layer blocks tower selection, tower upgrades, builders, and other underlying controls. The ability dock remains interactive for switching or cancelling the selected ability, and the overlay forwards the world placement click to the active effect.
 
 Special abilities share the same effect scene, `100px` radius, AOE targeting, `1.25s` duration, and `20s` cooldown. Each `SpecialAbilityData` resource supplies its own damage, `SpriteFrames`, animation name, `effect_scale`, `effect_offset`, visual instance count, spread, stagger, and optional sound. Scale and offset adjust only the visual; they do not move or resize the gameplay AOE. Ability animations use the non-looping `special` animation and are played through `AnimatedSprite2D.play()`.
 
-The level selector includes a persistent special-ability shop. Fire costs `3`, Time Freeze costs `4`, Thunder costs `5`, and Rock costs `4` reward currency. Plus/minus controls build a temporary cart without allowing its total to exceed the saved balance. `DONE` commits all selected quantities in one atomic save through `SaveManager.purchase_abilities()`; closing the shop discards the unconfirmed cart.
+The level selector includes a persistent special-ability shop. Fire costs `3`, Thunder costs `5`, and Rock costs `4` reward currency. Plus/minus controls build a temporary cart without allowing its total to exceed the saved balance. `DONE` commits all selected quantities in one atomic save through `SaveManager.purchase_abilities()`; closing the shop discards the unconfirmed cart.
 
 ## Audio
 

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpecialAbilityData" format=3 uid="uid://cnqyglleiyqgd"]
+
+[ext_resource type="Script" uid="uid://c2hs8d7d3to4q" path="res://scripts/gameplay/special_ability_data.gd" id="1_data"]
+[ext_resource type="SpriteFrames" uid="uid://b0qbbbng52yd4" path="res://resources/special_abilities/thunder_frames.tres" id="2_frames"]
+[ext_resource type="AudioStream" uid="uid://bvlkwgdwt3sgx" path="res://assets/audio/specialAbilities/lighting.mp3" id="2_fxvhr"]
+
+[resource]
+script = ExtResource("1_data")
+ability_id = &"thunder"
+damage = 220.0
+sprite_frames = ExtResource("2_frames")
+sync_animation_to_effect_duration = false
+effect_offset = Vector2(0, -70)
+visual_instances = 3
+visual_spread = 60.0
+visual_stagger = 0.2
+enter_from_screen_top = true
+anchor_to_screen_top = true
+entry_duration = 1.0
+screen_entry_margin = 0.0
+sound = ExtResource("2_fxvhr")

@@ -7,7 +7,6 @@ const PANEL_SCALE := Vector2(0.86, 0.86)
 const PANEL_OPEN_START_SCALE := Vector2(0.78, 0.78)
 const ITEM_DATA: Dictionary = {
 	&"fire": {"price": 3, "node": "Fire", "count": "FireCount"},
-	&"freeze": {"price": 4, "node": "Freeze", "count": "FreezeCount"},
 	&"thunder": {"price": 5, "node": "Thunder", "count": "ThunderCount"},
 	&"rock": {"price": 4, "node": "Rock", "count": "RockCount"},
 }

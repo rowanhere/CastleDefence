@@ -14,4 +14,6 @@ effect_offset = Vector2(0, -35)
 visual_instances = 3
 visual_spread = 55.0
 visual_stagger = 0.12
+enter_from_screen_top = true
+entry_duration = 0.7
 sound = ExtResource("3_sound")

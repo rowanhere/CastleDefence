@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jg0d168mu4yu"
-path="res://.godot/imported/specialTimeFreeze.png-79383d9ad83541ab57c68a9523157287.ctex"
+uid="uid://cqdqp5emcw7gd"
+path="res://.godot/imported/Lightning-bolt.png-f518175e03e3c25d9c2f4aad014e8b13.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/specialAbilities/specialTimeFreeze.png"
-dest_files=["res://.godot/imported/specialTimeFreeze.png-79383d9ad83541ab57c68a9523157287.ctex"]
+source_file="res://assets/textures/specialAbilities/thunder/Lightning-bolt.png"
+dest_files=["res://.godot/imported/Lightning-bolt.png-f518175e03e3c25d9c2f4aad014e8b13.ctex"]
 
 [params]
 

@@ -4,7 +4,6 @@ const SAVE_PATH := "user://save.cfg"
 const SAVE_VERSION := 2
 const DEFAULT_ABILITY_COUNTS: Dictionary = {
 	"fire": 1,
-	"freeze": 1,
 	"thunder": 1,
 	"rock": 1,
 }

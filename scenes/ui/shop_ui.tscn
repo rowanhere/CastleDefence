@@ -7,7 +7,6 @@
 [ext_resource type="Texture2D" path="res://assets/textures/towers/button_close.png" id="5_close"]
 [ext_resource type="Texture2D" path="res://assets/textures/levelWin/zip.png" id="6_zip"]
 [ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialFire.png" id="7_fire"]
-[ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialTimeFreeze.png" id="8_freeze"]
 [ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialThunder.png" id="9_thunder"]
 [ext_resource type="Texture2D" path="res://assets/textures/specialAbilities/specialRock.png" id="10_rock"]
 [ext_resource type="FontFile" path="res://assets/fonts/Utroligt.otf" id="11_font"]
@@ -118,9 +117,9 @@ vertical_alignment = 1
 
 [node name="Items" type="HBoxContainer" parent="Panel"]
 layout_mode = 0
-offset_left = 25.0
+offset_left = 53.0
 offset_top = 36.0
-offset_right = 233.0
+offset_right = 205.0
 offset_bottom = 127.0
 theme_override_constants/separation = 4
 alignment = 1
@@ -206,94 +205,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Plus" type="Button" parent="Panel/Items/Fire/Selector"]
-custom_minimum_size = Vector2(12, 12)
-layout_mode = 2
-theme_override_fonts/font = ExtResource("11_font")
-theme_override_font_sizes/font_size = 8
-text = "+"
-flat = true
-
-[node name="Freeze" type="VBoxContainer" parent="Panel/Items"]
-custom_minimum_size = Vector2(48, 90)
-layout_mode = 2
-theme_override_constants/separation = 1
-
-[node name="Icon" type="TextureRect" parent="Panel/Items/Freeze"]
-custom_minimum_size = Vector2(42, 42)
-layout_mode = 2
-texture = ExtResource("8_freeze")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Price" type="TextureRect" parent="Panel/Items/Freeze"]
-custom_minimum_size = Vector2(42, 14)
-layout_mode = 2
-texture = ExtResource("4_price")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Content" type="HBoxContainer" parent="Panel/Items/Freeze/Price"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_constants/separation = 1
-alignment = 1
-
-[node name="Zip" type="TextureRect" parent="Panel/Items/Freeze/Price/Content"]
-custom_minimum_size = Vector2(5, 8)
-layout_mode = 2
-size_flags_vertical = 4
-texture = ExtResource("6_zip")
-expand_mode = 1
-stretch_mode = 6
-
-[node name="Value" type="Label" parent="Panel/Items/Freeze/Price/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.93, 0.66, 1)
-theme_override_fonts/font = ExtResource("11_font")
-theme_override_font_sizes/font_size = 7
-text = "4"
-vertical_alignment = 1
-
-[node name="FreezeCount" type="Label" parent="Panel/Items/Freeze"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.82, 0.65, 1)
-theme_override_fonts/font = ExtResource("11_font")
-theme_override_font_sizes/font_size = 6
-text = "OWNED 0"
-horizontal_alignment = 1
-
-[node name="Selector" type="HBoxContainer" parent="Panel/Items/Freeze"]
-custom_minimum_size = Vector2(42, 13)
-layout_mode = 2
-theme_override_constants/separation = 1
-alignment = 1
-
-[node name="Minus" type="Button" parent="Panel/Items/Freeze/Selector"]
-custom_minimum_size = Vector2(12, 12)
-layout_mode = 2
-theme_override_fonts/font = ExtResource("11_font")
-theme_override_font_sizes/font_size = 8
-text = "-"
-flat = true
-
-[node name="Quantity" type="Label" parent="Panel/Items/Freeze/Selector"]
-custom_minimum_size = Vector2(14, 12)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.93, 0.66, 1)
-theme_override_colors/font_outline_color = Color(0.16, 0.07, 0.025, 1)
-theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("11_font")
-theme_override_font_sizes/font_size = 8
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Plus" type="Button" parent="Panel/Items/Freeze/Selector"]
 custom_minimum_size = Vector2(12, 12)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("11_font")

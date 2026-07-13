@@ -13,4 +13,6 @@ effect_scale = Vector2(1.5, 1.5)
 visual_instances = 3
 visual_spread = 50.0
 visual_stagger = 0.12
+enter_from_screen_top = true
+entry_duration = 0.65
 sound = ExtResource("3_sound")
